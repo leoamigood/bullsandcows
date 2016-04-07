@@ -15,3 +15,8 @@
 /log/*
 !/log/.keep
 /tmp
+
+# Ignore idea files
+.idea
+.rspec
+.byebug_history
