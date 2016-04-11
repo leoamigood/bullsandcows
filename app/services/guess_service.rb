@@ -1,14 +1,28 @@
 class GuessService
 
-  def GuessService.guess(word)
+  def GuessService.guess(game, word)
+    raise if game.secret.length != word.length
 
+    guess = Guess.where(game_id: game.id, word: word).first
+    if (guess.nil?)
+      match = GuessService.match(word, game.secret)
+      guess = Guess.create(match.merge(game_id: game.id, attempts: 1))
+
+      game.guesses << guess
+      game.save!
+    else
+      guess.attempts += 1
+      guess.save!
+    end
+
+    guess
   end
 
   def GuessService.match(guess, secret)
     bulls = bulls(guess.split(''), secret.split(''))
     cows = cows(guess.split(''), secret.split(''))
 
-    return bulls.compact.count, cows.compact.count
+    return {word: guess, bulls: bulls.compact.count, cows: cows.compact.count}
   end
 
 

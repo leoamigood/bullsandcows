@@ -14,22 +14,22 @@ describe GuessService do
     end
 
     it 'counts bulls and cows in input against the secret word' do
-      expect(GuessService.match('корень', 'корова')).to eq([3, 0])
-      expect(GuessService.match('восток', 'корова')).to eq([1, 3])
-      expect(GuessService.match('оборот', 'корова')).to eq([0, 3])
-      expect(GuessService.match('краска', 'корова')).to eq([2, 1])
-      expect(GuessService.match('оборот', 'корова')).to eq([0, 3])
-      expect(GuessService.match('корова', 'корова')).to eq([6, 0])
+      expect(GuessService.match('корень', 'корова')).to eq({word: 'корень', bulls: 3, cows: 0})
+      expect(GuessService.match('восток', 'корова')).to eq({word: 'восток', bulls: 1, cows: 3})
+      expect(GuessService.match('оборот', 'корова')).to eq({word: 'оборот', bulls: 0, cows: 3})
+      expect(GuessService.match('краска', 'корова')).to eq({word: 'краска', bulls: 2, cows: 1})
+      expect(GuessService.match('оборот', 'корова')).to eq({word: 'оборот', bulls: 0, cows: 3})
+      expect(GuessService.match('корова', 'корова')).to eq({word: 'корова', bulls: 6, cows: 0})
 
-      expect(GuessService.match('похоть', 'хребет')).to eq([0, 2])
-      expect(GuessService.match('хартия', 'хребет')).to eq([1, 2])
-      expect(GuessService.match('карате', 'хребет')).to eq([0, 3])
-      expect(GuessService.match('хребет', 'хребет')).to eq([6, 0])
+      expect(GuessService.match('похоть', 'хребет')).to eq({word: 'похоть', bulls: 0, cows: 2})
+      expect(GuessService.match('хартия', 'хребет')).to eq({word: 'хартия', bulls: 1, cows: 2})
+      expect(GuessService.match('карате', 'хребет')).to eq({word: 'карате', bulls: 0, cows: 3})
+      expect(GuessService.match('хребет', 'хребет')).to eq({word: 'хребет', bulls: 6, cows: 0})
 
-      expect(GuessService.match('мораль', 'пароль')).to eq([3, 2])
-      expect(GuessService.match('пассаж', 'пароль')).to eq([2, 0])
-      expect(GuessService.match('партер', 'пароль')).to eq([3, 0])
-      expect(GuessService.match('пароль', 'пароль')).to eq([6, 0])
+      expect(GuessService.match('мораль', 'пароль')).to eq({word: 'мораль', bulls: 3, cows: 2})
+      expect(GuessService.match('пассаж', 'пароль')).to eq({word: 'пассаж', bulls: 2, cows: 0})
+      expect(GuessService.match('партер', 'пароль')).to eq({word: 'партер', bulls: 3, cows: 0})
+      expect(GuessService.match('пароль', 'пароль')).to eq({word: 'пароль', bulls: 6, cows: 0})
     end
 
   end

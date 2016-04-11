@@ -19,4 +19,6 @@
 # Ignore idea files
 .idea
 .rspec
+
+*.bak
 .byebug_history
