@@ -2,7 +2,7 @@ require 'rails_helper'
 
 describe 'Bulls and Cows API' do
   context "with a secret word 'hostel'" do
-    let!(:game) { create(:game, id: 1, secret: 'hostel')}
+    let!(:game) { create(:game, secret: 'hostel')}
 
     it 'places a guess with partially matched word' do
       data = {

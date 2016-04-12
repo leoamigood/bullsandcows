@@ -15,6 +15,7 @@ ActiveRecord::Schema.define(version: 20160407193901) do
 
   create_table "games", force: :cascade do |t|
     t.string   "secret",     limit: 64
+    t.integer  "status",     limit: 4,  default: 0
     t.datetime "created_at"
     t.datetime "updated_at"
   end
@@ -25,6 +26,7 @@ ActiveRecord::Schema.define(version: 20160407193901) do
     t.integer  "bulls",      limit: 4
     t.integer  "cows",       limit: 4
     t.integer  "attempts",   limit: 4,   default: 0
+    t.boolean  "exact"
     t.datetime "created_at"
     t.datetime "updated_at"
   end

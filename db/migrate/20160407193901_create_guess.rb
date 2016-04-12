@@ -6,6 +6,7 @@ class CreateGuess < ActiveRecord::Migration
       t.integer :bulls
       t.integer :cows
       t.integer :attempts, default: 0
+      t.boolean :exact
 
       t.timestamps nill: false
     end

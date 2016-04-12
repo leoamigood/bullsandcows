@@ -4,9 +4,9 @@ class GuessesController < BaseApiController
     Rails.logger.info("Received guess word: #{validate[:guess]}")
 
     game = Game.find_by_id!(validate[:game_id])
-    @guess = GuessService.guess(game, validate[:guess])
+    guess = GameService.guess(game, validate[:guess])
 
-    render json: @guess
+    render json: guess
   end
 
   private

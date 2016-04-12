@@ -1,3 +1,5 @@
 FactoryGirl.define do
-  factory :game
+  factory :game do |g|
+    g.status 0
+  end
 end

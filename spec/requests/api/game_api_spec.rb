@@ -12,6 +12,7 @@ describe 'Bulls and Cows API' do
       }.to change(Game, :count).by(1)
 
       expect(response).to be_success
+      expect(json['status']).to eq('created')
     end
 
     context 'with game in progress and a few guesses placed' do
