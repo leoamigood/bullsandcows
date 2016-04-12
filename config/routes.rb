@@ -54,7 +54,7 @@ Rails.application.routes.draw do
   #     resources :products
   #   end
 
-  resources :games, defaults: { format: 'json' } do
+  resources :games, :only => [:create, :show], defaults: { format: 'json' } do
     resources :guesses, :only => [:create] do
       post :action => 'create', :on => :collection
     end
