@@ -1,11 +1,16 @@
 class GameService
 
   def GameService.create(secret)
+    Rails.logger.info("Creating a game with secret: <#{secret}>")
     Game.create({secret: secret})
   end
 
+  def GameService.find_game
+    Game.last!
+  end
+
   def GameService.guess(game, word)
-    raise if game.secret.length != word.length
+    raise "Guess <#{game.secret}> has to have same amount of letters as a secret word" if game.secret.length != word.length
 
     guess = Guess.where(game_id: game.id, word: word).take
     if (guess.nil?)
