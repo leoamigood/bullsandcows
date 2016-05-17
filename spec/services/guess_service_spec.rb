@@ -1,6 +1,6 @@
 require 'rails_helper'
 
-describe GuessService do
+describe GuessService, type: :service do
 
   context 'with a secret word given' do
     it 'returns true in places of bulls' do

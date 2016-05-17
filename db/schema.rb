@@ -11,11 +11,13 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20160407193901) do
+ActiveRecord::Schema.define(version: 20160517141946) do
 
   create_table "games", force: :cascade do |t|
     t.string   "secret",     limit: 64
-    t.integer  "status",     limit: 4,  default: 0
+    t.string   "channel",    limit: 255
+    t.string   "source",     limit: 255
+    t.integer  "status",     limit: 4,   default: 0
     t.datetime "created_at"
     t.datetime "updated_at"
   end

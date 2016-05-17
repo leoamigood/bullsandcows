@@ -1,9 +1,11 @@
 require 'telegram/bot'
 
-token = '228214841:AAHZuSrThClDQ2hDJtnyN4qD0SLTzWExiCw'
+token = '228214841:AAGjFhBb_AzPBAy0h47GO9mTX03CnV_y3vc'
 
-Telegram::Bot::Client.run(token, logger: Logger.new($stderr)) do |bot|
-  bot.listen do |message|
-    TelegramService.listen(bot, message)
+unless Rails.env.test?
+  Telegram::Bot::Client.run(token, logger: Logger.new($stderr)) do |bot|
+    bot.listen do |message|
+      TelegramService.listen(bot, message)
+    end
   end
 end

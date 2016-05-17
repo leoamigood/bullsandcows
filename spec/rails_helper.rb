@@ -56,4 +56,13 @@ RSpec.configure do |config|
   config.filter_rails_from_backtrace!
   # arbitrary gems may also be filtered via:
   # config.filter_gems_from_backtrace("gem name")
+
+  #suppressing rspec deprecated warnings for mocks
+  config.mock_with :rspec do |mocks|
+    mocks.syntax = [:should, :expect]
+  end
+  config.expect_with :rspec do |expectations|
+    expectations.syntax = [:should, :expect]
+  end
+
 end

@@ -1,12 +1,8 @@
 class GameService
 
-  def GameService.create(secret)
-    Rails.logger.info("Creating a game with secret: <#{secret}>")
-    Game.create({secret: secret})
-  end
-
-  def GameService.find_game
-    Game.last!
+  def GameService.create(channel, secret, source = nil)
+    Rails.logger.info("Creating a game in channel <#{channel}> with secret: <#{secret}>")
+    Game.create({channel: channel, secret: secret, source: source})
   end
 
   def GameService.guess(game, word)

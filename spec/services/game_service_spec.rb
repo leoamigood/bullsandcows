@@ -1,9 +1,9 @@
 require 'rails_helper'
 
-describe GameService do
+describe GameService, type: :service do
 
   it 'creates a game' do
-    game = GameService.create('secret')
+    game = GameService.create('channel-id-1', 'secret', :web)
 
     expect(game).not_to be(nil)
     expect(game.secret).to eq('secret')
