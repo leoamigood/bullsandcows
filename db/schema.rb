@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20160517141946) do
+ActiveRecord::Schema.define(version: 20160520220921) do
 
   create_table "games", force: :cascade do |t|
     t.string   "secret",     limit: 64
@@ -31,6 +31,11 @@ ActiveRecord::Schema.define(version: 20160517141946) do
     t.boolean  "exact"
     t.datetime "created_at"
     t.datetime "updated_at"
+  end
+
+  create_table "nouns", force: :cascade do |t|
+    t.string "noun", limit: 64
+    t.string "lang", limit: 2,  default: "EN"
   end
 
 end

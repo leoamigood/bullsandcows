@@ -6,7 +6,7 @@ class GameService
   end
 
   def GameService.guess(game, word)
-    raise "Guess <#{game.secret}> has to have same amount of letters as a secret word" if game.secret.length != word.length
+    raise "Guess <#{word}> has to have same amount of letters as a secret word" if game.secret.length != word.length
 
     guess = Guess.where(game_id: game.id, word: word).take
     if (guess.nil?)
