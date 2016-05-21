@@ -1,6 +1,7 @@
 require 'rails_helper'
 
 describe GameService, type: :service do
+  let!(:noun) { create(:noun, noun: 'secret')}
 
   it 'creates a game' do
     game = GameService.create('channel-id-1', 'secret', :web)

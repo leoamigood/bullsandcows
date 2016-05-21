@@ -1,6 +1,9 @@
 require 'rails_helper'
 
 describe 'Bulls and Cows API' do
+  let!(:hostel) { create(:noun, noun: 'hostel') }
+  let!(:tomato) { create(:noun, noun: 'tomato') }
+  let!(:mortal) { create(:noun, noun: 'mortal') }
 
   describe 'Game API' do
     it 'creates a game with a word' do
