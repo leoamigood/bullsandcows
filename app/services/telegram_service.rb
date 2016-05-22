@@ -25,8 +25,11 @@ class TelegramService
         when /^\/guess ([[:alpha:]]+)/
           guess(bot, message, $1)
 
-        when '/tries'
-          list_attempts(bot, message)
+        when /^\/tries/
+          tries = list_attempts(message)
+          tries.each do |guess|
+            bot.api.send_message(chat_id: message.chat.id, text: "Guess: *#{guess.word}*, Bulls: *#{guess.bulls}*, Cows: *#{guess.cows}*", parse_mode: 'Markdown')
+          end
 
         when '/stop'
           bot.api.send_message(chat_id: message.chat.id, text: "Bye, #{message.from.first_name}")
@@ -46,13 +49,11 @@ class TelegramService
     end
   end
 
-  def self.list_attempts(bot, message)
+  def self.list_attempts(message)
     game = Game.where(channel: message.chat.id).last
     raise "Failed to find the game. Is game started for telegram message chat ID: #{message.chat.id}" unless game.present?
 
-    game.guesses.each do |guess|
-      bot.api.send_message(chat_id: message.chat.id, text: "Guess: *#{guess.word}*, Bulls: *#{guess.bulls}*, Cows: *#{guess.cows}*", parse_mode: 'Markdown')
-    end
+    game.guesses
   end
 
   def self.guess(bot, message, word)
