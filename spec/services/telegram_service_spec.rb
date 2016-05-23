@@ -48,7 +48,7 @@ describe TelegramService, type: :service do
     it 'replies previous guess tries' do
       TelegramService.listen(bot, message)
 
-      expect(api).to have_received(:send_message).with(hash_including(:text, chat_id: chat_id)).exactly(4).times
+      expect(api).to have_received(:send_message).with(hash_including(:text, chat_id: chat_id)).once
     end
   end
 

@@ -9,12 +9,17 @@ class TelegramService
           bot.api.send_message(chat_id: message.chat.id, text: "#{@@WELCOME_MSG}")
 
         when /^\/create ([[:alpha:]]+)/
-          game = GameService.create(message.chat.id, "#{$1}", :telegram)
+          secret = Noun.find_by_noun($1)
+          raise "Word #{$1} not found in the dictionary. Please try different secret word." unless secret.present?
+
+          GameService.create(message.chat.id, "#{secret.noun}", :telegram)
           bot.api.send_message(chat_id: message.chat.id, text: 'Game created!')
 
-        when /^\/create ([[:digit:]])/
-          secret = Noun.where('length(noun) = ?', $1).order('RAND()').first!.noun
-          game = GameService.create(message.chat.id, secret, :telegram)
+        when /^\/create ([[:digit:]]+)/
+          secret = Noun.where('char_length(noun) = ?', $1).order('RAND()').first
+          raise "Unable to create a game with #{$1} letters word. Please try different amount." unless secret.present?
+
+          game = GameService.create(message.chat.id, secret.noun, :telegram)
           bot.api.send_message(chat_id: message.chat.id, text: "Game created with *#{game.secret.length}* letters in the secret word.", parse_mode: 'Markdown')
 
         when /^\/create/
@@ -27,17 +32,18 @@ class TelegramService
 
         when /^\/tries/
           tries = list_attempts(message)
-          tries.each_with_index do |guess, i|
-            bot.api.send_message(chat_id: message.chat.id, text: "Attempt #{i + 1}: *#{guess.word}*, Bulls: *#{guess.bulls}*, Cows: *#{guess.cows}*", parse_mode: 'Markdown')
+          text = tries.each_with_index.map do |guess, i|
+            "Attempt #{i + 1}: *#{guess.word}*, Bulls: *#{guess.bulls}*, Cows: *#{guess.cows}*"
+            # bot.api.send_message(chat_id: message.chat.id, text: "Attempt #{i + 1}: *#{guess.word}*, Bulls: *#{guess.bulls}*, Cows: *#{guess.cows}*", parse_mode: 'Markdown')
           end
+          bot.api.send_message(chat_id: message.chat.id, text: text.join("\n"), parse_mode: 'Markdown')
 
         when '/stop'
           bot.api.send_message(chat_id: message.chat.id, text: "Bye, #{message.from.first_name}")
 
         when '/help'
-          bot.api.send_message(chat_id: message.chat.id, text: 'Use _/create_ to create a game', parse_mode: 'Markdown')
-          bot.api.send_message(chat_id: message.chat.id, text: 'Use _/guess <word>_ to guess the secret word', parse_mode: 'Markdown')
-          bot.api.send_message(chat_id: message.chat.id, text: 'Use _/tries_ to show previous attempts', parse_mode: 'Markdown')
+          lines = ['Use _/create_ to create a game', 'Use _/guess <word>_ to guess the secret word', 'Use _/tries_ to show previous attempts']
+          bot.api.send_message(chat_id: message.chat.id, text: lines.join("\n"), parse_mode: 'Markdown')
 
         else
           game = Game.where(channel: message.chat.id).last
@@ -54,9 +60,13 @@ class TelegramService
           end
       end
     rescue => ex
-      bot.logger.info("Error: #{ex.message}")
+      begin
+        bot.logger.info("Error: #{ex.message}")
 
-      bot.api.send_message(chat_id: message.chat.id, text: "Error: #{ex.message}", parse_mode: 'Markdown')
+        bot.api.send_message(chat_id: message.chat.id, text: "Error: #{ex.message}", parse_mode: 'Markdown')
+      rescue => internal
+        bot.logger.info("Error: #{internal.message}")
+      end
     end
   end
 

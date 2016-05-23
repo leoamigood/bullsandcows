@@ -30,7 +30,7 @@ test:
   pool: 5
   host: <%= ENV['DB_HOST'] %>
   port: <%= ENV['DB_PORT'] %>
-  
+
 production:
   <<: *default
   database: db/production.sqlite3
