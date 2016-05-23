@@ -14,7 +14,7 @@ development:
   <<: *default
   database: bulls_cows_development
   username: root
-  password: <%= ENV['DB_PASSWORD'] %>
+  password: <%= ENV['MYSQL_ROOT_PASSWORD'] %>
   pool: 5
   host: <%= ENV['DB_HOST'] %>
   port: <%= ENV['DB_PORT'] %>
@@ -26,10 +26,11 @@ test:
   <<: *default
   database: bulls_cows_test
   username: root
-  password:
+  password: <%= ENV['MYSQL_ROOT_PASSWORD'] %>
   pool: 5
-  host: localhost
-
+  host: <%= ENV['DB_HOST'] %>
+  port: <%= ENV['DB_PORT'] %>
+  
 production:
   <<: *default
   database: db/production.sqlite3

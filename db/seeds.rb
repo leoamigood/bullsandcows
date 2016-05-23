@@ -5,3 +5,7 @@
 #
 #   cities = City.create([{ name: 'Chicago' }, { name: 'Copenhagen' }])
 #   Mayor.create(name: 'Emanuel', city: cities.first)
+
+File.readlines('tmp/seed_data/nouns.en.txt').each do |line|
+  Noun.create(noun: line.chomp)
+end
