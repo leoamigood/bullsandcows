@@ -14,10 +14,10 @@ development:
   <<: *default
   database: bulls_cows_development
   username: root
-  password: q_7qrNVD5tRMV
+  password: <%= ENV['MYSQL_ROOT_PASSWORD'] %>
   pool: 5
-  host: db
-  port: 3306
+  host: <%= ENV['DB_HOST'] %>
+  port: <%= ENV['DB_PORT'] %>
 
 # Warning: The database defined as "test" will be erased and
 # re-generated from your development database when you run "rake".
@@ -26,9 +26,10 @@ test:
   <<: *default
   database: bulls_cows_test
   username: root
-  password:
+  password: <%= ENV['MYSQL_ROOT_PASSWORD'] %>
   pool: 5
-  host: localhost
+  host: <%= ENV['DB_HOST'] %>
+  port: <%= ENV['DB_PORT'] %>
 
 production:
   <<: *default
