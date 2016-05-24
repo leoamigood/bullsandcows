@@ -4,7 +4,7 @@ class TelegramService
 
   def self.listen(bot, message)
     begin
-      case message.text.downcase
+      case message.text.mb_chars.downcase.to_s
         when /^\/start/
           bot.api.send_message(chat_id: message.chat.id, text: "#{@@WELCOME_MSG}")
 
@@ -49,7 +49,7 @@ class TelegramService
           game = Game.where(channel: message.chat.id).last
           if game.present?
             unless game.finished?
-              guess(bot, message.chat.id, message.text.downcase)
+              guess(bot, message.chat.id, message.text.mb_chars.downcase.to_s)
             else
               bot.api.send_message(chat_id: message.chat.id, text: 'Go ahead and _/create_ a new game. For help try _/help_', parse_mode: 'Markdown')
             end

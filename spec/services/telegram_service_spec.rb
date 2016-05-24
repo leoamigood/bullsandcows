@@ -50,6 +50,45 @@ describe TelegramService, type: :service do
     end
   end
 
+  context 'when /guess command received case sensitive guess word' do
+    let!(:game) { create(:game, secret: 'secret', channel: chat_id) }
+
+    let!(:message) { Telegram::Bot::Types::Message.new(text: 'Secret') }
+
+    before(:each) do
+      message.stub_chain(:chat, :id).and_return(chat_id)
+    end
+
+    it 'handles case sensitive case' do
+      expect {
+        TelegramService.listen(bot, message)
+        expect(game.reload.finished?).to eq(true)
+      }.to change(Guess, :count).by(1)
+
+      expect(api).to have_received(:send_message).with(hash_including(:text, chat_id: chat_id)).twice
+    end
+  end
+
+  context 'when /guess command received case sensitive unicode guess word' do
+    let!(:privet) { create(:noun, noun: 'привет')}
+    let!(:game) { create(:game, secret: 'привет', channel: chat_id) }
+
+    let!(:message) { Telegram::Bot::Types::Message.new(text: 'Привет') }
+
+    before(:each) do
+      message.stub_chain(:chat, :id).and_return(chat_id)
+    end
+
+    it 'handles case sensitive unicode case' do
+      expect {
+        TelegramService.listen(bot, message)
+        expect(game.reload.finished?).to eq(true)
+      }.to change(Guess, :count).by(1)
+
+      expect(api).to have_received(:send_message).with(hash_including(:text, chat_id: chat_id)).twice
+    end
+  end
+
   context 'when /guess command received with exact guess word' do
     let!(:game) { create(:game, secret: 'secret', channel: chat_id) }
 

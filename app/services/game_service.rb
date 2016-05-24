@@ -23,7 +23,7 @@ class GameService
 
   def self.validate!(game, guess)
     raise 'Game has finished. Please start a new game using _/secret_ command.' if game.finished?
-    raise "Guess _#{guess}_ is not in dictionary, please try another word." unless Noun.find_by_noun(guess).present?
+    # raise "Guess _#{guess}_ is not in dictionary, please try another word." unless Noun.find_by_noun(guess).present?
     raise "Your guess word _#{guess}_ has to be *#{game.secret.length}* letters long." if game.secret.length != guess.length
   end
 end
