@@ -7,6 +7,11 @@ describe TelegramService, type: :service do
   let!(:bot) { Telegram::Bot::Client.new(token) }
   let!(:api) { Telegram::Bot::Api.new(token) }
 
+  let!(:secret) { create(:noun, noun: 'secret')}
+  let!(:tomato) { create(:noun, noun: 'tomato') }
+  let!(:mortal) { create(:noun, noun: 'mortal') }
+  let!(:combat) { create(:noun, noun: 'combat') }
+
   before(:each) do
     allow(bot).to receive(:api).and_return(api)
     allow(api).to receive(:send_message)
@@ -26,10 +31,43 @@ describe TelegramService, type: :service do
     end
   end
 
-  let!(:secret) { create(:noun, noun: 'secret')}
-  let!(:tomato) { create(:noun, noun: 'tomato') }
-  let!(:mortal) { create(:noun, noun: 'mortal') }
-  let!(:combat) { create(:noun, noun: 'combat') }
+  context 'when /guess command received with non-exact guess word' do
+    let!(:game) { create(:game, secret: 'secret', channel: chat_id) }
+
+    let!(:message) { Telegram::Bot::Types::Message.new(text: '/guess combat') }
+
+    before(:each) do
+      message.stub_chain(:chat, :id).and_return(chat_id)
+    end
+
+    it 'replies with guess result' do
+      expect {
+        TelegramService.listen(bot, message)
+        expect(game.reload.running?).to eq(true)
+      }.to change(Guess, :count).by(1)
+
+      expect(api).to have_received(:send_message).with(hash_including(:text, chat_id: chat_id)).once
+    end
+  end
+
+  context 'when /guess command received with exact guess word' do
+    let!(:game) { create(:game, secret: 'secret', channel: chat_id) }
+
+    let!(:message) { Telegram::Bot::Types::Message.new(text: '/guess secret') }
+
+    before(:each) do
+      message.stub_chain(:chat, :id).and_return(chat_id)
+    end
+
+    it 'replies with congratulations' do
+      expect {
+        TelegramService.listen(bot, message)
+        expect(game.reload.finished?).to eq(true)
+      }.to change(Guess, :count).by(1)
+
+      expect(api).to have_received(:send_message).with(hash_including(:text, chat_id: chat_id)).twice
+    end
+  end
 
   context 'when /tries command received' do
     let!(:game) { create(:game, secret: 'secret', channel: chat_id) }
