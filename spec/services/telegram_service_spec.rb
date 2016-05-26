@@ -1,6 +1,7 @@
 require 'rails_helper'
 
 describe TelegramService, type: :service do
+  let!(:user) { '@Amig0' }
   let!(:chat_id) { 169778030 }
 
   let!(:token) { 'api_token:goes_here' }
@@ -38,6 +39,7 @@ describe TelegramService, type: :service do
 
     before(:each) do
       message.stub_chain(:chat, :id).and_return(chat_id)
+      message.stub_chain(:from, :username).and_return(user)
     end
 
     it 'replies with guess result' do
@@ -57,6 +59,7 @@ describe TelegramService, type: :service do
 
     before(:each) do
       message.stub_chain(:chat, :id).and_return(chat_id)
+      message.stub_chain(:from, :username).and_return(user)
     end
 
     it 'handles case sensitive case' do
@@ -77,6 +80,7 @@ describe TelegramService, type: :service do
 
     before(:each) do
       message.stub_chain(:chat, :id).and_return(chat_id)
+      message.stub_chain(:from, :username).and_return(user)
     end
 
     it 'handles case sensitive unicode case' do
@@ -96,6 +100,7 @@ describe TelegramService, type: :service do
 
     before(:each) do
       message.stub_chain(:chat, :id).and_return(chat_id)
+      message.stub_chain(:from, :username).and_return(user)
     end
 
     it 'replies with congratulations' do
@@ -120,6 +125,7 @@ describe TelegramService, type: :service do
 
     before(:each) do
       message.stub_chain(:chat, :id).and_return(chat_id)
+      message.stub_chain(:from, :username).and_return(user)
     end
 
     it 'replies previous guess tries' do

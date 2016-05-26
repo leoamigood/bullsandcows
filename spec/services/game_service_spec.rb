@@ -1,6 +1,7 @@
 require 'rails_helper'
 
 describe GameService, type: :service do
+  let!(:user) { '@Amig0' }
   let!(:noun) { create(:noun, noun: 'secret')}
 
   it 'creates a game' do
@@ -15,14 +16,14 @@ describe GameService, type: :service do
     let!(:game) { create(:game, secret: 'hostel')}
 
     it 'places non full match guess' do
-      guess = GameService.guess(game, 'mortal')
+      guess = GameService.guess(game, user, 'mortal')
 
       expect(guess).not_to be(nil)
       expect(game.status).to eq('running')
     end
 
     it 'places a full match guess' do
-      guess = GameService.guess(game, 'hostel')
+      guess = GameService.guess(game, user, 'hostel')
 
       expect(guess).not_to be(nil)
       expect(game.status).to eq('finished')
