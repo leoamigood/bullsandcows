@@ -45,8 +45,8 @@ class TelegramService
             bot.api.send_message(chat_id: message.chat.id, text: 'There was no guesses so far. Go ahead and submit one with _/guess <word>_', parse_mode: 'Markdown')
           end
 
-        when '/stop$'
-          bot.api.send_message(chat_id: message.chat.id, text: "Bye, #{message.from.first_name}")
+        when /^\/stop$/
+          abandon(bot, message)
 
         when /^\/help$/
           lines = ['Use _/create [number]_ to create a game', 'Use _/guess <word>_ to guess the secret word', 'Use _/tries_ to show previous attempts', 'Use _/hint_ reveals one letter']
@@ -103,4 +103,34 @@ class TelegramService
 
     bot.api.send_message(chat_id: channel, text: "Secret word has letter _#{GameService.hint(game)}_ in it", parse_mode: 'Markdown')
   end
+
+  def self.abandon(bot, message)
+    game = Game.where(channel: message.chat.id).last
+    raise "Failed to find the game. Is game started for telegram message chat ID: #{message.chat.id}" unless game.present?
+
+    GameService.validate_game!(game)
+
+    if (stop_permitted(bot, message))
+      game.finished!
+      game.save!
+
+      bot.api.send_message(chat_id: message.chat.id, text: "You give up? Here is the secret word *#{game.secret}*", parse_mode: 'Markdown')
+    else
+      bot.api.send_message(chat_id: message.chat.id, text: 'You are NOT allowed to _/stop_ this game. Only _admin_ or _creator_ is', parse_mode: 'Markdown')
+    end
+  end
+
+  private
+
+  def self.stop_permitted(bot, message)
+    member = bot.api.getChatMember({chat_id: message.chat.id, user_id: message.from.id})
+    status = member['result']['status']
+
+    group_message?(message) ? status == 'creator' || status == 'administrator' : status == 'member'
+  end
+
+  def self.group_message?(message)
+    message.chat.type == 'group'
+  end
+
 end
