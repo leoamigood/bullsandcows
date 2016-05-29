@@ -1,10 +1,8 @@
 class GuessesController < BaseApiController
 
   def create
-    Rails.logger.info("Received guess word: #{validate[:guess]}")
-
     game = Game.find_by_id!(validate[:game_id])
-    guess = GameService.guess(game, validate[:guess])
+    guess = GameService.guess(game, validate[:username], validate[:guess])
 
     render json: guess
   end
@@ -12,6 +10,6 @@ class GuessesController < BaseApiController
   private
 
   def validate
-    params.permit(:game_id, :guess)
+    params.permit(:game_id, :username, :guess)
   end
 end
