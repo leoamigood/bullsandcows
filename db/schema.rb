@@ -13,23 +13,26 @@
 
 ActiveRecord::Schema.define(version: 20160526151651) do
 
+  # These are extensions that must be enabled in order to support this database
+  enable_extension "plpgsql"
+
   create_table "games", force: :cascade do |t|
     t.string   "secret",     limit: 64
     t.string   "channel",    limit: 255
     t.string   "source",     limit: 255
-    t.integer  "status",     limit: 4,   default: 0
-    t.integer  "hints",      limit: 4,   default: 0
+    t.integer  "status",                 default: 0
+    t.integer  "hints",                  default: 0
     t.datetime "created_at"
     t.datetime "updated_at"
   end
 
   create_table "guesses", force: :cascade do |t|
-    t.integer  "game_id",    limit: 4
+    t.integer  "game_id"
     t.string   "word",       limit: 255
     t.string   "username",   limit: 255
-    t.integer  "bulls",      limit: 4
-    t.integer  "cows",       limit: 4
-    t.integer  "attempts",   limit: 4,   default: 0
+    t.integer  "bulls"
+    t.integer  "cows"
+    t.integer  "attempts",               default: 0
     t.boolean  "exact"
     t.datetime "created_at"
     t.datetime "updated_at"

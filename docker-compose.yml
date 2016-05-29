@@ -7,15 +7,22 @@ services:
     ports:
       - "13000:3000"
     links:
-      - db
+      - mysql
+      - postgres
     depends_on:
-      - db
+      - postgres
     env_file:
-      - '.env.db'
+      - '.env.mysql'
       - '.env.web'
-  db:
+  mysql:
     image: library/mysql:5.6.22
     ports:
       - "13306:3306"
     env_file:
-      - '.env.db'
+      - '.env.mysql'
+  postgres:
+    image: postgres:9.5.3
+    ports:
+      - "15432:5432"
+    env_file:
+      - '.env.postgres'

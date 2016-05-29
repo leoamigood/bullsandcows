@@ -16,7 +16,7 @@ class TelegramService
           bot.api.send_message(chat_id: message.chat.id, text: 'Game created!')
 
         when /^\/create ([[:digit:]]+)/
-          secret = Noun.where('char_length(noun) = ?', $1).order('RAND()').first
+          secret = Noun.where('char_length(noun) = ?', $1).order('RANDOM()').first
           raise "Unable to create a game with #{$1} letters word. Please try different amount." unless secret.present?
 
           game = GameService.create(message.chat.id, secret.noun, :telegram)
