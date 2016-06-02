@@ -59,4 +59,10 @@ Rails.application.routes.draw do
       post :action => 'create', :on => :collection
     end
   end
+
+  namespace :hooks do
+    resources :telegram, :only => [] do
+      post ENV['TELEGRAM_WEBHOOK'], action: :update, :on => :collection
+    end
+  end
 end
