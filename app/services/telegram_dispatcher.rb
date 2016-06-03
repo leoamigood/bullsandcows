@@ -1,8 +1,8 @@
-class TelegramController
+class TelegramDispatcher
 
   @@WELCOME_MSG = 'Welcome to Bulls and Cows! Here be dragons! Well, the rules actually.'
 
-  def listen(bot, message)
+  def self.listen(bot, message)
     begin
       self.handle(bot, message)
     rescue => ex
@@ -15,7 +15,7 @@ class TelegramController
     end
   end
 
-  def handle(bot, message)
+  def self.handle(bot, message)
     command = message.text.mb_chars.downcase.to_s
     case command
       when /^\/start/
@@ -63,7 +63,8 @@ class TelegramController
         game = Game.where(channel: message.chat.id).last
         if game.present?
           unless game.finished?
-            guess(bot, message.chat.id, message.from.username, command)
+            reply = TelegramService.guess(message.chat.id, message.from.username, command)
+            bot.api.send_message(chat_id: message.chat.id, text: reply, parse_mode: 'Markdown')
           else
             bot.api.send_message(chat_id: message.chat.id, text: 'Go ahead and _/create_ a new game. For help try _/help_', parse_mode: 'Markdown')
           end

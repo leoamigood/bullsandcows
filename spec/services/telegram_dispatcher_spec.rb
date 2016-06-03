@@ -1,6 +1,6 @@
 require 'rails_helper'
 
-describe TelegramService, type: :service do
+describe TelegramDispatcher, type: :dispatcher do
   let!(:user) { '@Amig0' }
   let!(:chat_id) { 169778030 }
 
@@ -26,7 +26,7 @@ describe TelegramService, type: :service do
     end
 
     it 'replies with a welcome text' do
-      TelegramService.listen(bot, message)
+      TelegramDispatcher.listen(bot, message)
 
       expect(api).to have_received(:send_message).with(hash_including(:text, chat_id: chat_id))
     end
@@ -44,7 +44,7 @@ describe TelegramService, type: :service do
 
     it 'replies with guess result' do
       expect {
-        TelegramService.listen(bot, message)
+        TelegramDispatcher.listen(bot, message)
         expect(game.reload.running?).to eq(true)
       }.to change(Guess, :count).by(1)
 
@@ -64,11 +64,11 @@ describe TelegramService, type: :service do
 
     it 'handles case sensitive case' do
       expect {
-        TelegramService.listen(bot, message)
+        TelegramDispatcher.listen(bot, message)
         expect(game.reload.finished?).to eq(true)
       }.to change(Guess, :count).by(1)
 
-      expect(api).to have_received(:send_message).with(hash_including(:text, chat_id: chat_id)).twice
+      expect(api).to have_received(:send_message).with(hash_including(:text, chat_id: chat_id)).once
     end
   end
 
@@ -85,11 +85,11 @@ describe TelegramService, type: :service do
 
     it 'handles case sensitive unicode case' do
       expect {
-        TelegramService.listen(bot, message)
+        TelegramDispatcher.listen(bot, message)
         expect(game.reload.finished?).to eq(true)
       }.to change(Guess, :count).by(1)
 
-      expect(api).to have_received(:send_message).with(hash_including(:text, chat_id: chat_id)).twice
+      expect(api).to have_received(:send_message).with(hash_including(:text, chat_id: chat_id)).once
     end
   end
 
@@ -105,11 +105,11 @@ describe TelegramService, type: :service do
 
     it 'replies with congratulations' do
       expect {
-        TelegramService.listen(bot, message)
+        TelegramDispatcher.listen(bot, message)
         expect(game.reload.finished?).to eq(true)
       }.to change(Guess, :count).by(1)
 
-      expect(api).to have_received(:send_message).with(hash_including(:text, chat_id: chat_id)).twice
+      expect(api).to have_received(:send_message).with(hash_including(:text, chat_id: chat_id)).once
     end
   end
 
@@ -129,7 +129,7 @@ describe TelegramService, type: :service do
     end
 
     it 'replies previous guess tries' do
-      TelegramService.listen(bot, message)
+      TelegramDispatcher.listen(bot, message)
 
       expect(api).to have_received(:send_message).with(hash_including(:text, chat_id: chat_id)).once
     end
