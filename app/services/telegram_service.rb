@@ -6,26 +6,26 @@ class TelegramService
     @@WELCOME_MSG
   end
 
-  def self.create()
+  def self.create(channel)
     secret = Noun.offset(rand(Noun.count)).first!.noun
 
-    game = GameService.create(message.chat.id, secret, :telegram)
+    game = GameService.create(channel, secret, :telegram)
     "Game created with *#{game.secret.length}* letters in the secret word."
   end
 
-  def self.create_by_word(word)
+  def self.create_by_word(channel, word)
     secret = Noun.find_by_noun(word)
     raise "Word #{word} not found in the dictionary. Please try different secret word." unless secret.present?
 
-    game = GameService.create(message.chat.id, secret.noun, :telegram)
+    game = GameService.create(channel, secret.noun, :telegram)
     "Game created with *#{game.secret.length}* letters in the secret word."
   end
 
-  def self.create_by_number(number)
+  def self.create_by_number(channel, number)
     secret = Noun.where('char_length(noun) = ?', number).order('RANDOM()').first
     raise "Unable to create a game with #{number} letters word. Please try different amount." unless secret.present?
 
-    game = GameService.create(message.chat.id, secret.noun, :telegram)
+    game = GameService.create(channel, secret.noun, :telegram)
     "Game created with *#{game.secret.length}* letters in the secret word."
   end
 
@@ -39,8 +39,10 @@ class TelegramService
     guess = GameService.guess(game, username, word)
 
     text = "Guess: _#{word}_, *Bulls: #{guess.bulls}*, *Cows: #{guess.cows}*"
-    text + "Congratulations! You guessed it with *#{guess.game.guesses.length}* tries" if game.finished?
-  end
+    text += "\nCongratulations! You guessed it with *#{guess.game.guesses.length}* tries" if game.finished?
+
+    text
+ end
 
   def self.hint(channel)
     game = Game.where(channel: channel).last
@@ -54,11 +56,12 @@ class TelegramService
 
   def self.tries(channel)
     game = Game.where(channel: channel).last
-    raise "Failed to find the game. Is game started for telegram message chat ID: #{message.chat.id}" unless game.present?
+    raise "Failed to find the game. Is game started for telegram message channel: #{channel}" unless game.present?
 
-    unless (game.guesses.empty)
+    tries = game.guesses
+    unless (tries.empty?)
       text = tries.each_with_index.map do |guess, i|
-        "Attempt #{i + 1}: *#{guess.word}*, Bulls: *#{guess.bulls}*, Cows: *#{guess.cows}*"
+        "Try #{i + 1}: *#{guess.word}*, Bulls: *#{guess.bulls}*, Cows: *#{guess.cows}*"
       end
       text.join("\n")
     else
@@ -66,16 +69,19 @@ class TelegramService
     end
   end
 
-  def self.stop_permitted(bot, message)
-    member = bot.api.getChatMember({chat_id: message.chat.id, user_id: message.from.id})
-    status = member['result']['status']
+  def self.stop_permitted(message)
+    token = ENV['TELEGRAM_API_TOKEN']
+    Telegram::Bot::Client.run(token) do |bot|
+      member = bot.api.getChatMember({chat_id: message.chat.id, user_id: message.from.id})
+      status = member['result']['status']
 
-    message.chat.type == 'group' ? status == 'creator' || status == 'administrator' : status == 'member'
+      message.chat.type == 'group' ? status == 'creator' || status == 'administrator' : status == 'member'
+    end
   end
 
-  def self.stop(message)
-    game = Game.where(channel: message.chat.id).last
-    raise "Failed to find the game. Is game started for telegram message chat ID: #{message.chat.id}" unless game.present?
+  def self.stop(channel)
+    game = Game.where(channel: channel).last
+    raise "Failed to find the game. Is game started for telegram message chat ID: #{channel}" unless game.present?
 
     GameService.validate_game!(game)
 
@@ -86,7 +92,14 @@ class TelegramService
   end
 
   def self.help
-    lines = ['Use _/create [number]_ to create a game', 'Use _/guess <word>_ to guess the secret word', 'Use _/tries_ to show previous attempts', 'Use _/hint_ reveals one letter']
+    lines = [
+        'Here is the list of available commands:',
+        'Use _/create [number]_ to create a game',
+        'Use _/guess <word>_ to place a guess for the secret',
+        'Use _/tries_ to show previous attempts',
+        'Use _/hint_ to reveal a random letter in a secret',
+        'Use _/stop_ to abort the game and show secret'
+    ]
     lines.join("\n")
   end
 

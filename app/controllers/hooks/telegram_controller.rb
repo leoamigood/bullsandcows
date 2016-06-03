@@ -1,14 +1,30 @@
-class TelegramController < BaseApiController
+class Hooks::TelegramController < BaseApiController
+
+  Rails.logger = Logger.new(STDOUT)
 
   def update
-    Rails.logger.info("Telegram web hook hit: #{params}")
+    begin
+      Rails.logger.info("Telegram request: #{params}")
 
-    message = params['message']
-    
-    lines = ['Use _/create [number]_ to create a game', 'Use _/guess <word>_ to guess the secret word', 'Use _/tries_ to show previous attempts', 'Use _/hint_ reveals one letter']
-    payload = Message.new(message.chat_id, lines.join(' '))
+      payload = telegram_params[:message]
+      payload = telegram_params[:edited_message] unless payload.present?
+      message = Telegram::Bot::Types::Message.new(payload.to_hash)
 
-    render json: payload
+      reply = TelegramDispatcher.handle(message)
+      response = Telegram::Response.new(message['chat']['id'], reply)
+
+      Rails.logger.info("Telegram respond: #{response.to_json}")
+      render json: response
+    rescue => ex
+      Rails.logger.warn("Error: #{ex.message}")
+      render nothing: true
+    end
   end
 
+  private
+
+  def telegram_params
+    message = [:message_id, :text, :date, from: [:id, :first_name, :username], chat: [:id, :first_name, :username, :type]]
+    params.permit(message: message, edited_message: message)
+  end
 end

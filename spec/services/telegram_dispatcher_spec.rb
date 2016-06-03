@@ -26,9 +26,7 @@ describe TelegramDispatcher, type: :dispatcher do
     end
 
     it 'replies with a welcome text' do
-      TelegramDispatcher.listen(bot, message)
-
-      expect(api).to have_received(:send_message).with(hash_including(:text, chat_id: chat_id))
+      expect(TelegramDispatcher.handle(message)).to include('Welcome to Bulls and Cows!')
     end
   end
 
@@ -44,11 +42,9 @@ describe TelegramDispatcher, type: :dispatcher do
 
     it 'replies with guess result' do
       expect {
-        TelegramDispatcher.listen(bot, message)
+        TelegramDispatcher.handle(message)
         expect(game.reload.running?).to eq(true)
       }.to change(Guess, :count).by(1)
-
-      expect(api).to have_received(:send_message).with(hash_including(:text, chat_id: chat_id)).once
     end
   end
 
@@ -64,11 +60,9 @@ describe TelegramDispatcher, type: :dispatcher do
 
     it 'handles case sensitive case' do
       expect {
-        TelegramDispatcher.listen(bot, message)
+        TelegramDispatcher.handle(message)
         expect(game.reload.finished?).to eq(true)
       }.to change(Guess, :count).by(1)
-
-      expect(api).to have_received(:send_message).with(hash_including(:text, chat_id: chat_id)).once
     end
   end
 
@@ -85,11 +79,9 @@ describe TelegramDispatcher, type: :dispatcher do
 
     it 'handles case sensitive unicode case' do
       expect {
-        TelegramDispatcher.listen(bot, message)
+        TelegramDispatcher.handle(message)
         expect(game.reload.finished?).to eq(true)
       }.to change(Guess, :count).by(1)
-
-      expect(api).to have_received(:send_message).with(hash_including(:text, chat_id: chat_id)).once
     end
   end
 
@@ -105,11 +97,9 @@ describe TelegramDispatcher, type: :dispatcher do
 
     it 'replies with congratulations' do
       expect {
-        TelegramDispatcher.listen(bot, message)
+        TelegramDispatcher.handle(message)
         expect(game.reload.finished?).to eq(true)
       }.to change(Guess, :count).by(1)
-
-      expect(api).to have_received(:send_message).with(hash_including(:text, chat_id: chat_id)).once
     end
   end
 
@@ -129,10 +119,23 @@ describe TelegramDispatcher, type: :dispatcher do
     end
 
     it 'replies previous guess tries' do
-      TelegramDispatcher.listen(bot, message)
-
-      expect(api).to have_received(:send_message).with(hash_including(:text, chat_id: chat_id)).once
+      expect(TelegramDispatcher.handle(message)).to include('Try 4:')
     end
   end
 
+  context 'when /help command received' do
+    let!(:message) { Telegram::Bot::Types::Message.new(text: '/help') }
+
+    it 'replies with help message' do
+      expect(TelegramDispatcher.handle(message)).to include('Here is the list of available commands:')
+    end
+  end
+
+  context 'when /unknown command received' do
+    let!(:message) { Telegram::Bot::Types::Message.new(text: '/unknown') }
+
+    it 'replies with generic message' do
+      expect(TelegramDispatcher.handle(message)).to include('Nothing I can do')
+    end
+  end
 end
