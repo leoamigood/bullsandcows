@@ -1,7 +1,7 @@
 class GameService
 
   def self.create(channel, secret, source = nil)
-    raise "Secret *#{secret}* is not in dictionary, please try another word." unless Noun.find_by_noun(secret).present?
+    # raise "Secret *#{secret}* is not in dictionary, please try another word." unless Noun.find_by_noun(secret).present?
 
     Game.create({channel: channel, secret: secret, source: source})
   end

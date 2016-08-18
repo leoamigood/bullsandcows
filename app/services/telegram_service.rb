@@ -14,10 +14,7 @@ class TelegramService
   end
 
   def self.create_by_word(channel, word)
-    secret = Noun.find_by_noun(word)
-    raise "Word #{word} not found in the dictionary. Please try different secret word." unless secret.present?
-
-    game = GameService.create(channel, secret.noun, :telegram)
+    game = GameService.create(channel, word, :telegram)
     "Game created with *#{game.secret.length}* letters in the secret word."
   end
 

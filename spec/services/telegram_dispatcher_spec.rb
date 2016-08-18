@@ -30,6 +30,44 @@ describe TelegramDispatcher, type: :dispatcher do
     end
   end
 
+  context 'when /create command received' do
+    let!(:message) { Telegram::Bot::Types::Message.new(text: '/create') }
+
+    before(:each) do
+      message.stub_chain(:chat, :id).and_return(chat_id)
+    end
+
+    it 'replies with a game created text' do
+      expect(TelegramDispatcher.handle(message)).to include('Game created with')
+      expect(TelegramDispatcher.handle(message)).to include('letters in the secret word')
+    end
+  end
+
+
+  context 'when /create <word> command received' do
+    let!(:message) { Telegram::Bot::Types::Message.new(text: '/create коитус') }
+
+    before(:each) do
+      message.stub_chain(:chat, :id).and_return(chat_id)
+    end
+
+    it 'replies with a game created text' do
+      expect(TelegramDispatcher.handle(message)).to include('Game created with *6* letters in the secret word')
+    end
+  end
+
+  context 'when /create <number> command received' do
+    let!(:message) { Telegram::Bot::Types::Message.new(text: '/create 6') }
+
+    before(:each) do
+      message.stub_chain(:chat, :id).and_return(chat_id)
+    end
+
+    it 'replies with a game created text' do
+      expect(TelegramDispatcher.handle(message)).to include('Game created with *6* letters in the secret word')
+    end
+  end
+
   context 'when /guess command received with non-exact guess word' do
     let!(:game) { create(:game, secret: 'secret', channel: chat_id) }
 
