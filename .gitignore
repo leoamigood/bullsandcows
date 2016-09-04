@@ -20,5 +20,8 @@
 .idea
 .rspec
 
+# Ignore local secure settings
+.env.*.secret
+
 *.bak
 .byebug_history

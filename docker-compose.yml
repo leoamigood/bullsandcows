@@ -12,8 +12,9 @@ services:
     depends_on:
       - postgres
     env_file:
-      - '.env.mysql'
+      - '.env.postgres'
       - '.env.web'
+      - '.env.web.secret'
   mysql:
     image: library/mysql:5.6.22
     ports:
