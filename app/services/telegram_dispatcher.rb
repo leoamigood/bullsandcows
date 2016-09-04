@@ -1,5 +1,6 @@
 class TelegramDispatcher
 
+  @@BOT_NAME = 'BullsAndCowsWordsBot'
   @@WELCOME_MSG = 'Welcome to Bulls and Cows! Here be dragons! Well, the rules actually.'
 
   def self.handle(message)
@@ -8,32 +9,32 @@ class TelegramDispatcher
       when /^\/start/
         TelegramService.start
 
-      when /^\/create$/
+      when /^\/create(?:@#{@@BOT_NAME})?$/i
         TelegramService.create(message.chat.id)
 
-      when /^\/create ([[:alpha:]]+)/
+      when /^\/create(?:@#{@@BOT_NAME})? ([[:alpha:]]+)/i
         TelegramService.create_by_word(message.chat.id, $1)
 
-      when /^\/create ([[:digit:]]+)/
+      when /^\/create(?:@#{@@BOT_NAME})? ([[:digit:]]+)/i
         TelegramService.create_by_number(message.chat.id ,$1)
 
-      when /^\/guess ([[:alpha:]]+)/
+      when /^\/guess(?:@#{@@BOT_NAME})? ([[:alpha:]]+)/i
         TelegramService.guess(message.chat.id, message.from.username, $1)
 
-      when /^\/hint$/
+      when /^\/hint(?:@#{@@BOT_NAME})?$/i
         TelegramService.hint(message.chat.id)
 
-      when /^\/tries$/
+      when /^\/tries(?:@#{@@BOT_NAME})?$/i
         TelegramService.tries(message.chat.id)
 
-      when /^\/stop$/
+      when /^\/stop(?:@#{@@BOT_NAME})?$/i
         if (TelegramService.stop_permitted(message))
           TelegramService.stop(message.chat.id)
         else
           'You are NOT allowed to _/stop_ this game. Only _admin_ or _creator_ is'
         end
 
-      when /^\/help$/
+      when /^\/help(?:@#{@@BOT_NAME})?$/i
         TelegramService.help
 
       when /^\/.*/
