@@ -68,6 +68,21 @@ describe TelegramDispatcher, type: :dispatcher do
     end
   end
 
+  context 'when /create command includes bot name received' do
+    let!(:message) { Telegram::Bot::Types::Message.new(text: '/create@BullsAndCowsWordsBot секрет') }
+
+    before do
+      allow(TelegramService).to receive(:create_by_word)
+
+      message.stub_chain(:chat, :id).and_return(chat_id)
+    end
+
+    it 'handles bot name as optional part in command' do
+      expect(TelegramDispatcher.handle(message))
+      expect(TelegramService).to have_received(:create_by_word).with(chat_id, 'секрет')
+    end
+  end
+
   context 'when /guess command received with non-exact guess word' do
     let!(:game) { create(:game, secret: 'secret', channel: chat_id) }
 
@@ -141,6 +156,22 @@ describe TelegramDispatcher, type: :dispatcher do
     end
   end
 
+  context 'when /guess command includes bot name received' do
+    let!(:message) { Telegram::Bot::Types::Message.new(text: '/guess@BullsAndCowsWordsBot secret') }
+
+    before do
+      allow(TelegramService).to receive(:guess)
+
+      message.stub_chain(:chat, :id).and_return(chat_id)
+      message.stub_chain(:from, :username).and_return(user)
+    end
+
+    it 'handles bot name as optional part in command' do
+      expect(TelegramDispatcher.handle(message))
+      expect(TelegramService).to have_received(:guess).with(chat_id, user, 'secret')
+    end
+  end
+
   context 'when /tries command received' do
     let!(:game) { create(:game, secret: 'secret', channel: chat_id) }
 
@@ -159,6 +190,19 @@ describe TelegramDispatcher, type: :dispatcher do
     it 'replies previous guess tries' do
       expect(TelegramDispatcher.handle(message)).to include('Try 4:')
     end
+
+    context 'when /tries command includes bot name received' do
+      let!(:message) { Telegram::Bot::Types::Message.new(text: '/tries@BullsAndCowsWordsBot') }
+
+      before do
+        allow(TelegramService).to receive(:tries)
+      end
+
+      it 'handles bot name as optional part in command' do
+        expect(TelegramDispatcher.handle(message))
+        expect(TelegramService).to have_received(:tries)
+      end
+    end
   end
 
   context 'when /help command received' do
@@ -166,6 +210,19 @@ describe TelegramDispatcher, type: :dispatcher do
 
     it 'replies with help message' do
       expect(TelegramDispatcher.handle(message)).to include('Here is the list of available commands:')
+    end
+
+    context 'when /help command includes bot name received' do
+      let!(:message) { Telegram::Bot::Types::Message.new(text: '/help@BullsAndCowsWordsBot') }
+
+      before do
+        allow(TelegramService).to receive(:help)
+      end
+
+      it 'handles bot name as optional part in command' do
+        expect(TelegramDispatcher.handle(message))
+        expect(TelegramService).to have_received(:help)
+      end
     end
   end
 
