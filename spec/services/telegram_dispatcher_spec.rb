@@ -119,6 +119,23 @@ describe TelegramDispatcher, type: :dispatcher do
     end
   end
 
+  context 'when /guess command received with incorrect amount of letters in word' do
+    let!(:game) { create(:game, secret: 'secret', channel: chat_id) }
+
+    let!(:message) { Telegram::Bot::Types::Message.new(text: 'mistake') }
+
+    before(:each) do
+      message.stub_chain(:chat, :id).and_return(chat_id)
+      message.stub_chain(:from, :username).and_return(user)
+    end
+
+    it 'replies with error message' do
+      expect {
+        expect(TelegramDispatcher.handle(message)).to include('Your guess word _mistake_ has to be *6* letters long.')
+      }.not_to change(Guess, :count)
+    end
+  end
+
   context 'when /guess command received case sensitive unicode guess word' do
     let!(:privet) { create(:noun, noun: 'привет')}
     let!(:game) { create(:game, secret: 'привет', channel: chat_id) }
@@ -153,6 +170,24 @@ describe TelegramDispatcher, type: :dispatcher do
         TelegramDispatcher.handle(message)
         expect(game.reload.finished?).to eq(true)
       }.to change(Guess, :count).by(1)
+    end
+  end
+
+  context 'when /guess command received after game has stopped' do
+    let!(:game) { create(:game, status: :finished, secret: 'secret', channel: chat_id) }
+
+    let!(:message) { Telegram::Bot::Types::Message.new(text: '/guess secret') }
+
+    before(:each) do
+      message.stub_chain(:chat, :id).and_return(chat_id)
+      message.stub_chain(:from, :username).and_return(user)
+    end
+
+    it 'replies with error message' do
+      expect {
+        expect(TelegramDispatcher.handle(message)).to include('Game has finished. Please start a new game using _/create_ command.')
+        expect(game.reload.finished?).to eq(true)
+      }.not_to change(Guess, :count)
     end
   end
 
@@ -202,6 +237,47 @@ describe TelegramDispatcher, type: :dispatcher do
         expect(TelegramDispatcher.handle(message))
         expect(TelegramService).to have_received(:tries)
       end
+    end
+  end
+
+  context 'when /stop command received' do
+    let!(:game) { create(:game, secret: 'secret', channel: chat_id) }
+
+    let!(:message) { Telegram::Bot::Types::Message.new(text: '/stop') }
+
+    before(:each) do
+      message.stub_chain(:chat, :id).and_return(chat_id)
+      message.stub_chain(:from, :username).and_return(user)
+    end
+
+    context 'when stop command is permitted' do
+      before(:each) do
+        allow(TelegramService).to receive(:stop_permitted).and_return(true)
+      end
+
+      it 'finishes the game, replies with a secret word' do
+        expect {
+          expect(TelegramDispatcher.handle(message)).to include('You give up? Here is the secret word *secret*')
+          expect(game.reload.finished?).to eq(true)
+        }.not_to change(Guess, :count)
+      end
+    end
+  end
+
+  context 'when /stop command includes bot name received' do
+    let!(:message) { Telegram::Bot::Types::Message.new(text: '/stop@BullsAndCowsWordsBot') }
+
+    before do
+      allow(TelegramService).to receive(:stop_permitted).and_return(true)
+      allow(TelegramService).to receive(:stop)
+
+      message.stub_chain(:chat, :id).and_return(chat_id)
+      message.stub_chain(:from, :username).and_return(user)
+    end
+
+    it 'handles bot name as optional part in command' do
+      expect(TelegramDispatcher.handle(message))
+      expect(TelegramService).to have_received(:stop)
     end
   end
 
