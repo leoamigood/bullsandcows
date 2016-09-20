@@ -21,13 +21,13 @@ class TelegramDispatcher
         when /^\/create(?:@#{@@BOT_NAME})?$/i
           TelegramService.create(message.chat.id)
 
-        when /^\/create(?:@#{@@BOT_NAME})? ([[:alpha:]]+)/i
+        when /^\/create(?:@#{@@BOT_NAME})? ([[:alpha:]]+)$/i
           TelegramService.create_by_word(message.chat.id, $1)
 
-        when /^\/create(?:@#{@@BOT_NAME})? ([[:digit:]]+)/i
+        when /^\/create(?:@#{@@BOT_NAME})? ([[:digit:]]+)$/i
           TelegramService.create_by_number(message.chat.id, $1)
 
-        when /^\/guess(?:@#{@@BOT_NAME})? ([[:alpha:]]+)/i
+        when /^\/guess(?:@#{@@BOT_NAME})? ([[:alpha:]]+)$/i
           TelegramService.guess(message.chat.id, message.from.username, $1)
 
         when /^\/hint(?:@#{@@BOT_NAME})?$/i
@@ -35,6 +35,12 @@ class TelegramDispatcher
 
         when /^\/tries(?:@#{@@BOT_NAME})?$/i
           TelegramService.tries(message.chat.id)
+
+        when /^\/best(?:@#{@@BOT_NAME})?$/i
+          TelegramService.best(message.chat.id)
+
+        when /^\/best(?:@#{@@BOT_NAME})? ([[:digit:]]+)$/i
+          TelegramService.best(message.chat.id, $1)
 
         when /^\/stop(?:@#{@@BOT_NAME})?$/i
           if (TelegramService.stop_permitted(message))
