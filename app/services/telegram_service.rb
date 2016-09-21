@@ -108,9 +108,10 @@ class TelegramService
     def help
       lines = [
           'Here is the list of available commands:',
-          'Use _/create [number]_ to create a game',
+          'Use _/create [word]|[number]_ to create a game',
           'Use _/guess <word>_ to place a guess for the secret',
-          'Use _/tries_ to show previous attempts',
+          'Use _/tries_ to show previous guess attempts',
+          'Use _/best [number]_ to see top guesses',
           'Use _/hint_ to reveal a random letter in a secret',
           'Use _/stop_ to abort the game and show secret'
       ]
