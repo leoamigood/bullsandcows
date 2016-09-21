@@ -240,6 +240,87 @@ describe TelegramDispatcher, type: :dispatcher do
     end
   end
 
+  context 'when /best command received' do
+    let!(:game) { create(:game, secret: 'secret', channel: chat_id) }
+
+    let!(:message) { Telegram::Bot::Types::Message.new(text: '/best') }
+
+    let!(:try1) { create(:guess, word: 'tomato', game: game, bulls: 0, cows: 1) }
+    let!(:try2) { create(:guess, word: 'mortal', game: game, bulls: 0, cows: 2) }
+    let!(:try3) { create(:guess, word: 'combat', game: game, bulls: 1, cows: 1) }
+    let!(:try4) { create(:guess, word: 'wonder', game: game, bulls: 1, cows: 1) }
+    let!(:try5) { create(:guess, word: 'sector', game: game, bulls: 3, cows: 2) }
+    let!(:try6) { create(:guess, word: 'energy', game: game, bulls: 1, cows: 2) }
+    let!(:try7) { create(:guess, word: 'master', game: game, bulls: 1, cows: 3) }
+    let!(:try8) { create(:guess, word: 'engine', game: game, bulls: 1, cows: 2) }
+    let!(:try9) { create(:guess, word: 'staple', game: game, bulls: 1, cows: 2) }
+
+    before(:each) do
+      message.stub_chain(:chat, :id).and_return(chat_id)
+      message.stub_chain(:from, :username).and_return(user)
+    end
+
+    it 'replies with top guesses' do
+      expect {
+        result = TelegramDispatcher.handle(message)
+        expect(result).to include('Top 1: *sector*, Bulls: *3*, Cows: *2*')
+        expect(result).to include('Top 2: *master*, Bulls: *1*, Cows: *3*')
+        expect(result).to include('Top 3: *engine*, Bulls: *1*, Cows: *2*')
+        expect(result).to include('Top 4: *energy*, Bulls: *1*, Cows: *2*')
+        expect(result).to include('Top 5: *staple*, Bulls: *1*, Cows: *2*')
+      }.not_to change(Guess, :count)
+    end
+  end
+
+  context 'when /best command received with a <limit>' do
+    let!(:game) { create(:game, secret: 'secret', channel: chat_id) }
+
+    let!(:message) { Telegram::Bot::Types::Message.new(text: '/best 3') }
+
+    let!(:try1) { create(:guess, word: 'tomato', game: game, bulls: 0, cows: 1) }
+    let!(:try2) { create(:guess, word: 'mortal', game: game, bulls: 0, cows: 2) }
+    let!(:try3) { create(:guess, word: 'combat', game: game, bulls: 1, cows: 1) }
+    let!(:try4) { create(:guess, word: 'wonder', game: game, bulls: 1, cows: 1) }
+    let!(:try5) { create(:guess, word: 'sector', game: game, bulls: 3, cows: 2) }
+    let!(:try6) { create(:guess, word: 'energy', game: game, bulls: 1, cows: 2) }
+    let!(:try7) { create(:guess, word: 'master', game: game, bulls: 1, cows: 3) }
+    let!(:try8) { create(:guess, word: 'engine', game: game, bulls: 1, cows: 2) }
+    let!(:try9) { create(:guess, word: 'staple', game: game, bulls: 1, cows: 2) }
+
+    before(:each) do
+      message.stub_chain(:chat, :id).and_return(chat_id)
+      message.stub_chain(:from, :username).and_return(user)
+    end
+
+    it 'replies with top <limit> guesses' do
+      expect {
+        result = TelegramDispatcher.handle(message)
+        expect(result).to include('Top 1: *sector*, Bulls: *3*, Cows: *2*')
+        expect(result).to include('Top 2: *master*, Bulls: *1*, Cows: *3*')
+        expect(result).to include('Top 3: *engine*, Bulls: *1*, Cows: *2*')
+      }.not_to change(Guess, :count)
+    end
+
+  end
+
+
+  context 'when /best command includes bot name received' do
+    let!(:message) { Telegram::Bot::Types::Message.new(text: '/best@BullsAndCowsWordsBot') }
+
+    before do
+      allow(TelegramService).to receive(:stop_permitted).and_return(true)
+      allow(TelegramService).to receive(:stop)
+
+      message.stub_chain(:chat, :id).and_return(chat_id)
+      message.stub_chain(:from, :username).and_return(user)
+    end
+
+    it 'handles bot name as optional part in command' do
+      expect(TelegramDispatcher.handle(message))
+      expect(TelegramService).to have_received(:best)
+    end
+  end
+
   context 'when /stop command received' do
     let!(:game) { create(:game, secret: 'secret', channel: chat_id) }
 
