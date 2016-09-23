@@ -3,7 +3,7 @@ services:
   web:
     build: .
     volumes:
-      - .:/myapp
+      - .:/u/apps/bullsandcows
     ports:
       - "13000:3000"
     links:
@@ -11,6 +11,7 @@ services:
       - postgres
     depends_on:
       - postgres
+    working_dir: /u/apps/bullsandcows
     env_file:
       - '.env.postgres'
       - '.env.web'
