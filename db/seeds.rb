@@ -10,6 +10,6 @@
 #   Noun.create(noun: line.chomp, lang: 'EN')
 # end
 
-File.readlines('tmp/seed_data/nouns.ru.txt').each do |line|
-  Noun.create(noun: line.chomp, lang: 'RU')
-end
+# File.readlines('tmp/seed_data/nouns.ru.txt').each do |line|
+#   Noun.create(noun: line.chomp, lang: 'RU')
+# end
