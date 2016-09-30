@@ -16,14 +16,24 @@ ActiveRecord::Schema.define(version: 20160923021303) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
+  create_table "dictionaries", force: :cascade do |t|
+    t.string   "source",     limit: 64
+    t.string   "lang",       limit: 2
+    t.boolean  "enabled",               default: true
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
+
   create_table "games", force: :cascade do |t|
-    t.string   "secret",     limit: 64
-    t.integer  "status",                default: 0
+    t.string   "secret",        limit: 64
+    t.integer  "status",                   default: 0
     t.datetime "created_at"
     t.datetime "updated_at"
     t.string   "channel"
     t.string   "source"
-    t.integer  "hints",                 default: 0
+    t.integer  "hints",                    default: 0
+    t.integer  "dictionary_id"
+    t.integer  "level"
   end
 
   create_table "guesses", force: :cascade do |t|
@@ -39,9 +49,9 @@ ActiveRecord::Schema.define(version: 20160923021303) do
   end
 
   create_table "nouns", force: :cascade do |t|
-    t.string  "noun",   limit: 64
-    t.string  "lang",   limit: 2,  default: "EN"
-    t.string  "source"
+    t.string  "noun",          limit: 64
+    t.integer "dictionary_id"
+    t.boolean "excluded",                 default: false, null: false
     t.integer "level"
     t.float   "ipm"
     t.integer "r"

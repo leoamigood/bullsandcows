@@ -4,6 +4,7 @@ class Guess < ActiveRecord::Base
   belongs_to :game
 
   def <=>(other)
-    bulls * 3 + cows <=> other.bulls * 3 + other.cows
+    score = other.bulls * 3 + other.cows <=> bulls * 3 + cows
+    score == 0 ? (self.created_at <=> other.created_at) : score
   end
 end

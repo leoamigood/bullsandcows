@@ -5,11 +5,12 @@ describe GameService, type: :service do
   let!(:noun) { create(:noun, noun: 'secret')}
 
   it 'creates a game' do
-    game = GameService.create('channel-id-1', 'secret', :web)
+    game = GameService.create('channel-id-1', Noun.new(noun: 'secret'), :web)
 
     expect(game).not_to be(nil)
     expect(game.secret).to eq('secret')
     expect(game.status).to eq('created')
+    expect(game.dictionary).to eq(nil)
   end
 
   context 'with a game started' do

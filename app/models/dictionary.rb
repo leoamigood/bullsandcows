@@ -1,7 +1,8 @@
 class Dictionary < ActiveRecord::Base
-  enum lang: [:EN, :RU]
+  enum lang: {:EN => 'EN', :RU => 'RU'}
 
-  belongs_to :dictionary
+  has_many :nouns
 
   scope :lang, -> (lang) { where(lang: lang.upcase) }
+  scope :enabled, -> { where(enabled: true) }
 end

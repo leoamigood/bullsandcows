@@ -8,10 +8,7 @@ describe TelegramDispatcher, type: :dispatcher do
   let!(:bot) { Telegram::Bot::Client.new(token) }
   let!(:api) { Telegram::Bot::Api.new(token) }
 
-  let!(:secret) { create(:noun, noun: 'secret')}
-  let!(:tomato) { create(:noun, noun: 'tomato') }
-  let!(:mortal) { create(:noun, noun: 'mortal') }
-  let!(:combat) { create(:noun, noun: 'combat') }
+  let!(:dictionary) { create :dictionary, :basic, lang: 'RU'}
 
   before(:each) do
     allow(bot).to receive(:api).and_return(api)
@@ -265,8 +262,8 @@ describe TelegramDispatcher, type: :dispatcher do
         result = TelegramDispatcher.handle(message)
         expect(result).to include('Top 1: *sector*, Bulls: *3*, Cows: *2*')
         expect(result).to include('Top 2: *master*, Bulls: *1*, Cows: *3*')
-        expect(result).to include('Top 3: *engine*, Bulls: *1*, Cows: *2*')
-        expect(result).to include('Top 4: *energy*, Bulls: *1*, Cows: *2*')
+        expect(result).to include('Top 3: *energy*, Bulls: *1*, Cows: *2*')
+        expect(result).to include('Top 4: *engine*, Bulls: *1*, Cows: *2*')
         expect(result).to include('Top 5: *staple*, Bulls: *1*, Cows: *2*')
       }.not_to change(Guess, :count)
     end
@@ -297,7 +294,7 @@ describe TelegramDispatcher, type: :dispatcher do
         result = TelegramDispatcher.handle(message)
         expect(result).to include('Top 1: *sector*, Bulls: *3*, Cows: *2*')
         expect(result).to include('Top 2: *master*, Bulls: *1*, Cows: *3*')
-        expect(result).to include('Top 3: *engine*, Bulls: *1*, Cows: *2*')
+        expect(result).to include('Top 3: *energy*, Bulls: *1*, Cows: *2*')
       }.not_to change(Guess, :count)
     end
 
@@ -308,8 +305,7 @@ describe TelegramDispatcher, type: :dispatcher do
     let!(:message) { Telegram::Bot::Types::Message.new(text: '/best@BullsAndCowsWordsBot') }
 
     before do
-      allow(TelegramService).to receive(:stop_permitted).and_return(true)
-      allow(TelegramService).to receive(:stop)
+      allow(TelegramService).to receive(:best)
 
       message.stub_chain(:chat, :id).and_return(chat_id)
       message.stub_chain(:from, :username).and_return(user)
@@ -333,7 +329,7 @@ describe TelegramDispatcher, type: :dispatcher do
 
     context 'when stop command is permitted' do
       before(:each) do
-        allow(TelegramService).to receive(:stop_permitted).and_return(true)
+        allow(TelegramService).to receive(:stop_permitted?).and_return(true)
       end
 
       it 'finishes the game, replies with a secret word' do
@@ -349,7 +345,7 @@ describe TelegramDispatcher, type: :dispatcher do
     let!(:message) { Telegram::Bot::Types::Message.new(text: '/stop@BullsAndCowsWordsBot') }
 
     before do
-      allow(TelegramService).to receive(:stop_permitted).and_return(true)
+      allow(TelegramService).to receive(:stop_permitted?).and_return(true)
       allow(TelegramService).to receive(:stop)
 
       message.stub_chain(:chat, :id).and_return(chat_id)
@@ -373,12 +369,12 @@ describe TelegramDispatcher, type: :dispatcher do
       let!(:message) { Telegram::Bot::Types::Message.new(text: '/help@BullsAndCowsWordsBot') }
 
       before do
-        allow(TelegramService).to receive(:help)
+        allow(TelegramMessenger).to receive(:help)
       end
 
       it 'handles bot name as optional part in command' do
         expect(TelegramDispatcher.handle(message))
-        expect(TelegramService).to have_received(:help)
+        expect(TelegramMessenger).to have_received(:help)
       end
     end
   end

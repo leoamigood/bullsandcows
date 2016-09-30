@@ -1,7 +1,6 @@
 class TelegramDispatcher
 
   @@BOT_NAME = 'BullsAndCowsWordsBot'
-  @@WELCOME_MSG = 'Welcome to Bulls and Cows! Here be dragons! Well, the rules actually.'
 
   class << self
     def handle(message)
@@ -16,51 +15,61 @@ class TelegramDispatcher
     def execute(command, message)
       case command
         when /^\/start/
-          TelegramService.start
+          TelegramMessenger.welcome
 
         when /^\/create(?:@#{@@BOT_NAME})?$/i
-          TelegramService.create(message.chat.id)
+          game = TelegramService.create(message.chat.id)
+          TelegramMessenger.create(game)
 
         when /^\/create(?:@#{@@BOT_NAME})? ([[:alpha:]]+)$/i
-          TelegramService.create_by_word(message.chat.id, $1)
+          game = TelegramService.create_by_word(message.chat.id, $1)
+          TelegramMessenger.create(game)
 
         when /^\/create(?:@#{@@BOT_NAME})? ([[:digit:]]+)$/i
-          TelegramService.create_by_number(message.chat.id, $1)
+          game = TelegramService.create_by_number(message.chat.id, $1)
+          TelegramMessenger.create(game)
 
         when /^\/guess(?:@#{@@BOT_NAME})? ([[:alpha:]]+)$/i
-          TelegramService.guess(message.chat.id, message.from.username, $1)
+          guess = TelegramService.guess(message.chat.id, message.from.username, $1)
+          TelegramMessenger.guess(guess)
 
         when /^\/hint(?:@#{@@BOT_NAME})?$/i
-          TelegramService.hint(message.chat.id)
+          letter = TelegramService.hint(message.chat.id)
+          TelegramMessenger.hint(letter)
 
         when /^\/tries(?:@#{@@BOT_NAME})?$/i
-          TelegramService.tries(message.chat.id)
+          guesses = TelegramService.tries(message.chat.id)
+          TelegramMessenger.tries(guesses)
 
         when /^\/best(?:@#{@@BOT_NAME})?$/i
-          TelegramService.best(message.chat.id)
+          guesses = TelegramService.best(message.chat.id)
+          TelegramMessenger.best(guesses)
 
         when /^\/best(?:@#{@@BOT_NAME})? ([[:digit:]]+)$/i
-          TelegramService.best(message.chat.id, $1)
+          guesses = TelegramService.best(message.chat.id, $1)
+          TelegramMessenger.best(guesses)
 
         when /^\/stop(?:@#{@@BOT_NAME})?$/i
-          if (TelegramService.stop_permitted(message))
-            TelegramService.stop(message.chat.id)
+          if TelegramService.stop_permitted?(message)
+            game = TelegramService.stop(message.chat.id)
+            TelegramMessenger.stop(game)
           else
-            'You are NOT allowed to _/stop_ this game. Only _admin_ or _creator_ is'
+            TelegramMessenger.no_permissions_to_stop_game
           end
 
         when /^\/help(?:@#{@@BOT_NAME})?$/i
-          TelegramService.help
+          TelegramMessenger.help
 
         when /^\/.*/
-          "Nothing I can do with *#{message}*. For help try _/help_"
+          TelegramMessenger.unknown_command(message)
 
         else
           game = Game.where(channel: message.chat.id).last
           if game.present? && !game.finished?
             TelegramService.guess(message.chat.id, message.from.username, command)
+            TelegramMessenger.guess(guess)
           else
-            'Go ahead and _/create_ a new game. For help try _/help_'
+            TelegramMessenger.new_game?
           end
       end
     end
