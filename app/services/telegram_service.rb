@@ -47,11 +47,18 @@ class TelegramService
       game.guesses
     end
 
-    def best(channel, limit = 5)
+    def best(channel, limit = 8)
       game = Game.where(channel: channel).last
       raise "Failed to find the game. Is game started for telegram message channel: #{channel}" unless game.present?
 
       game.guesses.sort.first(limit.to_i)
+    end
+
+    def zeros(channel)
+      game = Game.where(channel: channel).last
+      raise "Failed to find the game. Is game started for telegram message channel: #{channel}" unless game.present?
+
+      game.guesses.where(bulls: 0, cows: 0)
     end
 
     def stop_permitted?(message)

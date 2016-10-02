@@ -92,7 +92,7 @@ describe TelegramDispatcher, type: :dispatcher do
 
     it 'replies with guess result' do
       expect {
-        TelegramDispatcher.handle(message)
+        expect(TelegramDispatcher.handle(message)).to include('Guess: _combat_')
         expect(game.reload.running?).to eq(true)
       }.to change(Guess, :count).by(1)
     end
@@ -164,7 +164,7 @@ describe TelegramDispatcher, type: :dispatcher do
 
     it 'replies with congratulations' do
       expect {
-        TelegramDispatcher.handle(message)
+        expect(TelegramDispatcher.handle(message)).to include('Congratulations!')
         expect(game.reload.finished?).to eq(true)
       }.to change(Guess, :count).by(1)
     end
@@ -205,12 +205,7 @@ describe TelegramDispatcher, type: :dispatcher do
   end
 
   context 'when /tries command received' do
-    let!(:game) { create(:game, secret: 'secret', channel: chat_id) }
-
-    let!(:try1) { create(:guess, word: 'tomato', game: game) }
-    let!(:try2) { create(:guess, word: 'mortal', game: game) }
-    let!(:try3) { create(:guess, word: 'combat', game: game) }
-    let!(:try4) { create(:guess, word: 'secret', game: game) }
+    let!(:game) { create(:game, :with_tries, secret: 'secret', channel: chat_id) }
 
     let!(:message) { Telegram::Bot::Types::Message.new(text: '/tries') }
 
@@ -220,7 +215,7 @@ describe TelegramDispatcher, type: :dispatcher do
     end
 
     it 'replies previous guess tries' do
-      expect(TelegramDispatcher.handle(message)).to include('Try 4:')
+      expect(TelegramDispatcher.handle(message)).to include('Try 9:')
     end
 
     context 'when /tries command includes bot name received' do
@@ -238,19 +233,9 @@ describe TelegramDispatcher, type: :dispatcher do
   end
 
   context 'when /best command received' do
-    let!(:game) { create(:game, secret: 'secret', channel: chat_id) }
+    let!(:game) { create(:game, :with_tries, secret: 'secret', channel: chat_id) }
 
     let!(:message) { Telegram::Bot::Types::Message.new(text: '/best') }
-
-    let!(:try1) { create(:guess, word: 'tomato', game: game, bulls: 0, cows: 1) }
-    let!(:try2) { create(:guess, word: 'mortal', game: game, bulls: 0, cows: 2) }
-    let!(:try3) { create(:guess, word: 'combat', game: game, bulls: 1, cows: 1) }
-    let!(:try4) { create(:guess, word: 'wonder', game: game, bulls: 1, cows: 1) }
-    let!(:try5) { create(:guess, word: 'sector', game: game, bulls: 3, cows: 2) }
-    let!(:try6) { create(:guess, word: 'energy', game: game, bulls: 1, cows: 2) }
-    let!(:try7) { create(:guess, word: 'master', game: game, bulls: 1, cows: 3) }
-    let!(:try8) { create(:guess, word: 'engine', game: game, bulls: 1, cows: 2) }
-    let!(:try9) { create(:guess, word: 'staple', game: game, bulls: 1, cows: 2) }
 
     before(:each) do
       message.stub_chain(:chat, :id).and_return(chat_id)
@@ -270,19 +255,9 @@ describe TelegramDispatcher, type: :dispatcher do
   end
 
   context 'when /best command received with a <limit>' do
-    let!(:game) { create(:game, secret: 'secret', channel: chat_id) }
+    let!(:game) { create(:game, :with_tries, secret: 'secret', channel: chat_id) }
 
     let!(:message) { Telegram::Bot::Types::Message.new(text: '/best 3') }
-
-    let!(:try1) { create(:guess, word: 'tomato', game: game, bulls: 0, cows: 1) }
-    let!(:try2) { create(:guess, word: 'mortal', game: game, bulls: 0, cows: 2) }
-    let!(:try3) { create(:guess, word: 'combat', game: game, bulls: 1, cows: 1) }
-    let!(:try4) { create(:guess, word: 'wonder', game: game, bulls: 1, cows: 1) }
-    let!(:try5) { create(:guess, word: 'sector', game: game, bulls: 3, cows: 2) }
-    let!(:try6) { create(:guess, word: 'energy', game: game, bulls: 1, cows: 2) }
-    let!(:try7) { create(:guess, word: 'master', game: game, bulls: 1, cows: 3) }
-    let!(:try8) { create(:guess, word: 'engine', game: game, bulls: 1, cows: 2) }
-    let!(:try9) { create(:guess, word: 'staple', game: game, bulls: 1, cows: 2) }
 
     before(:each) do
       message.stub_chain(:chat, :id).and_return(chat_id)
@@ -295,11 +270,10 @@ describe TelegramDispatcher, type: :dispatcher do
         expect(result).to include('Top 1: *sector*, Bulls: *3*, Cows: *2*')
         expect(result).to include('Top 2: *master*, Bulls: *1*, Cows: *3*')
         expect(result).to include('Top 3: *energy*, Bulls: *1*, Cows: *2*')
+        expect(result).not_to include('Top 4:')
       }.not_to change(Guess, :count)
     end
-
   end
-
 
   context 'when /best command includes bot name received' do
     let!(:message) { Telegram::Bot::Types::Message.new(text: '/best@BullsAndCowsWordsBot') }
@@ -314,6 +288,25 @@ describe TelegramDispatcher, type: :dispatcher do
     it 'handles bot name as optional part in command' do
       expect(TelegramDispatcher.handle(message))
       expect(TelegramService).to have_received(:best)
+    end
+  end
+
+  context 'when /zeros command received' do
+    let!(:game) { create(:game, :with_tries, secret: 'secret', channel: chat_id) }
+
+    let!(:message) { Telegram::Bot::Types::Message.new(text: '/zeros') }
+
+    before(:each) do
+      message.stub_chain(:chat, :id).and_return(chat_id)
+      message.stub_chain(:from, :username).and_return(user)
+    end
+
+    it 'replies with guesses where bulls and cows have zero occurrences' do
+      expect {
+        result = TelegramDispatcher.handle(message)
+        expect(result).to include('Zero letters in: *ballad*, Bulls: *0*, Cows: *0*')
+        expect(result).to include('Zero letters in: *quorum*, Bulls: *0*, Cows: *0*')
+      }.not_to change(Guess, :count)
     end
   end
 
@@ -384,6 +377,42 @@ describe TelegramDispatcher, type: :dispatcher do
 
     it 'replies with generic message' do
       expect(TelegramDispatcher.handle(message)).to include('Nothing I can do')
+    end
+  end
+
+  context 'when not a command word received with non-exact guess word' do
+    let!(:game) { create(:game, secret: 'secret', channel: chat_id) }
+
+    let!(:message) { Telegram::Bot::Types::Message.new(text: 'combat') }
+
+    before(:each) do
+      message.stub_chain(:chat, :id).and_return(chat_id)
+      message.stub_chain(:from, :username).and_return(user)
+    end
+
+    it 'replies with guess result' do
+      expect {
+        expect(TelegramDispatcher.handle(message)).to include('Guess: _combat_')
+        expect(game.reload.running?).to eq(true)
+      }.to change(Guess, :count).by(1)
+    end
+  end
+
+  context 'when not a command word is received with exact guess word' do
+    let!(:game) { create(:game, secret: 'secret', channel: chat_id) }
+
+    let!(:message) { Telegram::Bot::Types::Message.new(text: 'secret') }
+
+    before(:each) do
+      message.stub_chain(:chat, :id).and_return(chat_id)
+      message.stub_chain(:from, :username).and_return(user)
+    end
+
+    it 'replies with congratulations' do
+      expect {
+        expect(TelegramDispatcher.handle(message)).to include('Congratulations!')
+        expect(game.reload.finished?).to eq(true)
+      }.to change(Guess, :count).by(1)
     end
   end
 end

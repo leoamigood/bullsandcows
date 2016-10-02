@@ -49,6 +49,10 @@ class TelegramDispatcher
           guesses = TelegramService.best(message.chat.id, $1)
           TelegramMessenger.best(guesses)
 
+        when /^\/zeros(?:@#{@@BOT_NAME})?$/i
+          guesses = TelegramService.zeros(message.chat.id)
+          TelegramMessenger.zeros(guesses)
+
         when /^\/stop(?:@#{@@BOT_NAME})?$/i
           if TelegramService.stop_permitted?(message)
             game = TelegramService.stop(message.chat.id)
@@ -66,7 +70,7 @@ class TelegramDispatcher
         else
           game = Game.where(channel: message.chat.id).last
           if game.present? && !game.finished?
-            TelegramService.guess(message.chat.id, message.from.username, command)
+            guess = TelegramService.guess(message.chat.id, message.from.username, command)
             TelegramMessenger.guess(guess)
           else
             TelegramMessenger.new_game?

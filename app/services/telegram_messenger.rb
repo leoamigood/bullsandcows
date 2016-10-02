@@ -10,8 +10,10 @@ class TelegramMessenger
     end
 
     def guess(guess)
-      text = "Guess: _#{word}_, *Bulls: #{guess.bulls}*, *Cows: #{guess.cows}*\n"
-      text + "Congratulations! You guessed it with *#{guess.game.guesses.length}* tries" if guess.game.finished?
+      text = "Guess: _#{guess.word}_, *Bulls: #{guess.bulls}*, *Cows: #{guess.cows}*\n"
+      text += "Congratulations! You guessed it with *#{guess.game.guesses.length}* tries" if guess.game.finished?
+
+      text
     end
 
     def hint(letter)
@@ -37,6 +39,17 @@ class TelegramMessenger
         text.join("\n")
       else
         self.no_guesses_submitted
+      end
+    end
+
+    def zeros(guesses)
+      unless guesses.empty?
+        text = guesses.each.map do |guess|
+          "Zero letters in: *#{guess.word}*, Bulls: *#{guess.bulls}*, Cows: *#{guess.cows}*"
+        end
+        text.join("\n")
+      else
+        'There was no guesses with zero bulls and cows matches so far.'
       end
     end
 
