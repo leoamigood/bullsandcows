@@ -22,7 +22,7 @@ describe TelegramDispatcher, type: :dispatcher do
       message.stub_chain(:chat, :id).and_return(chat_id)
     end
 
-    it 'replies with a welcome text' do
+    xit 'replies with a welcome text' do
       expect(TelegramDispatcher.handle(message)).to include('Welcome to Bulls and Cows!')
     end
   end

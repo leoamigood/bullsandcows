@@ -1,7 +1,18 @@
 class TelegramMessenger
 
   class << self
-    def welcome
+    def welcome(message)
+      kb = [
+          Telegram::Bot::Types::InlineKeyboardButton.new(text: 'Easy', callback_data: '/level easy'),
+          Telegram::Bot::Types::InlineKeyboardButton.new(text: 'Medium', callback_data: '/level medium'),
+          Telegram::Bot::Types::InlineKeyboardButton.new(text: 'Hard', callback_data: '/level hard')
+      ]
+      markup = Telegram::Bot::Types::InlineKeyboardMarkup.new(inline_keyboard: kb)
+
+      Telegram::Bot::Client.run(TELEGRAM_TOKEN, logger: Logger.new($stderr)) do |bot|
+        bot.api.send_message(chat_id: message.chat.id, text: 'Select a game level:', reply_markup: markup)
+      end
+
       'Welcome to Bulls and Cows! Here be dragons! Well, the rules actually.'
     end
 

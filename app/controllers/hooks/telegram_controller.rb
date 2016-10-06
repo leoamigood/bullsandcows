@@ -8,6 +8,7 @@ class Hooks::TelegramController < BaseApiController
 
       payload = telegram_params[:message]
       payload = telegram_params[:edited_message] unless payload.present?
+      payload = telegram_params[:callback_query] unless payload.present?
       message = Telegram::Bot::Types::Message.new(payload.to_hash)
 
       reply = TelegramDispatcher.handle(message)
@@ -25,6 +26,6 @@ class Hooks::TelegramController < BaseApiController
 
   def telegram_params
     message = [:message_id, :text, :date, from: [:id, :first_name, :username], chat: [:id, :first_name, :username, :type]]
-    params.permit(message: message, edited_message: message)
+    params.permit(message: message, edited_message: message, callback_query: message)
   end
 end

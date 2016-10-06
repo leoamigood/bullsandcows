@@ -62,8 +62,7 @@ class TelegramService
     end
 
     def stop_permitted?(message)
-      token = ENV['TELEGRAM_API_TOKEN']
-      Telegram::Bot::Client.run(token) do |bot|
+      Telegram::Bot::Client.run(TELEGRAM_TOKEN) do |bot|
         member = bot.api.getChatMember({chat_id: message.chat.id, user_id: message.from.id})
         status = member['result']['status']
 

@@ -5,8 +5,15 @@ class TelegramDispatcher
   class << self
     def handle(message)
       begin
-        command = message.text.mb_chars.downcase.to_s
-        execute(command, message)
+        case message
+          when Telegram::Bot::Types::CallbackQuery
+            command = message.data
+            execute(command, message)
+
+          when Telegram::Bot::Types::Message
+            command = message.text.mb_chars.downcase.to_s
+            execute(command, message)
+        end
       rescue => ex
         ex.message
       end
@@ -15,7 +22,7 @@ class TelegramDispatcher
     def execute(command, message)
       case command
         when /^\/start/
-          TelegramMessenger.welcome
+          TelegramMessenger.welcome(message)
 
         when /^\/create(?:@#{@@BOT_NAME})?$/i
           game = TelegramService.create(message.chat.id)
