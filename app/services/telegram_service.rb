@@ -61,6 +61,17 @@ class TelegramService
       game.guesses.where(bulls: 0, cows: 0)
     end
 
+    def level(level)
+      case level
+        when 'easy'
+          [1, 2]
+        when 'medium'
+          [3, 4]
+        when 'hard'
+          [5, 6]
+      end
+    end
+
     def stop_permitted?(message)
       Telegram::Bot::Client.run(TELEGRAM_TOKEN) do |bot|
         member = bot.api.getChatMember({chat_id: message.chat.id, user_id: message.from.id})

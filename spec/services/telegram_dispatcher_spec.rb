@@ -70,6 +70,7 @@ describe TelegramDispatcher, type: :dispatcher do
 
     before do
       allow(TelegramService).to receive(:create_by_word)
+      allow(TelegramMessenger).to receive(:create)
 
       message.stub_chain(:chat, :id).and_return(chat_id)
     end
@@ -193,6 +194,7 @@ describe TelegramDispatcher, type: :dispatcher do
 
     before do
       allow(TelegramService).to receive(:guess)
+      allow(TelegramMessenger).to receive(:guess)
 
       message.stub_chain(:chat, :id).and_return(chat_id)
       message.stub_chain(:from, :username).and_return(user)
@@ -223,6 +225,7 @@ describe TelegramDispatcher, type: :dispatcher do
 
       before do
         allow(TelegramService).to receive(:tries)
+        allow(TelegramMessenger).to receive(:tries)
       end
 
       it 'handles bot name as optional part in command' do
@@ -280,6 +283,7 @@ describe TelegramDispatcher, type: :dispatcher do
 
     before do
       allow(TelegramService).to receive(:best)
+      allow(TelegramMessenger).to receive(:best)
 
       message.stub_chain(:chat, :id).and_return(chat_id)
       message.stub_chain(:from, :username).and_return(user)
@@ -292,6 +296,25 @@ describe TelegramDispatcher, type: :dispatcher do
   end
 
   context 'when /zeros command received' do
+    let!(:game) { create(:game, :with_tries, secret: 'secret', channel: chat_id) }
+
+    let!(:message) { Telegram::Bot::Types::Message.new(text: '/zeros') }
+
+    before(:each) do
+      message.stub_chain(:chat, :id).and_return(chat_id)
+      message.stub_chain(:from, :username).and_return(user)
+    end
+
+    it 'replies with guesses where bulls and cows have zero occurrences' do
+      expect {
+        result = TelegramDispatcher.handle(message)
+        expect(result).to include('Zero letters in: *ballad*, Bulls: *0*, Cows: *0*')
+        expect(result).to include('Zero letters in: *quorum*, Bulls: *0*, Cows: *0*')
+      }.not_to change(Guess, :count)
+    end
+  end
+
+  context 'when /level command received with specified level' do
     let!(:game) { create(:game, :with_tries, secret: 'secret', channel: chat_id) }
 
     let!(:message) { Telegram::Bot::Types::Message.new(text: '/zeros') }
@@ -340,6 +363,7 @@ describe TelegramDispatcher, type: :dispatcher do
     before do
       allow(TelegramService).to receive(:stop_permitted?).and_return(true)
       allow(TelegramService).to receive(:stop)
+      allow(TelegramMessenger).to receive(:stop)
 
       message.stub_chain(:chat, :id).and_return(chat_id)
       message.stub_chain(:from, :username).and_return(user)
@@ -353,6 +377,11 @@ describe TelegramDispatcher, type: :dispatcher do
 
   context 'when /help command received' do
     let!(:message) { Telegram::Bot::Types::Message.new(text: '/help') }
+
+    before(:each) do
+      message.stub_chain(:chat, :id).and_return(chat_id)
+      message.stub_chain(:from, :username).and_return(user)
+    end
 
     it 'replies with help message' do
       expect(TelegramDispatcher.handle(message)).to include('Here is the list of available commands:')
@@ -374,6 +403,11 @@ describe TelegramDispatcher, type: :dispatcher do
 
   context 'when /unknown command received' do
     let!(:message) { Telegram::Bot::Types::Message.new(text: '/unknown') }
+    
+    before(:each) do
+      message.stub_chain(:chat, :id).and_return(chat_id)
+      message.stub_chain(:from, :username).and_return(user)
+    end
 
     it 'replies with generic message' do
       expect(TelegramDispatcher.handle(message)).to include('Nothing I can do')

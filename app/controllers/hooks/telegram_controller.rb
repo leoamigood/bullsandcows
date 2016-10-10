@@ -5,16 +5,10 @@ class Hooks::TelegramController < BaseApiController
   def update
     begin
       Rails.logger.info("Telegram request: #{params}")
-
-      payload = telegram_params[:message]
-      payload = telegram_params[:edited_message] unless payload.present?
-      payload = telegram_params[:callback_query] unless payload.present?
-      message = Telegram::Bot::Types::Message.new(payload.to_hash)
-
-      reply = TelegramDispatcher.handle(message)
-      response = Telegram::Response.new(message['chat']['id'], reply)
-
+      update = Telegram::Bot::Types::Update.new(params)
+      response = TelegramDispatcher.update(update)
       Rails.logger.info("Telegram respond: #{response.to_json}")
+
       render json: response
     rescue => ex
       Rails.logger.warn("Error: #{ex.message}")
@@ -26,6 +20,6 @@ class Hooks::TelegramController < BaseApiController
 
   def telegram_params
     message = [:message_id, :text, :date, from: [:id, :first_name, :username], chat: [:id, :first_name, :username, :type]]
-    params.permit(message: message, edited_message: message, callback_query: message)
+    params.permit(:data, message: message, edited_message: message, callback_query: [message: message])
   end
 end
