@@ -4,15 +4,16 @@ class TelegramDispatcher
 
   class << self
     def update(update)
-      message = extract_message(update)
-      case message
+      payload = extract_message(update)
+
+      case payload
         when Telegram::Bot::Types::Message
-          response = handle(message)
-          Telegram::Response.new(message.chat.id, response)
+          response = handle(payload)
+          Telegram::Response.new(payload.chat.id, response)
 
         when Telegram::Bot::Types::CallbackQuery
-          response = handle_callback(message)
-          Telegram::Response.new(message.message.chat.id, response)
+          response = handle_callback_query(payload)
+          Telegram::Response.new(payload.message.chat.id, response)
       end
     end
 
@@ -25,10 +26,10 @@ class TelegramDispatcher
       end
     end
 
-    def handle_callback(message)
+    def handle_callback_query(callback_query)
       begin
-        command = message.data.downcase.to_s
-        execute(command, message.message.chat.id, message)
+        command = callback_query.data.downcase.to_s
+        execute(command, callback_query.message.chat.id, callback_query)
       rescue => ex
         ex.message
       end
@@ -77,6 +78,8 @@ class TelegramDispatcher
 
         when /^\/level(?:@#{@@BOT_NAME})? ([[:alpha:]]+)$/i
           levels = GameEngineService.level($1)
+          TelegramMessenger.level(message, $1)
+
           game = GameEngineService.create(channel, levels)
           TelegramMessenger.game_created(game)
 

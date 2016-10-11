@@ -4,33 +4,27 @@ describe TelegramDispatcher, type: :dispatcher do
   let!(:user) { '@Amig0' }
   let!(:chat_id) { 169778030 }
 
-  let!(:token) { 'api_token:goes_here' }
-  let!(:bot) { Telegram::Bot::Client.new(token) }
-  let!(:api) { Telegram::Bot::Api.new(token) }
-
   let!(:dictionary) { create :dictionary, :basic, lang: 'RU'}
-
-  before(:each) do
-    allow(bot).to receive(:api).and_return(api)
-    allow(api).to receive(:send_message)
-  end
 
   context 'when /start command received' do
     let!(:message) { Telegram::Bot::Types::Message.new(text: '/start') }
 
-    before(:each) do
+    before do
       message.stub_chain(:chat, :id).and_return(chat_id)
+      allow(TelegramMessenger).to receive(:send_message)
     end
 
-    xit 'replies with a welcome text' do
-      expect(TelegramDispatcher.handle(message)).to include('Welcome to Bulls and Cows!')
+    it 'replies with a welcome text' do
+      expect(TelegramDispatcher.handle(message))
+      expect(TelegramMessenger).to have_received(:send_message).with(chat_id, /Welcome to Bulls and Cows!/).once
+      # expect(TelegramMessenger).to have_received(:send_message).with(chat_id, 'Select a game level:')
     end
   end
 
   context 'when /create command received' do
     let!(:message) { Telegram::Bot::Types::Message.new(text: '/create') }
 
-    before(:each) do
+    before do
       message.stub_chain(:chat, :id).and_return(chat_id)
     end
 
@@ -44,7 +38,7 @@ describe TelegramDispatcher, type: :dispatcher do
   context 'when /create <word> command received' do
     let!(:message) { Telegram::Bot::Types::Message.new(text: '/create коитус') }
 
-    before(:each) do
+    before do
       message.stub_chain(:chat, :id).and_return(chat_id)
     end
 
@@ -56,7 +50,7 @@ describe TelegramDispatcher, type: :dispatcher do
   context 'when /create <number> command received' do
     let!(:message) { Telegram::Bot::Types::Message.new(text: '/create 6') }
 
-    before(:each) do
+    before do
       message.stub_chain(:chat, :id).and_return(chat_id)
     end
 
@@ -86,7 +80,7 @@ describe TelegramDispatcher, type: :dispatcher do
 
     let!(:message) { Telegram::Bot::Types::Message.new(text: '/guess combat') }
 
-    before(:each) do
+    before do
       message.stub_chain(:chat, :id).and_return(chat_id)
       message.stub_chain(:from, :username).and_return(user)
     end
@@ -104,7 +98,7 @@ describe TelegramDispatcher, type: :dispatcher do
 
     let!(:message) { Telegram::Bot::Types::Message.new(text: 'Secret') }
 
-    before(:each) do
+    before do
       message.stub_chain(:chat, :id).and_return(chat_id)
       message.stub_chain(:from, :username).and_return(user)
     end
@@ -122,7 +116,7 @@ describe TelegramDispatcher, type: :dispatcher do
 
     let!(:message) { Telegram::Bot::Types::Message.new(text: 'mistake') }
 
-    before(:each) do
+    before do
       message.stub_chain(:chat, :id).and_return(chat_id)
       message.stub_chain(:from, :username).and_return(user)
     end
@@ -140,7 +134,7 @@ describe TelegramDispatcher, type: :dispatcher do
 
     let!(:message) { Telegram::Bot::Types::Message.new(text: 'Привет') }
 
-    before(:each) do
+    before do
       message.stub_chain(:chat, :id).and_return(chat_id)
       message.stub_chain(:from, :username).and_return(user)
     end
@@ -158,7 +152,7 @@ describe TelegramDispatcher, type: :dispatcher do
 
     let!(:message) { Telegram::Bot::Types::Message.new(text: '/guess secret') }
 
-    before(:each) do
+    before do
       message.stub_chain(:chat, :id).and_return(chat_id)
       message.stub_chain(:from, :username).and_return(user)
     end
@@ -176,7 +170,7 @@ describe TelegramDispatcher, type: :dispatcher do
 
     let!(:message) { Telegram::Bot::Types::Message.new(text: '/guess secret') }
 
-    before(:each) do
+    before do
       message.stub_chain(:chat, :id).and_return(chat_id)
       message.stub_chain(:from, :username).and_return(user)
     end
@@ -211,7 +205,7 @@ describe TelegramDispatcher, type: :dispatcher do
 
     let!(:message) { Telegram::Bot::Types::Message.new(text: '/tries') }
 
-    before(:each) do
+    before do
       message.stub_chain(:chat, :id).and_return(chat_id)
       message.stub_chain(:from, :username).and_return(user)
     end
@@ -240,7 +234,7 @@ describe TelegramDispatcher, type: :dispatcher do
 
     let!(:message) { Telegram::Bot::Types::Message.new(text: '/best') }
 
-    before(:each) do
+    before do
       message.stub_chain(:chat, :id).and_return(chat_id)
       message.stub_chain(:from, :username).and_return(user)
     end
@@ -262,7 +256,7 @@ describe TelegramDispatcher, type: :dispatcher do
 
     let!(:message) { Telegram::Bot::Types::Message.new(text: '/best 3') }
 
-    before(:each) do
+    before do
       message.stub_chain(:chat, :id).and_return(chat_id)
       message.stub_chain(:from, :username).and_return(user)
     end
@@ -300,7 +294,7 @@ describe TelegramDispatcher, type: :dispatcher do
 
     let!(:message) { Telegram::Bot::Types::Message.new(text: '/zeros') }
 
-    before(:each) do
+    before do
       message.stub_chain(:chat, :id).and_return(chat_id)
       message.stub_chain(:from, :username).and_return(user)
     end
@@ -319,7 +313,7 @@ describe TelegramDispatcher, type: :dispatcher do
 
     let!(:message) { Telegram::Bot::Types::Message.new(text: '/zeros') }
 
-    before(:each) do
+    before do
       message.stub_chain(:chat, :id).and_return(chat_id)
       message.stub_chain(:from, :username).and_return(user)
     end
@@ -338,13 +332,13 @@ describe TelegramDispatcher, type: :dispatcher do
 
     let!(:message) { Telegram::Bot::Types::Message.new(text: '/stop') }
 
-    before(:each) do
+    before do
       message.stub_chain(:chat, :id).and_return(chat_id)
       message.stub_chain(:from, :username).and_return(user)
     end
 
     context 'when stop command is permitted' do
-      before(:each) do
+      before do
         allow(GameEngineService).to receive(:stop_permitted?).and_return(true)
       end
 
@@ -378,7 +372,7 @@ describe TelegramDispatcher, type: :dispatcher do
   context 'when /help command received' do
     let!(:message) { Telegram::Bot::Types::Message.new(text: '/help') }
 
-    before(:each) do
+    before do
       message.stub_chain(:chat, :id).and_return(chat_id)
       message.stub_chain(:from, :username).and_return(user)
     end
@@ -404,7 +398,7 @@ describe TelegramDispatcher, type: :dispatcher do
   context 'when /unknown command received' do
     let!(:message) { Telegram::Bot::Types::Message.new(text: '/unknown') }
     
-    before(:each) do
+    before do
       message.stub_chain(:chat, :id).and_return(chat_id)
       message.stub_chain(:from, :username).and_return(user)
     end
@@ -419,7 +413,7 @@ describe TelegramDispatcher, type: :dispatcher do
 
     let!(:message) { Telegram::Bot::Types::Message.new(text: 'combat') }
 
-    before(:each) do
+    before do
       message.stub_chain(:chat, :id).and_return(chat_id)
       message.stub_chain(:from, :username).and_return(user)
     end
@@ -437,7 +431,7 @@ describe TelegramDispatcher, type: :dispatcher do
 
     let!(:message) { Telegram::Bot::Types::Message.new(text: 'secret') }
 
-    before(:each) do
+    before do
       message.stub_chain(:chat, :id).and_return(chat_id)
       message.stub_chain(:from, :username).and_return(user)
     end

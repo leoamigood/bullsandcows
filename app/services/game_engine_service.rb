@@ -60,7 +60,7 @@ class GameEngineService
         when 'medium'
           [3, 4]
         when 'hard'
-          [5, 6]
+          [5]
       end
     end
 

@@ -1,7 +1,21 @@
 class TelegramMessenger
 
   class << self
+    def send_message(channel, text, markup = nil)
+      Telegram::Bot::Client.run(TELEGRAM_TOKEN) do |bot|
+        bot.api.send_message(chat_id: channel, text: text, parse_mode: 'Markdown', reply_markup: markup)
+      end
+    end
+
+    def answerCallbackQuery(channel, text)
+      Telegram::Bot::Client.run(TELEGRAM_TOKEN) do |bot|
+        bot.api.answerCallbackQuery(callback_query_id: channel, text: text)
+      end
+    end
+
     def welcome(message)
+      send_message(message.chat.id, 'Welcome to Bulls and Cows! Here be dragons! Well, the rules actually.')
+
       kb = [
           Telegram::Bot::Types::InlineKeyboardButton.new(text: 'Easy', callback_data: '/level easy'),
           Telegram::Bot::Types::InlineKeyboardButton.new(text: 'Medium', callback_data: '/level medium'),
@@ -9,11 +23,9 @@ class TelegramMessenger
       ]
       markup = Telegram::Bot::Types::InlineKeyboardMarkup.new(inline_keyboard: kb)
 
-      Telegram::Bot::Client.run(TELEGRAM_TOKEN, logger: Logger.new($stderr)) do |bot|
-        bot.api.send_message(chat_id: message.chat.id, text: 'Select a game level:', reply_markup: markup)
-      end
+      send_message(message.chat.id, 'Select a game level:', markup)
 
-      'Welcome to Bulls and Cows! Here be dragons! Well, the rules actually.'
+      ''
     end
 
     def game_created(game)
@@ -62,6 +74,10 @@ class TelegramMessenger
       else
         'There was no guesses with zero bulls and cows matches so far.'
       end
+    end
+
+    def level(callbackQuery, level)
+      answerCallbackQuery(callbackQuery.id, "Game level set to #{level}")
     end
 
     def game_stop(game)
