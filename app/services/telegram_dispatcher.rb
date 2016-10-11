@@ -40,50 +40,50 @@ class TelegramDispatcher
           TelegramMessenger.welcome(message)
 
         when /^\/create(?:@#{@@BOT_NAME})?$/i
-          game = TelegramService.create(channel)
-          TelegramMessenger.create(game)
+          game = GameEngineService.create(channel, :telegram)
+          TelegramMessenger.game_created(game)
 
         when /^\/create(?:@#{@@BOT_NAME})? ([[:alpha:]]+)$/i
-          game = TelegramService.create_by_word(channel, $1)
-          TelegramMessenger.create(game)
+          game = GameEngineService.create_by_word(channel, $1, :telegram)
+          TelegramMessenger.game_created(game)
 
         when /^\/create(?:@#{@@BOT_NAME})? ([[:digit:]]+)$/i
-          game = TelegramService.create_by_number(channel, $1)
-          TelegramMessenger.create(game)
+          game = GameEngineService.create_by_number(channel, $1, :telegram)
+          TelegramMessenger.game_created(game)
 
         when /^\/guess(?:@#{@@BOT_NAME})? ([[:alpha:]]+)$/i
-          guess = TelegramService.guess(channel, message.from.username, $1)
+          guess = GameEngineService.guess(channel, message.from.username, $1)
           TelegramMessenger.guess(guess)
 
         when /^\/hint(?:@#{@@BOT_NAME})?$/i
-          letter = TelegramService.hint(channel)
+          letter = GameEngineService.hint(channel)
           TelegramMessenger.hint(letter)
 
         when /^\/tries(?:@#{@@BOT_NAME})?$/i
-          guesses = TelegramService.tries(channel)
+          guesses = GameEngineService.tries(channel)
           TelegramMessenger.tries(guesses)
 
         when /^\/best(?:@#{@@BOT_NAME})?$/i
-          guesses = TelegramService.best(channel)
+          guesses = GameEngineService.best(channel)
           TelegramMessenger.best(guesses)
 
         when /^\/best(?:@#{@@BOT_NAME})? ([[:digit:]]+)$/i
-          guesses = TelegramService.best(channel, $1)
+          guesses = GameEngineService.best(channel, $1)
           TelegramMessenger.best(guesses)
 
         when /^\/zeros(?:@#{@@BOT_NAME})?$/i
-          guesses = TelegramService.zeros(channel)
+          guesses = GameEngineService.zeros(channel)
           TelegramMessenger.zeros(guesses)
 
         when /^\/level(?:@#{@@BOT_NAME})? ([[:alpha:]]+)$/i
-          levels = TelegramService.level($1)
-          game = TelegramService.create(channel, levels)
-          TelegramMessenger.create(game)
+          levels = GameEngineService.level($1)
+          game = GameEngineService.create(channel, levels)
+          TelegramMessenger.game_created(game)
 
         when /^\/stop(?:@#{@@BOT_NAME})?$/i
-          if TelegramService.stop_permitted?(message)
-            game = TelegramService.stop(channel)
-            TelegramMessenger.stop(game)
+          if GameEngineService.stop_permitted?(message)
+            game = GameEngineService.stop(channel)
+            TelegramMessenger.game_stop(game)
           else
             TelegramMessenger.no_permissions_to_stop_game
           end
@@ -97,7 +97,7 @@ class TelegramDispatcher
         else
           game = Game.where(channel: channel).last
           if game.present? && !game.finished?
-            guess = TelegramService.guess(channel, message.from.username, command)
+            guess = GameEngineService.guess(channel, message.from.username, command)
             TelegramMessenger.guess(guess)
           else
             TelegramMessenger.new_game?

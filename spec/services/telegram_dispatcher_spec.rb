@@ -69,20 +69,20 @@ describe TelegramDispatcher, type: :dispatcher do
     let!(:message) { Telegram::Bot::Types::Message.new(text: '/create@BullsAndCowsWordsBot секрет') }
 
     before do
-      allow(TelegramService).to receive(:create_by_word)
-      allow(TelegramMessenger).to receive(:create)
+      allow(GameEngineService).to receive(:create_by_word)
+      allow(TelegramMessenger).to receive(:game_created)
 
       message.stub_chain(:chat, :id).and_return(chat_id)
     end
 
     it 'handles bot name as optional part in command' do
       expect(TelegramDispatcher.handle(message))
-      expect(TelegramService).to have_received(:create_by_word).with(chat_id, 'секрет')
+      expect(GameEngineService).to have_received(:create_by_word).with(chat_id, 'секрет', :telegram)
     end
   end
 
   context 'when /guess command received with non-exact guess word' do
-    let!(:game) { create(:game, secret: 'secret', channel: chat_id) }
+    let!(:game) { create(:game, :telegram, secret: 'secret', channel: chat_id) }
 
     let!(:message) { Telegram::Bot::Types::Message.new(text: '/guess combat') }
 
@@ -100,7 +100,7 @@ describe TelegramDispatcher, type: :dispatcher do
   end
 
   context 'when /guess command received case sensitive guess word' do
-    let!(:game) { create(:game, secret: 'secret', channel: chat_id) }
+    let!(:game) { create(:game, :telegram, secret: 'secret', channel: chat_id) }
 
     let!(:message) { Telegram::Bot::Types::Message.new(text: 'Secret') }
 
@@ -118,7 +118,7 @@ describe TelegramDispatcher, type: :dispatcher do
   end
 
   context 'when /guess command received with incorrect amount of letters in word' do
-    let!(:game) { create(:game, secret: 'secret', channel: chat_id) }
+    let!(:game) { create(:game, :telegram, secret: 'secret', channel: chat_id) }
 
     let!(:message) { Telegram::Bot::Types::Message.new(text: 'mistake') }
 
@@ -136,7 +136,7 @@ describe TelegramDispatcher, type: :dispatcher do
 
   context 'when /guess command received case sensitive unicode guess word' do
     let!(:privet) { create(:noun, noun: 'привет')}
-    let!(:game) { create(:game, secret: 'привет', channel: chat_id) }
+    let!(:game) { create(:game, :telegram, secret: 'привет', channel: chat_id) }
 
     let!(:message) { Telegram::Bot::Types::Message.new(text: 'Привет') }
 
@@ -154,7 +154,7 @@ describe TelegramDispatcher, type: :dispatcher do
   end
 
   context 'when /guess command received with exact guess word' do
-    let!(:game) { create(:game, secret: 'secret', channel: chat_id) }
+    let!(:game) { create(:game, :telegram, secret: 'secret', channel: chat_id) }
 
     let!(:message) { Telegram::Bot::Types::Message.new(text: '/guess secret') }
 
@@ -172,7 +172,7 @@ describe TelegramDispatcher, type: :dispatcher do
   end
 
   context 'when /guess command received after game has stopped' do
-    let!(:game) { create(:game, status: :finished, secret: 'secret', channel: chat_id) }
+    let!(:game) { create(:game, :telegram, status: :finished, secret: 'secret', channel: chat_id) }
 
     let!(:message) { Telegram::Bot::Types::Message.new(text: '/guess secret') }
 
@@ -193,7 +193,7 @@ describe TelegramDispatcher, type: :dispatcher do
     let!(:message) { Telegram::Bot::Types::Message.new(text: '/guess@BullsAndCowsWordsBot secret') }
 
     before do
-      allow(TelegramService).to receive(:guess)
+      allow(GameEngineService).to receive(:guess)
       allow(TelegramMessenger).to receive(:guess)
 
       message.stub_chain(:chat, :id).and_return(chat_id)
@@ -202,12 +202,12 @@ describe TelegramDispatcher, type: :dispatcher do
 
     it 'handles bot name as optional part in command' do
       expect(TelegramDispatcher.handle(message))
-      expect(TelegramService).to have_received(:guess).with(chat_id, user, 'secret')
+      expect(GameEngineService).to have_received(:guess).with(chat_id, user, 'secret')
     end
   end
 
   context 'when /tries command received' do
-    let!(:game) { create(:game, :with_tries, secret: 'secret', channel: chat_id) }
+    let!(:game) { create(:game, :telegram, :telegram, :with_tries, secret: 'secret', channel: chat_id) }
 
     let!(:message) { Telegram::Bot::Types::Message.new(text: '/tries') }
 
@@ -224,19 +224,19 @@ describe TelegramDispatcher, type: :dispatcher do
       let!(:message) { Telegram::Bot::Types::Message.new(text: '/tries@BullsAndCowsWordsBot') }
 
       before do
-        allow(TelegramService).to receive(:tries)
+        allow(GameEngineService).to receive(:tries)
         allow(TelegramMessenger).to receive(:tries)
       end
 
       it 'handles bot name as optional part in command' do
         expect(TelegramDispatcher.handle(message))
-        expect(TelegramService).to have_received(:tries)
+        expect(GameEngineService).to have_received(:tries)
       end
     end
   end
 
   context 'when /best command received' do
-    let!(:game) { create(:game, :with_tries, secret: 'secret', channel: chat_id) }
+    let!(:game) { create(:game, :telegram, :telegram, :with_tries, secret: 'secret', channel: chat_id) }
 
     let!(:message) { Telegram::Bot::Types::Message.new(text: '/best') }
 
@@ -258,7 +258,7 @@ describe TelegramDispatcher, type: :dispatcher do
   end
 
   context 'when /best command received with a <limit>' do
-    let!(:game) { create(:game, :with_tries, secret: 'secret', channel: chat_id) }
+    let!(:game) { create(:game, :telegram, :telegram, :with_tries, secret: 'secret', channel: chat_id) }
 
     let!(:message) { Telegram::Bot::Types::Message.new(text: '/best 3') }
 
@@ -282,7 +282,7 @@ describe TelegramDispatcher, type: :dispatcher do
     let!(:message) { Telegram::Bot::Types::Message.new(text: '/best@BullsAndCowsWordsBot') }
 
     before do
-      allow(TelegramService).to receive(:best)
+      allow(GameEngineService).to receive(:best)
       allow(TelegramMessenger).to receive(:best)
 
       message.stub_chain(:chat, :id).and_return(chat_id)
@@ -291,12 +291,12 @@ describe TelegramDispatcher, type: :dispatcher do
 
     it 'handles bot name as optional part in command' do
       expect(TelegramDispatcher.handle(message))
-      expect(TelegramService).to have_received(:best)
+      expect(GameEngineService).to have_received(:best)
     end
   end
 
   context 'when /zeros command received' do
-    let!(:game) { create(:game, :with_tries, secret: 'secret', channel: chat_id) }
+    let!(:game) { create(:game, :telegram, :telegram, :with_tries, secret: 'secret', channel: chat_id) }
 
     let!(:message) { Telegram::Bot::Types::Message.new(text: '/zeros') }
 
@@ -315,7 +315,7 @@ describe TelegramDispatcher, type: :dispatcher do
   end
 
   context 'when /level command received with specified level' do
-    let!(:game) { create(:game, :with_tries, secret: 'secret', channel: chat_id) }
+    let!(:game) { create(:game, :telegram, :with_tries, secret: 'secret', channel: chat_id) }
 
     let!(:message) { Telegram::Bot::Types::Message.new(text: '/zeros') }
 
@@ -334,7 +334,7 @@ describe TelegramDispatcher, type: :dispatcher do
   end
 
   context 'when /stop command received' do
-    let!(:game) { create(:game, secret: 'secret', channel: chat_id) }
+    let!(:game) { create(:game, :telegram, secret: 'secret', channel: chat_id) }
 
     let!(:message) { Telegram::Bot::Types::Message.new(text: '/stop') }
 
@@ -345,7 +345,7 @@ describe TelegramDispatcher, type: :dispatcher do
 
     context 'when stop command is permitted' do
       before(:each) do
-        allow(TelegramService).to receive(:stop_permitted?).and_return(true)
+        allow(GameEngineService).to receive(:stop_permitted?).and_return(true)
       end
 
       it 'finishes the game, replies with a secret word' do
@@ -361,9 +361,9 @@ describe TelegramDispatcher, type: :dispatcher do
     let!(:message) { Telegram::Bot::Types::Message.new(text: '/stop@BullsAndCowsWordsBot') }
 
     before do
-      allow(TelegramService).to receive(:stop_permitted?).and_return(true)
-      allow(TelegramService).to receive(:stop)
-      allow(TelegramMessenger).to receive(:stop)
+      allow(GameEngineService).to receive(:stop_permitted?).and_return(true)
+      allow(GameEngineService).to receive(:stop)
+      allow(TelegramMessenger).to receive(:game_was_finished)
 
       message.stub_chain(:chat, :id).and_return(chat_id)
       message.stub_chain(:from, :username).and_return(user)
@@ -371,7 +371,7 @@ describe TelegramDispatcher, type: :dispatcher do
 
     it 'handles bot name as optional part in command' do
       expect(TelegramDispatcher.handle(message))
-      expect(TelegramService).to have_received(:stop)
+      expect(GameEngineService).to have_received(:stop)
     end
   end
 
@@ -415,7 +415,7 @@ describe TelegramDispatcher, type: :dispatcher do
   end
 
   context 'when not a command word received with non-exact guess word' do
-    let!(:game) { create(:game, secret: 'secret', channel: chat_id) }
+    let!(:game) { create(:game, :telegram, secret: 'secret', channel: chat_id) }
 
     let!(:message) { Telegram::Bot::Types::Message.new(text: 'combat') }
 
@@ -433,7 +433,7 @@ describe TelegramDispatcher, type: :dispatcher do
   end
 
   context 'when not a command word is received with exact guess word' do
-    let!(:game) { create(:game, secret: 'secret', channel: chat_id) }
+    let!(:game) { create(:game, :telegram, secret: 'secret', channel: chat_id) }
 
     let!(:message) { Telegram::Bot::Types::Message.new(text: 'secret') }
 

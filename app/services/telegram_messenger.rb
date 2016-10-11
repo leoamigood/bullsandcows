@@ -16,7 +16,7 @@ class TelegramMessenger
       'Welcome to Bulls and Cows! Here be dragons! Well, the rules actually.'
     end
 
-    def create(game)
+    def game_created(game)
       "Game created with *#{game.secret.length}* letters in the secret word."
     end
 
@@ -64,8 +64,12 @@ class TelegramMessenger
       end
     end
 
-    def stop(game)
+    def game_stop(game)
       "You give up? Here is the secret word *#{game.secret}*"
+    end
+
+    def game_was_finished(game)
+      'Game has already finished. Please start a new game using _/create_ command.'
     end
 
     def no_permissions_to_stop_game

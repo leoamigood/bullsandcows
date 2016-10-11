@@ -1,6 +1,10 @@
 FactoryGirl.define do
   factory :game
 
+  trait :telegram do
+    source :telegram
+  end
+
   trait :with_tries do
     after :create do |game|
       FactoryGirl.create(:guess, word: 'tomato', game: game, bulls: 0, cows: 1)

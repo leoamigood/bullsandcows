@@ -5,6 +5,13 @@ class GameService
       Game.create({channel: channel, secret: secret.noun, level: secret.level, dictionary: secret.dictionary, source: source})
     end
 
+    def find!(channel)
+      game = Game.where(channel: channel).last
+      raise "Failed to find the game. Is game started for telegram message chat ID: #{channel}" unless game.present?
+
+      game
+    end
+
     def guess(game, username, word)
       guess = Guess.where(game_id: game.id, word: word).take
       if (guess.nil?)
@@ -28,7 +35,14 @@ class GameService
       letter
     end
 
-    def validate_game!(game)
+    def stop!(game)
+      raise 'Game has already finished. Please start a new game using _/create_ command.' if game.finished?
+
+      game.finished!
+      game.save!
+    end
+
+    def is_running?(game)
       raise 'Game has finished. Please start a new game using _/create_ command.' if game.finished?
     end
 
