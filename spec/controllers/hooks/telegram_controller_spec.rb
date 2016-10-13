@@ -3,7 +3,6 @@ require 'rails_helper'
 describe Hooks::TelegramController do
 
   context 'when receives telegram message with /start command' do
-
     before(:each) do
       allow(TelegramMessenger).to receive(:send_message)
     end
@@ -57,7 +56,10 @@ describe Hooks::TelegramController do
       post :update, command
 
       expect(response).to be_success
-      expect(response.status).to be(200)
+      expect(response).to have_http_status(200)
+
+      body = JSON.parse(response.body)
+      expect(body).to include('text' => '')
     end
   end
 
@@ -111,7 +113,7 @@ describe Hooks::TelegramController do
       post :update, command
 
       expect(response).to be_success
-      expect(response.status).to be(200)
+      expect(response).to have_http_status(200)
 
       body = JSON.parse(response.body)
       expect(body).to include('text' => /Here is the list of available commands/)
@@ -126,7 +128,7 @@ describe Hooks::TelegramController do
 
     let!(:dictionary) { create :dictionary, :words_with_levels, lang: 'RU'}
 
-    context 'when receives telegram callback with /level command' do
+    context 'when receives telegram callback with /level <level> command' do
       let!(:command) {
         {
             'update_id' => 215227400,
@@ -194,10 +196,10 @@ describe Hooks::TelegramController do
         post :update, command
 
         expect(response).to be_success
-        expect(response.status).to be(200)
+        expect(response).to have_http_status(200)
 
         body = JSON.parse(response.body)
-        expect(body).to include('text' => /Game created/)
+        expect(body).to include('text' => '')
       end
     end
   end

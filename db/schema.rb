@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20160923021303) do
+ActiveRecord::Schema.define(version: 20161012131330) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -57,6 +57,15 @@ ActiveRecord::Schema.define(version: 20160923021303) do
     t.integer "r"
     t.integer "d"
     t.integer "doc"
+  end
+
+  create_table "settings", force: :cascade do |t|
+    t.string   "channel"
+    t.string   "language",      default: "RU"
+    t.string   "complexity",    default: "easy"
+    t.integer  "dictionary_id"
+    t.datetime "created_at"
+    t.datetime "updated_at"
   end
 
 end

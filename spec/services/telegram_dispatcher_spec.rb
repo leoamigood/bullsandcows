@@ -16,8 +16,7 @@ describe TelegramDispatcher, type: :dispatcher do
 
     it 'replies with a welcome text' do
       expect(TelegramDispatcher.handle(message))
-      expect(TelegramMessenger).to have_received(:send_message).with(chat_id, /Welcome to Bulls and Cows!/).once
-      # expect(TelegramMessenger).to have_received(:send_message).with(chat_id, 'Select a game level:')
+      expect(TelegramMessenger).to have_received(:send_message).with(chat_id, /Welcome to Bulls and Cows!/)
     end
   end
 
@@ -207,7 +206,6 @@ describe TelegramDispatcher, type: :dispatcher do
 
     before do
       message.stub_chain(:chat, :id).and_return(chat_id)
-      message.stub_chain(:from, :username).and_return(user)
     end
 
     it 'replies previous guess tries' do
@@ -236,7 +234,6 @@ describe TelegramDispatcher, type: :dispatcher do
 
     before do
       message.stub_chain(:chat, :id).and_return(chat_id)
-      message.stub_chain(:from, :username).and_return(user)
     end
 
     it 'replies with top guesses' do
@@ -258,7 +255,6 @@ describe TelegramDispatcher, type: :dispatcher do
 
     before do
       message.stub_chain(:chat, :id).and_return(chat_id)
-      message.stub_chain(:from, :username).and_return(user)
     end
 
     it 'replies with top <limit> guesses' do
@@ -280,7 +276,6 @@ describe TelegramDispatcher, type: :dispatcher do
       allow(TelegramMessenger).to receive(:best)
 
       message.stub_chain(:chat, :id).and_return(chat_id)
-      message.stub_chain(:from, :username).and_return(user)
     end
 
     it 'handles bot name as optional part in command' do
@@ -296,7 +291,6 @@ describe TelegramDispatcher, type: :dispatcher do
 
     before do
       message.stub_chain(:chat, :id).and_return(chat_id)
-      message.stub_chain(:from, :username).and_return(user)
     end
 
     it 'replies with guesses where bulls and cows have zero occurrences' do
@@ -308,22 +302,37 @@ describe TelegramDispatcher, type: :dispatcher do
     end
   end
 
-  context 'when /level command received with specified level' do
-    let!(:game) { create(:game, :telegram, :with_tries, secret: 'secret', channel: chat_id) }
-
-    let!(:message) { Telegram::Bot::Types::Message.new(text: '/zeros') }
+  context 'when /level command received' do
+    let!(:message) { Telegram::Bot::Types::Message.new(text: '/level') }
 
     before do
+      allow(TelegramMessenger).to receive(:send_message)
+
       message.stub_chain(:chat, :id).and_return(chat_id)
-      message.stub_chain(:from, :username).and_return(user)
     end
 
-    it 'replies with guesses where bulls and cows have zero occurrences' do
+    it 'replies with prompt to submit game level' do
       expect {
-        result = TelegramDispatcher.handle(message)
-        expect(result).to include('Zero letters in: *ballad*, Bulls: *0*, Cows: *0*')
-        expect(result).to include('Zero letters in: *quorum*, Bulls: *0*, Cows: *0*')
+        TelegramDispatcher.handle(message)
+        expect(TelegramMessenger).to have_received(:send_message).with(chat_id, 'Select a game level:', anything)
       }.not_to change(Guess, :count)
+    end
+  end
+
+  context 'when /level command received with selected level' do
+    let!(:callbackQuery) { Telegram::Bot::Types::CallbackQuery.new(id: 729191086489033331, data: '/level easy') }
+
+    before do
+      allow(TelegramMessenger).to receive(:answerCallbackQuery)
+
+      callbackQuery.stub_chain(:message, :chat, :id).and_return(chat_id)
+    end
+
+    it 'creates setting with selected game level' do
+      expect {
+        expect(TelegramDispatcher.handle_callback_query(callbackQuery)).not_to be
+        expect(TelegramMessenger).to have_received(:answerCallbackQuery).with(callbackQuery.id, "Game level set to easy")
+      }.to change(Setting, :count).by(1)
     end
   end
 
@@ -334,7 +343,6 @@ describe TelegramDispatcher, type: :dispatcher do
 
     before do
       message.stub_chain(:chat, :id).and_return(chat_id)
-      message.stub_chain(:from, :username).and_return(user)
     end
 
     context 'when stop command is permitted' do
@@ -360,7 +368,6 @@ describe TelegramDispatcher, type: :dispatcher do
       allow(TelegramMessenger).to receive(:game_was_finished)
 
       message.stub_chain(:chat, :id).and_return(chat_id)
-      message.stub_chain(:from, :username).and_return(user)
     end
 
     it 'handles bot name as optional part in command' do
@@ -374,7 +381,6 @@ describe TelegramDispatcher, type: :dispatcher do
 
     before do
       message.stub_chain(:chat, :id).and_return(chat_id)
-      message.stub_chain(:from, :username).and_return(user)
     end
 
     it 'replies with help message' do
@@ -400,7 +406,6 @@ describe TelegramDispatcher, type: :dispatcher do
     
     before do
       message.stub_chain(:chat, :id).and_return(chat_id)
-      message.stub_chain(:from, :username).and_return(user)
     end
 
     it 'replies with generic message' do

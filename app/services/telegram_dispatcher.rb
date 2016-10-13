@@ -1,6 +1,6 @@
 class TelegramDispatcher
 
-  @@BOT_NAME = 'BullsAndCowsWordsBot'
+  @@BOT_REGEXP = '(?:@BullsAndCowsWordsBot)?'
 
   class << self
     def update(update)
@@ -38,52 +38,55 @@ class TelegramDispatcher
     def execute(command, channel, message)
       case command
         when /^\/start/
-          TelegramMessenger.welcome(message)
+          TelegramMessenger.welcome(channel)
+          TelegramMessenger.ask_level(channel)
 
-        when /^\/create(?:@#{@@BOT_NAME})?$/i
-          game = GameEngineService.create(channel, :telegram)
+        when /^\/create#{@@BOT_REGEXP}$/i
+          complexity = GameEngineService.complexity(channel)
+          game = GameEngineService.create(channel, complexity, :telegram)
           TelegramMessenger.game_created(game)
 
-        when /^\/create(?:@#{@@BOT_NAME})? ([[:alpha:]]+)$/i
+        when /^\/create#{@@BOT_REGEXP} ([[:alpha:]]+)$/i
           game = GameEngineService.create_by_word(channel, $1, :telegram)
           TelegramMessenger.game_created(game)
 
-        when /^\/create(?:@#{@@BOT_NAME})? ([[:digit:]]+)$/i
-          game = GameEngineService.create_by_number(channel, $1, :telegram)
+        when /^\/create#{@@BOT_REGEXP} ([[:digit:]]+)$/i
+          complexity = GameEngineService.complexity(channel)
+          game = GameEngineService.create_by_number(channel, $1, :telegram, complexity)
           TelegramMessenger.game_created(game)
 
-        when /^\/guess(?:@#{@@BOT_NAME})? ([[:alpha:]]+)$/i
+        when /^\/guess#{@@BOT_REGEXP} ([[:alpha:]]+)$/i
           guess = GameEngineService.guess(channel, message.from.username, $1)
           TelegramMessenger.guess(guess)
 
-        when /^\/hint(?:@#{@@BOT_NAME})?$/i
+        when /^\/hint#{@@BOT_REGEXP}$/i
           letter = GameEngineService.hint(channel)
           TelegramMessenger.hint(letter)
 
-        when /^\/tries(?:@#{@@BOT_NAME})?$/i
+        when /^\/tries#{@@BOT_REGEXP}$/i
           guesses = GameEngineService.tries(channel)
           TelegramMessenger.tries(guesses)
 
-        when /^\/best(?:@#{@@BOT_NAME})?$/i
+        when /^\/best#{@@BOT_REGEXP}$/i
           guesses = GameEngineService.best(channel)
           TelegramMessenger.best(guesses)
 
-        when /^\/best(?:@#{@@BOT_NAME})? ([[:digit:]]+)$/i
+        when /^\/best#{@@BOT_REGEXP} ([[:digit:]]+)$/i
           guesses = GameEngineService.best(channel, $1)
           TelegramMessenger.best(guesses)
 
-        when /^\/zeros(?:@#{@@BOT_NAME})?$/i
+        when /^\/zeros#{@@BOT_REGEXP}$/i
           guesses = GameEngineService.zeros(channel)
           TelegramMessenger.zeros(guesses)
 
-        when /^\/level(?:@#{@@BOT_NAME})? ([[:alpha:]]+)$/i
-          levels = GameEngineService.level($1)
+        when /^\/level#{@@BOT_REGEXP}$/i
+          TelegramMessenger.ask_level(channel)
+
+        when /^\/level#{@@BOT_REGEXP} ([[:alpha:]]+)$/i
+          GameEngineService.settings(channel, {complexity: $1})
           TelegramMessenger.level(message, $1)
 
-          game = GameEngineService.create(channel, levels)
-          TelegramMessenger.game_created(game)
-
-        when /^\/stop(?:@#{@@BOT_NAME})?$/i
+        when /^\/stop#{@@BOT_REGEXP}$/i
           if GameEngineService.stop_permitted?(message)
             game = GameEngineService.stop(channel)
             TelegramMessenger.game_stop(game)
@@ -91,7 +94,7 @@ class TelegramDispatcher
             TelegramMessenger.no_permissions_to_stop_game
           end
 
-        when /^\/help(?:@#{@@BOT_NAME})?$/i
+        when /^\/help#{@@BOT_REGEXP}$/i
           TelegramMessenger.help
 
         when /^\/.*/

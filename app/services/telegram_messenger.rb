@@ -7,25 +7,14 @@ class TelegramMessenger
       end
     end
 
-    def answerCallbackQuery(channel, text)
+    def answerCallbackQuery(channel, text = nil)
       Telegram::Bot::Client.run(TELEGRAM_TOKEN) do |bot|
         bot.api.answerCallbackQuery(callback_query_id: channel, text: text)
       end
     end
 
-    def welcome(message)
-      send_message(message.chat.id, 'Welcome to Bulls and Cows! Here be dragons! Well, the rules actually.')
-
-      kb = [
-          Telegram::Bot::Types::InlineKeyboardButton.new(text: 'Easy', callback_data: '/level easy'),
-          Telegram::Bot::Types::InlineKeyboardButton.new(text: 'Medium', callback_data: '/level medium'),
-          Telegram::Bot::Types::InlineKeyboardButton.new(text: 'Hard', callback_data: '/level hard')
-      ]
-      markup = Telegram::Bot::Types::InlineKeyboardMarkup.new(inline_keyboard: kb)
-
-      send_message(message.chat.id, 'Select a game level:', markup)
-
-      ''
+    def welcome(channel)
+      send_message(channel, 'Welcome to Bulls and Cows! Here be dragons! Well, the rules actually.')
     end
 
     def game_created(game)
@@ -74,6 +63,17 @@ class TelegramMessenger
       else
         'There was no guesses with zero bulls and cows matches so far.'
       end
+    end
+
+    def ask_level(channel)
+      kb = [
+          Telegram::Bot::Types::InlineKeyboardButton.new(text: 'Easy', callback_data: '/level easy'),
+          Telegram::Bot::Types::InlineKeyboardButton.new(text: 'Medium', callback_data: '/level medium'),
+          Telegram::Bot::Types::InlineKeyboardButton.new(text: 'Hard', callback_data: '/level hard')
+      ]
+      markup = Telegram::Bot::Types::InlineKeyboardMarkup.new(inline_keyboard: kb)
+
+      send_message(channel, 'Select a game level:', markup)
     end
 
     def level(callbackQuery, level)

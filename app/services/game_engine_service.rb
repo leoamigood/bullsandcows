@@ -1,7 +1,9 @@
 class GameEngineService
 
   class << self
-    def create(channel, source, levels = nil)
+    def create(channel, source, complexity = nil)
+      levels = level(complexity)
+
       nouns = Noun.active
       nouns = nouns.where(:level => levels) if levels.present?
       secret = nouns.offset(rand(nouns.count)).first!
@@ -13,7 +15,9 @@ class GameEngineService
       GameService.create(channel, Noun.new(noun: word), source)
     end
 
-    def create_by_number(channel, number, source, levels = nil)
+    def create_by_number(channel, number, source, complexity = nil)
+      levels = level(complexity)
+
       nouns = Noun.active
       nouns = nouns.where(:level => levels) if levels.present?
       secret = nouns.where('char_length(noun) = ?', number).order('RANDOM()').first
@@ -53,15 +57,30 @@ class GameEngineService
       game.guesses.where(bulls: 0, cows: 0)
     end
 
-    def level(level)
-      case level
+    def level(complexity)
+      case complexity
         when 'easy'
           [1, 2]
         when 'medium'
           [3, 4]
         when 'hard'
           [5]
+        else
+          nil
       end
+    end
+
+    def complexity(channel)
+      Setting.find_by_channel(channel).try(:complexity)
+    end
+
+    def settings(channel, attributes)
+      setting = Setting.find_or_create_by!(channel: channel)
+
+      setting.attributes = attributes
+      setting.save!
+
+      setting
     end
 
     def stop_permitted?(message)
