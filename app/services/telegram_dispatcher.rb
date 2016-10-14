@@ -28,6 +28,7 @@ class TelegramDispatcher
 
     def handle_callback_query(callback_query)
       begin
+        TelegramMessenger.answerCallbackQuery(callback_query.id)
         command = callback_query.data.downcase.to_s
         execute(command, callback_query.message.chat.id, callback_query)
       rescue => ex
@@ -42,9 +43,7 @@ class TelegramDispatcher
           TelegramMessenger.ask_level(channel)
 
         when /^\/create#{@@BOT_REGEXP}$/i
-          complexity = GameEngineService.complexity(channel)
-          game = GameEngineService.create(channel, complexity, :telegram)
-          TelegramMessenger.game_created(game)
+          TelegramMessenger.ask_create_game(channel)
 
         when /^\/create#{@@BOT_REGEXP} ([[:alpha:]]+)$/i
           game = GameEngineService.create_by_word(channel, $1, :telegram)
@@ -84,7 +83,7 @@ class TelegramDispatcher
 
         when /^\/level#{@@BOT_REGEXP} ([[:alpha:]]+)$/i
           GameEngineService.settings(channel, {complexity: $1})
-          TelegramMessenger.level(message, $1)
+          TelegramMessenger.level($1)
 
         when /^\/stop#{@@BOT_REGEXP}$/i
           if GameEngineService.stop_permitted?(message)
@@ -110,6 +109,7 @@ class TelegramDispatcher
           end
       end
     end
+
   end
 
   private

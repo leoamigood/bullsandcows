@@ -17,6 +17,15 @@ class TelegramMessenger
       send_message(channel, 'Welcome to Bulls and Cows! Here be dragons! Well, the rules actually.')
     end
 
+    def ask_create_game(channel)
+      kb = (4..8).reduce([]) { |kb, n|
+        kb << Telegram::Bot::Types::InlineKeyboardButton.new(text: n, callback_data: "/create #{n}")
+      }
+      markup = Telegram::Bot::Types::InlineKeyboardMarkup.new(inline_keyboard: kb)
+
+      send_message(channel, 'How many letters would it be?', markup)
+    end
+
     def game_created(game)
       "Game created with *#{game.secret.length}* letters in the secret word."
     end
@@ -66,18 +75,16 @@ class TelegramMessenger
     end
 
     def ask_level(channel)
-      kb = [
-          Telegram::Bot::Types::InlineKeyboardButton.new(text: 'Easy', callback_data: '/level easy'),
-          Telegram::Bot::Types::InlineKeyboardButton.new(text: 'Medium', callback_data: '/level medium'),
-          Telegram::Bot::Types::InlineKeyboardButton.new(text: 'Hard', callback_data: '/level hard')
-      ]
+      kb = %w(easy medium hard).reduce([]) { |kb, level|
+        kb << Telegram::Bot::Types::InlineKeyboardButton.new(text: level, callback_data: "/level #{level}")
+      }
       markup = Telegram::Bot::Types::InlineKeyboardMarkup.new(inline_keyboard: kb)
 
       send_message(channel, 'Select a game level:', markup)
     end
 
-    def level(callbackQuery, level)
-      answerCallbackQuery(callbackQuery.id, "Game level set to #{level}")
+    def level(level)
+      "Game level was set to #{level}"
     end
 
     def game_stop(game)

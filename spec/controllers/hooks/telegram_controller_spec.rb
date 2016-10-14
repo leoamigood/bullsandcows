@@ -199,7 +199,7 @@ describe Hooks::TelegramController do
         expect(response).to have_http_status(200)
 
         body = JSON.parse(response.body)
-        expect(body).to include('text' => '')
+        expect(body).to include('text' => 'Game level was set to easy')
       end
     end
   end

@@ -10,13 +10,17 @@ describe TelegramDispatcher, type: :dispatcher do
     let!(:message) { Telegram::Bot::Types::Message.new(text: '/start') }
 
     before do
+      allow(TelegramMessenger).to receive(:send_message).and_return(Telegram::Bot::Types::Message.new)
+
       message.stub_chain(:chat, :id).and_return(chat_id)
-      allow(TelegramMessenger).to receive(:send_message)
     end
 
+    let(:markup) { instance_of(Telegram::Bot::Types::InlineKeyboardMarkup) }
+
     it 'replies with a welcome text' do
-      expect(TelegramDispatcher.handle(message))
-      expect(TelegramMessenger).to have_received(:send_message).with(chat_id, /Welcome to Bulls and Cows!/)
+      expect(TelegramDispatcher.handle(message)).to be
+      expect(TelegramMessenger).to have_received(:send_message).with(chat_id, /Welcome to Bulls and Cows!/).once
+      expect(TelegramMessenger).to have_received(:send_message).with(chat_id, 'Select a game level:', markup).once
     end
   end
 
@@ -24,12 +28,16 @@ describe TelegramDispatcher, type: :dispatcher do
     let!(:message) { Telegram::Bot::Types::Message.new(text: '/create') }
 
     before do
+      allow(TelegramMessenger).to receive(:send_message).and_return(Telegram::Bot::Types::Message.new)
+
       message.stub_chain(:chat, :id).and_return(chat_id)
     end
 
-    it 'replies with a game created text' do
-      expect(TelegramDispatcher.handle(message)).to include('Game created with')
-      expect(TelegramDispatcher.handle(message)).to include('letters in the secret word')
+    let(:markup) { instance_of(Telegram::Bot::Types::InlineKeyboardMarkup) }
+
+    it 'replies with a prompt to specify word length' do
+      expect(TelegramDispatcher.handle(message)).to be
+      expect(TelegramMessenger).to have_received(:send_message).with(chat_id, 'How many letters would it be?', markup)
     end
   end
 
@@ -306,15 +314,17 @@ describe TelegramDispatcher, type: :dispatcher do
     let!(:message) { Telegram::Bot::Types::Message.new(text: '/level') }
 
     before do
-      allow(TelegramMessenger).to receive(:send_message)
+      allow(TelegramMessenger).to receive(:send_message).and_return(Telegram::Bot::Types::Message.new)
 
       message.stub_chain(:chat, :id).and_return(chat_id)
     end
 
+    let(:markup) { instance_of(Telegram::Bot::Types::InlineKeyboardMarkup) }
+
     it 'replies with prompt to submit game level' do
       expect {
         TelegramDispatcher.handle(message)
-        expect(TelegramMessenger).to have_received(:send_message).with(chat_id, 'Select a game level:', anything)
+        expect(TelegramMessenger).to have_received(:send_message).with(chat_id, 'Select a game level:', markup)
       }.not_to change(Guess, :count)
     end
   end
@@ -324,14 +334,15 @@ describe TelegramDispatcher, type: :dispatcher do
 
     before do
       allow(TelegramMessenger).to receive(:answerCallbackQuery)
+      allow(TelegramMessenger).to receive(:send_message).and_return(Telegram::Bot::Types::Message.new)
 
       callbackQuery.stub_chain(:message, :chat, :id).and_return(chat_id)
     end
 
     it 'creates setting with selected game level' do
       expect {
-        expect(TelegramDispatcher.handle_callback_query(callbackQuery)).not_to be
-        expect(TelegramMessenger).to have_received(:answerCallbackQuery).with(callbackQuery.id, "Game level set to easy")
+        expect(TelegramDispatcher.handle_callback_query(callbackQuery)).to eq('Game level was set to easy')
+        expect(TelegramMessenger).to have_received(:answerCallbackQuery).with(callbackQuery.id).once
       }.to change(Setting, :count).by(1)
     end
   end
