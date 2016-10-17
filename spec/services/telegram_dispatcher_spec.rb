@@ -54,6 +54,18 @@ describe TelegramDispatcher, type: :dispatcher do
     end
   end
 
+  context 'when /create multiple spaces in between <word> command received' do
+    let!(:message) { Telegram::Bot::Types::Message.new(text: '/create         коитус') }
+
+    before do
+      message.stub_chain(:chat, :id).and_return(chat_id)
+    end
+
+    it 'replies with a game created text' do
+      expect(TelegramDispatcher.handle(message)).to include('Game created with *6* letters in the secret word')
+    end
+  end
+
   context 'when /create <number> command received' do
     let!(:message) { Telegram::Bot::Types::Message.new(text: '/create 6') }
 

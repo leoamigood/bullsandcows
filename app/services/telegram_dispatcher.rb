@@ -1,6 +1,23 @@
 class TelegramDispatcher
 
-  @@BOT_REGEXP = '(?:@BullsAndCowsWordsBot)?'
+  class CommandRegExp
+    BOT_REGEXP = '(?:@BullsAndCowsWordsBot)?'
+
+    BEST         = /^#{Command::BEST}#{BOT_REGEXP}$/i
+    BEST_DIGIT   = /^#{Command::BEST}#{BOT_REGEXP}\s+([[:digit:]]+)$/i
+    CREATE       = /^#{Command::CREATE}#{BOT_REGEXP}$/i
+    CREATE_ALPHA = /^#{Command::CREATE}#{BOT_REGEXP}\s+([[:alpha:]]+)$/i
+    CREATE_DIGIT = /^#{Command::CREATE}#{BOT_REGEXP}\s+([[:digit:]]+)$/i
+    GUESS        = /^#{Command::GUESS}#{BOT_REGEXP}\s+([[:alpha:]]+)$/i
+    HELP         = /^#{Command::HELP}#{BOT_REGEXP}$/i
+    HINT         = /^#{Command::HINT}#{BOT_REGEXP}$/i
+    LEVEL        = /^#{Command::LEVEL}#{BOT_REGEXP}$/i
+    LEVEL_ALPHA  = /^#{Command::LEVEL}#{BOT_REGEXP}\s+([[:alpha:]]+)$/i
+    START        = /^#{Command::START}#{BOT_REGEXP}$/i
+    STOP         = /^#{Command::STOP}#{BOT_REGEXP}$/i
+    TRIES        = /^#{Command::TRIES}#{BOT_REGEXP}$/i
+    ZERO         = /^#{Command::ZERO}#{BOT_REGEXP}$/i
+  end
 
   class << self
     def update(update)
@@ -38,54 +55,54 @@ class TelegramDispatcher
 
     def execute(command, channel, message)
       case command
-        when /^\/start/
+        when CommandRegExp::START
           TelegramMessenger.welcome(channel)
           TelegramMessenger.ask_level(channel)
 
-        when /^\/create#{@@BOT_REGEXP}$/i
+        when CommandRegExp::CREATE
           TelegramMessenger.ask_create_game(channel)
 
-        when /^\/create#{@@BOT_REGEXP} ([[:alpha:]]+)$/i
+        when CommandRegExp::CREATE_ALPHA
           game = GameEngineService.create_by_word(channel, $1, :telegram)
           TelegramMessenger.game_created(game)
 
-        when /^\/create#{@@BOT_REGEXP} ([[:digit:]]+)$/i
+        when CommandRegExp::CREATE_DIGIT
           complexity = GameEngineService.complexity(channel)
           game = GameEngineService.create_by_number(channel, $1, :telegram, complexity)
           TelegramMessenger.game_created(game)
 
-        when /^\/guess#{@@BOT_REGEXP} ([[:alpha:]]+)$/i
+        when CommandRegExp::GUESS
           guess = GameEngineService.guess(channel, message.from.username, $1)
           TelegramMessenger.guess(guess)
 
-        when /^\/hint#{@@BOT_REGEXP}$/i
+        when CommandRegExp::HINT
           letter = GameEngineService.hint(channel)
           TelegramMessenger.hint(letter)
 
-        when /^\/tries#{@@BOT_REGEXP}$/i
+        when CommandRegExp::TRIES
           guesses = GameEngineService.tries(channel)
           TelegramMessenger.tries(guesses)
 
-        when /^\/best#{@@BOT_REGEXP}$/i
+        when CommandRegExp::BEST
           guesses = GameEngineService.best(channel)
           TelegramMessenger.best(guesses)
 
-        when /^\/best#{@@BOT_REGEXP} ([[:digit:]]+)$/i
+        when CommandRegExp::BEST_DIGIT
           guesses = GameEngineService.best(channel, $1)
           TelegramMessenger.best(guesses)
 
-        when /^\/zero#{@@BOT_REGEXP}$/i
+        when CommandRegExp::ZERO
           guesses = GameEngineService.zero(channel)
           TelegramMessenger.zero(guesses)
 
-        when /^\/level#{@@BOT_REGEXP}$/i
+        when CommandRegExp::LEVEL
           TelegramMessenger.ask_level(channel)
 
-        when /^\/level#{@@BOT_REGEXP} ([[:alpha:]]+)$/i
+        when CommandRegExp::LEVEL_ALPHA
           GameEngineService.settings(channel, {complexity: $1})
           TelegramMessenger.level($1)
 
-        when /^\/stop#{@@BOT_REGEXP}$/i
+        when CommandRegExp::STOP
           if GameEngineService.stop_permitted?(message)
             game = GameEngineService.stop(channel)
             TelegramMessenger.game_stop(game)
@@ -93,7 +110,7 @@ class TelegramDispatcher
             TelegramMessenger.no_permissions_to_stop_game
           end
 
-        when /^\/help#{@@BOT_REGEXP}$/i
+        when CommandRegExp::HELP
           TelegramMessenger.help
 
         when /^\/.*/
