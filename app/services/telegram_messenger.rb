@@ -63,7 +63,7 @@ class TelegramMessenger
       end
     end
 
-    def zeros(guesses)
+    def zero(guesses)
       unless guesses.empty?
         text = guesses.each.map do |guess|
           "Zero letters in: *#{guess.word}*, Bulls: *#{guess.bulls}*, Cows: *#{guess.cows}*"

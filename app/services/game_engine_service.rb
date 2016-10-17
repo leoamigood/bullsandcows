@@ -52,7 +52,7 @@ class GameEngineService
       game.guesses.sort.first(limit.to_i)
     end
 
-    def zeros(channel)
+    def zero(channel)
       game = GameService.find!(channel)
       game.guesses.where(bulls: 0, cows: 0)
     end

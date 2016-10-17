@@ -292,10 +292,10 @@ describe TelegramDispatcher, type: :dispatcher do
     end
   end
 
-  context 'when /zeros command received' do
+  context 'when /zero command received' do
     let!(:game) { create(:game, :telegram, :telegram, :with_tries, secret: 'secret', channel: chat_id) }
 
-    let!(:message) { Telegram::Bot::Types::Message.new(text: '/zeros') }
+    let!(:message) { Telegram::Bot::Types::Message.new(text: '/zero') }
 
     before do
       message.stub_chain(:chat, :id).and_return(chat_id)

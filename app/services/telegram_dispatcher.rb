@@ -74,9 +74,9 @@ class TelegramDispatcher
           guesses = GameEngineService.best(channel, $1)
           TelegramMessenger.best(guesses)
 
-        when /^\/zeros#{@@BOT_REGEXP}$/i
-          guesses = GameEngineService.zeros(channel)
-          TelegramMessenger.zeros(guesses)
+        when /^\/zero#{@@BOT_REGEXP}$/i
+          guesses = GameEngineService.zero(channel)
+          TelegramMessenger.zero(guesses)
 
         when /^\/level#{@@BOT_REGEXP}$/i
           TelegramMessenger.ask_level(channel)
