@@ -20,7 +20,44 @@ describe TelegramDispatcher, type: :dispatcher do
     it 'replies with a welcome text' do
       expect(TelegramDispatcher.handle(message)).to be
       expect(TelegramMessenger).to have_received(:send_message).with(chat_id, /Welcome to Bulls and Cows!/).once
-      expect(TelegramMessenger).to have_received(:send_message).with(chat_id, 'Select a game level:', markup).once
+      expect(TelegramMessenger).to have_received(:send_message).with(chat_id, 'Select game level:', markup).once
+    end
+  end
+
+  context 'when /lang command received' do
+    let!(:message) { Telegram::Bot::Types::Message.new(text: '/lang') }
+
+    before do
+      allow(TelegramMessenger).to receive(:send_message).and_return(Telegram::Bot::Types::Message.new)
+
+      message.stub_chain(:chat, :id).and_return(chat_id)
+    end
+
+    let(:markup) { instance_of(Telegram::Bot::Types::InlineKeyboardMarkup) }
+
+    it 'replies with prompt to submit game language' do
+      expect {
+        TelegramDispatcher.handle(message)
+        expect(TelegramMessenger).to have_received(:send_message).with(chat_id, 'Select game language:', markup)
+      }.not_to change(Game, :count)
+    end
+  end
+
+  context 'when /lang command received with selected language' do
+    let!(:callbackQuery) { Telegram::Bot::Types::CallbackQuery.new(id: 729191086489033331, data: '/lang Russian') }
+
+    before do
+      allow(TelegramMessenger).to receive(:answerCallbackQuery)
+      allow(TelegramMessenger).to receive(:send_message).and_return(Telegram::Bot::Types::Message.new)
+
+      callbackQuery.stub_chain(:message, :chat, :id).and_return(chat_id)
+    end
+
+    it 'creates setting with selected game language' do
+      expect {
+        expect(TelegramDispatcher.handle_callback_query(callbackQuery)).to eq('Language was set to Russian')
+        expect(TelegramMessenger).to have_received(:answerCallbackQuery).with(callbackQuery.id).once
+      }.to change(Setting, :count).by(1)
     end
   end
 
@@ -336,8 +373,8 @@ describe TelegramDispatcher, type: :dispatcher do
     it 'replies with prompt to submit game level' do
       expect {
         TelegramDispatcher.handle(message)
-        expect(TelegramMessenger).to have_received(:send_message).with(chat_id, 'Select a game level:', markup)
-      }.not_to change(Guess, :count)
+        expect(TelegramMessenger).to have_received(:send_message).with(chat_id, 'Select game level:', markup)
+      }.not_to change(Game, :count)
     end
   end
 

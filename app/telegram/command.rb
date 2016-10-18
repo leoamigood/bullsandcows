@@ -4,6 +4,7 @@ class Command
   GUESS  = '/guess'
   HELP   = '/help'
   HINT   = '/hint'
+  LANG   = '/lang'
   LEVEL  = '/level'
   START  = '/start'
   STOP   = '/stop'

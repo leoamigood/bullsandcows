@@ -17,6 +17,19 @@ class TelegramMessenger
       send_message(channel, 'Welcome to Bulls and Cows! Here be dragons! Well, the rules actually.')
     end
 
+    def ask_language(channel)
+      kb = %w(English Russian).reduce([]) { |kb, lang|
+        kb << Telegram::Bot::Types::InlineKeyboardButton.new(text: lang, callback_data: "/lang #{lang}")
+      }
+      markup = Telegram::Bot::Types::InlineKeyboardMarkup.new(inline_keyboard: kb)
+
+      send_message(channel, 'Select game language:', markup)
+    end
+
+    def language(language)
+      "Language was set to #{language}"
+    end
+
     def ask_create_game(channel)
       kb = (4..8).reduce([]) { |kb, n|
         kb << Telegram::Bot::Types::InlineKeyboardButton.new(text: n, callback_data: "/create #{n}")
@@ -80,7 +93,7 @@ class TelegramMessenger
       }
       markup = Telegram::Bot::Types::InlineKeyboardMarkup.new(inline_keyboard: kb)
 
-      send_message(channel, 'Select a game level:', markup)
+      send_message(channel, 'Select game level:', markup)
     end
 
     def level(level)
