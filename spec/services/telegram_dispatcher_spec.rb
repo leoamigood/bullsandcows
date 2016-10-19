@@ -4,7 +4,7 @@ describe TelegramDispatcher, type: :dispatcher do
   let!(:user) { '@Amig0' }
   let!(:chat_id) { 169778030 }
 
-  let!(:dictionary) { create :dictionary, :basic, lang: 'RU'}
+  let!(:dictionary) { create :dictionary, :words_with_levels, lang: 'RU'}
 
   context 'when /start command received' do
     let!(:message) { Telegram::Bot::Types::Message.new(text: '/start') }
@@ -44,7 +44,7 @@ describe TelegramDispatcher, type: :dispatcher do
   end
 
   context 'when /lang command received with selected language' do
-    let!(:callbackQuery) { Telegram::Bot::Types::CallbackQuery.new(id: 729191086489033331, data: '/lang Russian') }
+    let!(:callbackQuery) { Telegram::Bot::Types::CallbackQuery.new(id: 729191086489033331, data: '/lang RU') }
 
     before do
       allow(TelegramMessenger).to receive(:answerCallbackQuery)

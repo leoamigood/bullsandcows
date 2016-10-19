@@ -65,9 +65,9 @@ class TelegramDispatcher
           TelegramMessenger.ask_language(channel)
 
         when CommandRegExp::LANG_ALPHA
-          language = GameEngineService.get_language_or_default($1)
+          language = GameEngineService.get_language_or_default($1.upcase)
           GameEngineService.settings(channel, {language: language})
-          TelegramMessenger.language($1.camelcase)
+          TelegramMessenger.language(language)
 
         when CommandRegExp::CREATE
           TelegramMessenger.ask_create_game(channel)
@@ -77,8 +77,7 @@ class TelegramDispatcher
           TelegramMessenger.game_created(game)
 
         when CommandRegExp::CREATE_DIGIT
-          complexity = GameEngineService.complexity(channel)
-          game = GameEngineService.create_by_number(channel, $1, :telegram, {complexity: complexity})
+          game = GameEngineService.create_by_number(channel, $1, :telegram)
           TelegramMessenger.game_created(game)
 
         when CommandRegExp::GUESS

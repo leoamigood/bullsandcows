@@ -6,8 +6,8 @@ describe Dictionary, type: :model do
     let!(:dictionary) { create :dictionary, lang: 'EN' }
 
     it 'get language of dictionary' do
-      expect(dictionary.lang).to eq('english')
-      expect(dictionary.english?).to eq(true)
+      expect(dictionary.lang).to eq('EN')
+      expect(dictionary.EN?).to eq(true)
     end
   end
 

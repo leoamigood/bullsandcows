@@ -1,29 +1,20 @@
 class GameEngineService
 
   class << self
-    def create(channel, source, options = {})
-      levels = get_level_by_complexity(options[:complexity])
-      language = get_language_or_default(options[:language])
-
-      nouns = Noun.active.in_language(language)
-      nouns = nouns.where(:level => levels) if levels.present?
-      raise "No words found in dictionaries with options: #{options}" unless nouns.present?
-
-      secret = nouns.offset(rand(nouns.count)).first!
-
-      GameService.create(channel, secret, source)
-    end
-
     def create_by_word(channel, word, source)
       GameService.create(channel, Noun.new(noun: word), source)
     end
 
-    def create_by_number(channel, number, source, options = {})
-      levels = get_level_by_complexity(options[:complexity])
-      language = get_language_or_default(options[:language])
+    def create_by_number(channel, number, source)
+      settings = Setting.find_by_channel(channel) || Setting.new
+
+      levels = get_level_by_complexity(settings.complexity)
+      language = get_language_or_default(settings.language)
 
       nouns = Noun.active.in_language(language)
       nouns = nouns.where(:level => levels) if levels.present?
+      raise "No words found in dictionaries with complexity: #{settings.complexity} and language: #{settings.language} " unless nouns.present?
+
       secret = nouns.where('char_length(noun) = ?', number).order('RANDOM()').first
       raise "Unable to create a game with #{number} letters word. Please try different amount." unless secret.present?
 
@@ -62,8 +53,8 @@ class GameEngineService
     end
 
     def get_language_or_default(language = nil)
-      lang = Dictionary.langs[language || :russian]
-      raise "Language: #{language} is not available. Please try another!" unless lang.present?
+      lang = Dictionary.langs[language || :RU]
+      raise "Language: #{language} is not available!" unless lang.present?
 
       lang
     end
@@ -79,10 +70,6 @@ class GameEngineService
         else
           nil
       end
-    end
-
-    def complexity(channel)
-      Setting.find_by_channel(channel).try(:complexity)
     end
 
     def settings(channel, attributes)

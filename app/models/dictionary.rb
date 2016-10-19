@@ -1,5 +1,5 @@
 class Dictionary < ActiveRecord::Base
-  enum lang: {:english => 'EN', :russian => 'RU'}
+  enum lang: {:EN => 'EN', :RU => 'RU'}
 
   has_many :nouns
 

@@ -3,8 +3,8 @@ require 'rails_helper'
 describe Noun, type: :model do
 
   context 'given dictionaries' do
-    let!(:active) { create :dictionary, :basic, enabled: true, lang: 'EN' }
-    let!(:disabled) { create :dictionary, :basic, enabled: false, lang: 'RU' }
+    let!(:active) { create :dictionary, :words_with_levels, enabled: true, lang: 'EN' }
+    let!(:disabled) { create :dictionary, :words_with_levels, enabled: false, lang: 'RU' }
 
     it 'get nouns in active dictionary' do
       expect(Noun.active).to eq(active.nouns)

@@ -19,14 +19,22 @@ class TelegramMessenger
 
     def ask_language(channel)
       kb = %w(English Russian).reduce([]) { |kb, lang|
-        kb << Telegram::Bot::Types::InlineKeyboardButton.new(text: lang, callback_data: "/lang #{lang}")
+        kb << Telegram::Bot::Types::InlineKeyboardButton.new(text: lang, callback_data: "/lang #{lang[0..1].upcase}")
       }
       markup = Telegram::Bot::Types::InlineKeyboardMarkup.new(inline_keyboard: kb)
 
       send_message(channel, 'Select game language:', markup)
     end
 
-    def language(language)
+    def language(lang)
+      case lang
+        when Dictionary.langs[:RU]
+          language = 'Russian'
+        when Dictionary.langs[:EN]
+          language = 'English'
+        else
+          language = 'Unknown'
+      end
       "Language was set to #{language}"
     end
 
