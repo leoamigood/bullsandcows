@@ -48,7 +48,7 @@ class TelegramMessenger
     end
 
     def game_created(game)
-      "Game created with *#{game.secret.length}* letters in the secret word."
+      "Game created with #{game.secret.length} letters in the secret word."
     end
 
     def guess(guess)

@@ -1,6 +1,6 @@
 require 'rails_helper'
 
-describe TelegramDispatcher, type: :dispatcher do
+describe TelegramDispatcher, type: :service do
   let!(:user) { '@Amig0' }
   let!(:chat_id) { 169778030 }
 
@@ -18,9 +18,11 @@ describe TelegramDispatcher, type: :dispatcher do
     let(:markup) { instance_of(Telegram::Bot::Types::InlineKeyboardMarkup) }
 
     it 'replies with a welcome text' do
-      expect(TelegramDispatcher.handle(message)).to be
-      expect(TelegramMessenger).to have_received(:send_message).with(chat_id, /Welcome to Bulls and Cows!/).once
-      expect(TelegramMessenger).to have_received(:send_message).with(chat_id, 'Select game level:', markup).once
+      expect {
+        expect(TelegramDispatcher.handle(message)).to be
+        expect(TelegramMessenger).to have_received(:send_message).with(chat_id, /Welcome to Bulls and Cows!/).once
+        expect(TelegramMessenger).to have_received(:send_message).with(chat_id, 'Select game level:', markup).once
+      }.to change(TelegramDispatcher::CommandQueue, :size).by(2)
     end
   end
 
@@ -49,14 +51,15 @@ describe TelegramDispatcher, type: :dispatcher do
     before do
       allow(TelegramMessenger).to receive(:answerCallbackQuery)
       allow(TelegramMessenger).to receive(:send_message).and_return(Telegram::Bot::Types::Message.new)
+      allow(TelegramDispatcher::CommandQueue).to receive(:execute)
 
       callbackQuery.stub_chain(:message, :chat, :id).and_return(chat_id)
     end
 
     it 'creates setting with selected game language' do
       expect {
-        expect(TelegramDispatcher.handle_callback_query(callbackQuery)).to eq('Language was set to Russian')
-        expect(TelegramMessenger).to have_received(:answerCallbackQuery).with(callbackQuery.id).once
+        expect(TelegramDispatcher.handle_callback_query(callbackQuery)).to be_nil
+        expect(TelegramMessenger).to have_received(:answerCallbackQuery).with(callbackQuery.id, 'Language was set to Russian').once
       }.to change(Setting, :count).by(1)
     end
   end
@@ -87,7 +90,7 @@ describe TelegramDispatcher, type: :dispatcher do
     end
 
     it 'replies with a game created text' do
-      expect(TelegramDispatcher.handle(message)).to include('Game created with *6* letters in the secret word')
+      expect(TelegramDispatcher.handle(message)).to include('Game created with 6 letters in the secret word')
     end
   end
 
@@ -99,7 +102,7 @@ describe TelegramDispatcher, type: :dispatcher do
     end
 
     it 'replies with a game created text' do
-      expect(TelegramDispatcher.handle(message)).to include('Game created with *6* letters in the secret word')
+      expect(TelegramDispatcher.handle(message)).to include('Game created with 6 letters in the secret word')
     end
   end
 
@@ -111,7 +114,7 @@ describe TelegramDispatcher, type: :dispatcher do
     end
 
     it 'replies with a game created text' do
-      expect(TelegramDispatcher.handle(message)).to include('Game created with *6* letters in the secret word')
+      expect(TelegramDispatcher.handle(message)).to include('Game created with 6 letters in the secret word')
     end
   end
 
@@ -390,8 +393,8 @@ describe TelegramDispatcher, type: :dispatcher do
 
     it 'creates setting with selected game level' do
       expect {
-        expect(TelegramDispatcher.handle_callback_query(callbackQuery)).to eq('Game level was set to easy')
-        expect(TelegramMessenger).to have_received(:answerCallbackQuery).with(callbackQuery.id).once
+        expect(TelegramDispatcher.handle_callback_query(callbackQuery)).to be_nil
+        expect(TelegramMessenger).to have_received(:answerCallbackQuery).with(callbackQuery.id, 'Game level was set to easy').once
       }.to change(Setting, :count).by(1)
     end
   end
@@ -508,4 +511,111 @@ describe TelegramDispatcher, type: :dispatcher do
       }.to change(Guess, :count).by(1)
     end
   end
+end
+
+describe TelegramDispatcher::CommandQueue do
+
+  context 'given empty command queue' do
+    after do
+      TelegramDispatcher::CommandQueue.clear
+    end
+
+    it 'checks if queue is empty' do
+      expect{
+        expect(TelegramDispatcher::CommandQueue.empty?).to be true
+      }.not_to change(TelegramDispatcher::CommandQueue, :size)
+    end
+
+    it 'adds a code block' do
+      expect{
+        TelegramDispatcher::CommandQueue.push{ 'pushed block' }
+        expect(TelegramDispatcher::CommandQueue.empty?).to be false
+      }.to change(TelegramDispatcher::CommandQueue, :size).by(1)
+    end
+
+    it 'fails to remove code block from empty queue' do
+      expect{
+        expect(TelegramDispatcher::CommandQueue.pop).not_to be
+      }.not_to change(TelegramDispatcher::CommandQueue, :size)
+    end
+
+  end
+
+  context 'given one code block in command queue' do
+    before do
+      TelegramDispatcher::CommandQueue.push{ 'block to pop' }
+    end
+
+    after do
+      TelegramDispatcher::CommandQueue.clear
+    end
+
+    it 'executes and removed code block' do
+      expect{
+        expect(TelegramDispatcher::CommandQueue.execute).to eq('block to pop')
+      }.to change(TelegramDispatcher::CommandQueue, :size).by(-1)
+    end
+
+    it 'removes code block' do
+      expect{
+        block = TelegramDispatcher::CommandQueue.pop
+        expect(block).to be
+        expect(block.call).to eq('block to pop')
+      }.to change(TelegramDispatcher::CommandQueue, :size).by(-1)
+    end
+  end
+
+  context 'given two code blocks in command queue' do
+    before do
+      TelegramDispatcher::CommandQueue.push{ 'code block 1' }
+      TelegramDispatcher::CommandQueue.push{ 'code block 2' }
+    end
+
+    after do
+      TelegramDispatcher::CommandQueue.clear
+    end
+
+    it 'gives total amount of blocks' do
+      expect{
+        expect(TelegramDispatcher::CommandQueue.size).to eq(2)
+      }.not_to change(TelegramDispatcher::CommandQueue, :size)
+    end
+
+    it 'gets and removes first pushed code block (FIFO)' do
+      expect{
+        block = TelegramDispatcher::CommandQueue.pop
+        expect(block).to be
+        expect(block.call).to eq('code block 2')
+      }.to change(TelegramDispatcher::CommandQueue, :size).by(-1)
+    end
+
+    it 'gets and removes first pushed code block (LIFO)' do
+      expect{
+        block = TelegramDispatcher::CommandQueue.shift
+        expect(block).to be
+        expect(block.call).to eq('code block 1')
+      }.to change(TelegramDispatcher::CommandQueue, :size).by(-1)
+    end
+
+    it 'removes all code blocks' do
+      expect{
+        expect(TelegramDispatcher::CommandQueue.clear).to be_empty
+      }.to change(TelegramDispatcher::CommandQueue, :size).by(-2)
+    end
+
+    it 'checks if queue is empty' do
+      expect{
+        expect(TelegramDispatcher::CommandQueue.empty?).to be_falsey
+      }.not_to change(TelegramDispatcher::CommandQueue, :size)
+    end
+
+    it 'executes and removed first pushed code block' do
+      expect{
+        expect(TelegramDispatcher::CommandQueue.execute).to eq('code block 1')
+      }.to change(TelegramDispatcher::CommandQueue, :size).by(-1)
+    end
+
+  end
+
+
 end

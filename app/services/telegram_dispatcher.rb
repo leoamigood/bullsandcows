@@ -21,6 +21,40 @@ class TelegramDispatcher
     ZERO         = /^#{Command::ZERO}#{BOT_REGEXP}$/i
   end
 
+  class CommandQueue
+    @queue = []
+
+    class << self
+      def push(&block)
+        @queue.push(block)
+      end
+
+      def pop
+        @queue.pop
+      end
+
+      def execute
+        shift.try(:call)
+      end
+
+      def shift
+        @queue.shift
+      end
+
+      def size
+        @queue.size
+      end
+
+      def clear
+        @queue.clear
+      end
+
+      def empty?
+        @queue.empty?
+      end
+    end
+  end
+
   class << self
     def update(update)
       payload = extract_message(update)
@@ -47,9 +81,11 @@ class TelegramDispatcher
 
     def handle_callback_query(callback_query)
       begin
-        TelegramMessenger.answerCallbackQuery(callback_query.id)
         command = callback_query.data.downcase.to_s
-        execute(command, callback_query.message.chat.id, callback_query)
+        response = execute(command, callback_query.message.chat.id, callback_query)
+        TelegramMessenger.answerCallbackQuery(callback_query.id, response)
+
+        TelegramDispatcher::CommandQueue.execute
       rescue => ex
         ex.message
       end
@@ -60,6 +96,9 @@ class TelegramDispatcher
         when CommandRegExp::START
           TelegramMessenger.welcome(channel)
           TelegramMessenger.ask_level(channel)
+
+          TelegramDispatcher::CommandQueue.push{ TelegramMessenger.ask_language(channel) }
+          TelegramDispatcher::CommandQueue.push{ TelegramMessenger.ask_create_game(channel) }
 
         when CommandRegExp::LANG
           TelegramMessenger.ask_language(channel)
@@ -73,10 +112,12 @@ class TelegramDispatcher
           TelegramMessenger.ask_create_game(channel)
 
         when CommandRegExp::CREATE_ALPHA
+          TelegramDispatcher::CommandQueue.clear
           game = GameEngineService.create_by_word(channel, $1, :telegram)
           TelegramMessenger.game_created(game)
 
         when CommandRegExp::CREATE_DIGIT
+          TelegramDispatcher::CommandQueue.clear
           game = GameEngineService.create_by_number(channel, $1, :telegram)
           TelegramMessenger.game_created(game)
 

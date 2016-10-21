@@ -3,8 +3,9 @@ require 'rails_helper'
 describe Hooks::TelegramController do
 
   context 'when receives telegram message with /start command' do
-    before(:each) do
+    before do
       allow(TelegramMessenger).to receive(:send_message)
+      allow(TelegramDispatcher::CommandQueue).to receive(:push)
     end
 
     let!(:command) {
@@ -57,6 +58,8 @@ describe Hooks::TelegramController do
 
       expect(response).to be_success
       expect(response).to have_http_status(200)
+
+      expect(TelegramDispatcher::CommandQueue).to have_received(:push).twice
 
       body = JSON.parse(response.body)
       expect(body).to include('text' => '')
@@ -121,7 +124,6 @@ describe Hooks::TelegramController do
   end
 
   context 'given dictionary with word levels' do
-
     before(:each) do
       allow(TelegramMessenger).to receive(:answerCallbackQuery)
     end
@@ -199,7 +201,7 @@ describe Hooks::TelegramController do
         expect(response).to have_http_status(200)
 
         body = JSON.parse(response.body)
-        expect(body).to include('text' => 'Game level was set to easy')
+        expect(body).to include('text' => '')
       end
     end
   end
