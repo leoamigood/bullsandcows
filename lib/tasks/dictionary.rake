@@ -5,7 +5,7 @@ namespace :dictionary do
   # rake dictionary:import[RU,http://www.domain.com/seed_data/dictionary.csv]
   #
   # after import is completed you might want to calculate word level for example as:
-  # SQL: update nouns set level = <max level> - width_bucket(log(ipm * r), <min level>, <max level>, <total buckets>);
+  # SQL: update nouns set level = width_bucket(log(ipm * r), <min level>, <max level>, <total buckets>);
   task :import, [:lang, :uri] => :environment do |t, args|
     lang = args[:lang]
     uri = args[:uri]
@@ -20,7 +20,7 @@ namespace :dictionary do
         Noun.new(attributes.merge(excluded: false, dictionary_id: dictionary.id))
       }
 
-      #update nouns set level = 6 - width_bucket(log(ipm * r), 0, 5.58, 6);
+      #update nouns set level = width_bucket(log(ipm * r), 0, 5.58, 5);
     end
   end
 

@@ -22,7 +22,7 @@ describe GameEngineService, type: :service do
 
         expect(game).to be
         expect(game.secret.length).to eq(6)
-        expect(game.level).to be_between(3, 4)
+        expect(game.level).to be_between(2, 3)
         expect(game.dictionary.RU?).to be(true)
       end
     end
@@ -39,9 +39,9 @@ describe GameEngineService, type: :service do
   end
 
   it 'resolve game level numeric value by complexity string' do
-    expect(GameEngineService.get_level_by_complexity('easy')).to eq([1, 2])
-    expect(GameEngineService.get_level_by_complexity('medium')).to eq([3, 4])
-    expect(GameEngineService.get_level_by_complexity('hard')).to eq([5])
+    expect(GameEngineService.get_level_by_complexity('easy')).to eq([4, 5])
+    expect(GameEngineService.get_level_by_complexity('medium')).to eq([2, 3])
+    expect(GameEngineService.get_level_by_complexity('hard')).to eq([1, 2, 3])
   end
 
   it 'get language or default language value' do

@@ -62,11 +62,11 @@ class GameEngineService
     def get_level_by_complexity(complexity)
       case complexity
         when 'easy'
-          [1, 2]
+          [4, 5]
         when 'medium'
-          [3, 4]
+          [2, 3]
         when 'hard'
-          [5]
+          [1, 2, 3]
         else
           nil
       end
