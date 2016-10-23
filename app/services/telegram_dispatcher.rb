@@ -4,17 +4,17 @@ class TelegramDispatcher
     BOT_REGEXP = '(?:@BullsAndCowsWordsBot)?'
 
     BEST         = /^#{Command::BEST}#{BOT_REGEXP}$/i
-    BEST_DIGIT   = /^#{Command::BEST}#{BOT_REGEXP}\s+([[:digit:]]+)$/i
+    BEST_DIGIT   = /^#{Command::BEST}#{BOT_REGEXP}\s+(?<best>[[:digit:]]+)$/i
     CREATE       = /^#{Command::CREATE}#{BOT_REGEXP}$/i
-    CREATE_ALPHA = /^#{Command::CREATE}#{BOT_REGEXP}\s+([[:alpha:]]+)$/i
-    CREATE_DIGIT = /^#{Command::CREATE}#{BOT_REGEXP}\s+([[:digit:]]+)$/i
-    GUESS        = /^#{Command::GUESS}#{BOT_REGEXP}\s+([[:alpha:]]+)$/i
+    CREATE_ALPHA = /^#{Command::CREATE}#{BOT_REGEXP}\s+(?<secret>[[:alpha:]]+)$/i
+    CREATE_DIGIT = /^#{Command::CREATE}#{BOT_REGEXP}\s+(?<number>[[:digit:]]+)$/i
+    GUESS        = /^#{Command::GUESS}#{BOT_REGEXP}\s+(?<guess>[[:alpha:]]+)$/i
     HELP         = /^#{Command::HELP}#{BOT_REGEXP}$/i
     HINT         = /^#{Command::HINT}#{BOT_REGEXP}$/i
     LANG         = /^#{Command::LANG}#{BOT_REGEXP}$/i
-    LANG_ALPHA   = /^#{Command::LANG}#{BOT_REGEXP}\s+([[:alpha:]]+)$/i
+    LANG_ALPHA   = /^#{Command::LANG}#{BOT_REGEXP}\s+(?<language>[[:alpha:]]+)$/i
     LEVEL        = /^#{Command::LEVEL}#{BOT_REGEXP}$/i
-    LEVEL_ALPHA  = /^#{Command::LEVEL}#{BOT_REGEXP}\s+([[:alpha:]]+)$/i
+    LEVEL_ALPHA  = /^#{Command::LEVEL}#{BOT_REGEXP}\s+(?<level>[[:alpha:]]+)$/i
     START        = /^#{Command::START}#{BOT_REGEXP}$/i
     STOP         = /^#{Command::STOP}#{BOT_REGEXP}$/i
     TRIES        = /^#{Command::TRIES}#{BOT_REGEXP}$/i
@@ -104,7 +104,7 @@ class TelegramDispatcher
           TelegramMessenger.ask_language(channel)
 
         when CommandRegExp::LANG_ALPHA
-          language = GameEngineService.get_language_or_default($1.upcase)
+          language = GameEngineService.get_language_or_default($~['language'].upcase)
           GameEngineService.settings(channel, {language: language})
           TelegramMessenger.language(language)
 
@@ -113,16 +113,16 @@ class TelegramDispatcher
 
         when CommandRegExp::CREATE_ALPHA
           TelegramDispatcher::CommandQueue.clear
-          game = GameEngineService.create_by_word(channel, $1, :telegram)
+          game = GameEngineService.create_by_word(channel, $~['secret'], :telegram)
           TelegramMessenger.game_created(game)
 
         when CommandRegExp::CREATE_DIGIT
           TelegramDispatcher::CommandQueue.clear
-          game = GameEngineService.create_by_number(channel, $1, :telegram)
+          game = GameEngineService.create_by_number(channel, $~['number'], :telegram)
           TelegramMessenger.game_created(game)
 
         when CommandRegExp::GUESS
-          guess = GameEngineService.guess(channel, message.from.username, $1)
+          guess = GameEngineService.guess(channel, message.from.username, $~['guess'])
           TelegramMessenger.guess(guess)
 
         when CommandRegExp::HINT
@@ -138,7 +138,7 @@ class TelegramDispatcher
           TelegramMessenger.best(guesses)
 
         when CommandRegExp::BEST_DIGIT
-          guesses = GameEngineService.best(channel, $1)
+          guesses = GameEngineService.best(channel,  $~['best'])
           TelegramMessenger.best(guesses)
 
         when CommandRegExp::ZERO
@@ -149,8 +149,8 @@ class TelegramDispatcher
           TelegramMessenger.ask_level(channel)
 
         when CommandRegExp::LEVEL_ALPHA
-          GameEngineService.settings(channel, {complexity: $1})
-          TelegramMessenger.level($1)
+          GameEngineService.settings(channel, {complexity: $~['level']})
+          TelegramMessenger.level($~['level'])
 
         when CommandRegExp::STOP
           if GameEngineService.stop_permitted?(message)
