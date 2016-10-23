@@ -1,5 +1,7 @@
 class Noun < ActiveRecord::Base
-  enum lang: [:EN, :RU]
+  belongs_to :dictionary
 
-  scope :lang, -> (lang) { where(lang: lang.upcase) }
+  scope :active, -> { joins(:dictionary).where(excluded: false, dictionaries: {enabled: true}) }
+  scope :in_language, -> (language) { joins(:dictionary).where(dictionaries: {lang: language}) }
+
 end

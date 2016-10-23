@@ -3,7 +3,7 @@ class GamesController < BaseApiController
   def create
     Rails.logger.info("Creating a games with secret word: #{validate[:secret]}")
 
-    game = GameService.create(request.session_options[:id], validate[:secret], :web)
+    game = GameService.create(request.session_options[:id], Noun.new(noun: validate[:secret]), :web)
     render json: game
   end
 
