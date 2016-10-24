@@ -344,6 +344,51 @@ describe TelegramDispatcher, type: :service do
     end
   end
 
+  context 'when /hint command received' do
+    let!(:game) { create(:game, :telegram, :telegram, :with_tries, secret: 'secret', channel: chat_id) }
+
+    let!(:message) { Telegram::Bot::Types::Message.new(text: '/hint') }
+
+    before do
+      message.stub_chain(:chat, :id).and_return(chat_id)
+    end
+
+    it 'reveals one letter in a secret' do
+      expect {
+        expect(TelegramDispatcher.handle(message)).to match(/Secret word has letter _\w_ in it/)
+      }.to change{ game.reload.hints }.by(1)
+    end
+  end
+
+  context 'when /hint command received with a <letter>' do
+    let!(:game) { create(:game, :telegram, :telegram, :with_tries, secret: 'secret', channel: chat_id) }
+
+    before do
+      message.stub_chain(:chat, :id).and_return(chat_id)
+    end
+
+    context 'with a matching letter' do
+      let!(:message) { Telegram::Bot::Types::Message.new(text: '/hint c') }
+
+      it 'reveals specified matching letter in a secret' do
+        expect {
+          expect(TelegramDispatcher.handle(message)).to match(/Secret word has letter _c_ in it/)
+        }.to change{ game.reload.hints }.by(1)
+      end
+    end
+
+    context 'with a letter that is not in secret word' do
+      let!(:message) { Telegram::Bot::Types::Message.new(text: '/hint x') }
+
+      it 'reveals the fact that the specified letter is NOT in a secret' do
+        expect {
+          expect(TelegramDispatcher.handle(message)).to match(/Secret word has NO letter _x_ in it/)
+        }.to change{ game.reload.hints }.by(1)
+      end
+    end
+  end
+
+
   context 'when /zero command received' do
     let!(:game) { create(:game, :telegram, :telegram, :with_tries, secret: 'secret', channel: chat_id) }
 

@@ -27,12 +27,12 @@ class GameService
       guess
     end
 
-    def hint(game)
-      letter = game.secret[rand(game.secret.length)]
+    def hint(game, letter = nil)
+      hint = letter.present? ? game.secret.split('').detect { |l| l == letter } : game.secret[rand(game.secret.length)]
       game.hints += 1
       game.save!
 
-      letter
+      hint
     end
 
     def stop!(game)

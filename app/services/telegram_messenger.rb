@@ -62,6 +62,10 @@ class TelegramMessenger
       "Secret word has letter _#{letter}_ in it"
     end
 
+    def no_hint(letter)
+      "Secret word has NO letter _#{letter}_ in it"
+    end
+
     def tries(guesses)
       unless guesses.empty?
         text = guesses.each_with_index.map do |guess, i|

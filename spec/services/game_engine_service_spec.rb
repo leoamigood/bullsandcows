@@ -38,6 +38,33 @@ describe GameEngineService, type: :service do
     end
   end
 
+  context 'given a game with a secret word' do
+    let!(:game) { create(:game, :telegram, :telegram, secret: 'secret', channel: channel) }
+
+    it 'reveals one random letter in a secret' do
+      expect {
+        expect(GameEngineService.hint(channel)).to satisfy {
+            |letter| game.secret.include?(letter)
+        }
+      }.to change{ game.reload.hints }.by(1)
+    end
+
+    it 'returns specified matching letter in a secret' do
+      expect {
+        expect(GameEngineService.hint(channel, 's')).to satisfy {
+            |letter| game.secret.include?(letter)
+        }
+      }.to change{ game.reload.hints }.by(1)
+    end
+
+    it 'returns nil for specified NON matching letter in a secret' do
+      expect {
+        expect(GameEngineService.hint(channel, 'x')).to be_nil
+      }.to change{ game.reload.hints }.by(1)
+    end
+  end
+
+
   it 'resolve game level numeric value by complexity string' do
     expect(GameEngineService.get_level_by_complexity('easy')).to eq([4, 5])
     expect(GameEngineService.get_level_by_complexity('medium')).to eq([2, 3])

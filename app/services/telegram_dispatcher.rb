@@ -11,6 +11,7 @@ class TelegramDispatcher
     GUESS        = /^#{Command::GUESS}#{BOT_REGEXP}\s+(?<guess>[[:alpha:]]+)$/i
     HELP         = /^#{Command::HELP}#{BOT_REGEXP}$/i
     HINT         = /^#{Command::HINT}#{BOT_REGEXP}$/i
+    HINT_ALPHA   = /^#{Command::HINT}#{BOT_REGEXP}\s+(?<letter>[[:alpha:]])$/i
     LANG         = /^#{Command::LANG}#{BOT_REGEXP}$/i
     LANG_ALPHA   = /^#{Command::LANG}#{BOT_REGEXP}\s+(?<language>[[:alpha:]]+)$/i
     LEVEL        = /^#{Command::LEVEL}#{BOT_REGEXP}$/i
@@ -128,6 +129,10 @@ class TelegramDispatcher
         when CommandRegExp::HINT
           letter = GameEngineService.hint(channel)
           TelegramMessenger.hint(letter)
+
+        when CommandRegExp::HINT_ALPHA
+          letter = GameEngineService.hint(channel, $~['letter'])
+          letter.present? ? TelegramMessenger.hint($~['letter']) : TelegramMessenger.no_hint($~['letter'])
 
         when CommandRegExp::TRIES
           guesses = GameEngineService.tries(channel)

@@ -30,11 +30,11 @@ class GameEngineService
       GameService.guess(game, username, word)
     end
 
-    def hint(channel)
+    def hint(channel, letter = nil)
       game = GameService.find!(channel)
 
       GameService.is_running?(game)
-      GameService.hint(game)
+      GameService.hint(game, letter)
     end
 
     def tries(channel)
