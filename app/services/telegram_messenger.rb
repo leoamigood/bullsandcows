@@ -121,13 +121,27 @@ class TelegramMessenger
     end
 
     def help
+
+      # lang   - Use /lang to set secret word language
+      # create - Use /create [word]|[number] to create a game
+      # guess  - Use /guess <word> to place a guess for the secret
+      # tries  - Use /tries to show previous guess attempts
+      # best   - Use /best [number] to see top guesses
+      # hint   - Use /hint to reveal a random letter in a secret
+      # zero   - Use /zero to see guesses with zero matches
+      # level  - Use /level to set game complexity level
+      # stop   - Use /stop to abort the game and show secret
+
       lines = [
           'Here is the list of available commands:',
+          'Use _/lang_ to set secret word language',
           'Use _/create [word]|[number]_ to create a game',
           'Use _/guess <word>_ to place a guess for the secret',
           'Use _/tries_ to show previous guess attempts',
           'Use _/best [number]_ to see top guesses',
           'Use _/hint_ to reveal a random letter in a secret',
+          'Use _/zero_ to see guesses with zero matches',
+          'Use _/level_ to set game complexity level',
           'Use _/stop_ to abort the game and show secret'
       ]
       lines.join("\n")
