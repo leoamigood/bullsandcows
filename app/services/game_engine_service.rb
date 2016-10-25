@@ -24,7 +24,7 @@ class GameEngineService
     def guess(channel, username, word)
       game = GameService.find!(channel)
 
-      GameService.is_running?(game)
+      GameService.validate_game!(game)
       GameService.validate_guess!(game, word)
 
       GameService.guess(game, username, word)
@@ -33,7 +33,7 @@ class GameEngineService
     def hint(channel, letter = nil)
       game = GameService.find!(channel)
 
-      GameService.is_running?(game)
+      GameService.validate_game!(game)
       GameService.hint(game, letter)
     end
 
