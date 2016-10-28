@@ -1,6 +1,6 @@
 version: '2'
 services:
-  web:
+  backend:
     build: .
     volumes:
       - .:/u/apps/bullsandcows
@@ -13,11 +13,28 @@ services:
     working_dir: /u/apps/bullsandcows
     env_file:
       - '.env.postgres'
-      - '.env.web'
-      - '.env.web.secret'
+      - '.env.backend'
+      - '.env.backend.secret'
   postgres:
     image: postgres:9.5.3
     ports:
       - "15432:5432"
     env_file:
       - '.env.postgres'
+
+  rspec:
+    build: .
+    volumes:
+      - .:/u/apps/bullsandcows
+    links:
+      - postgres
+    depends_on:
+      - postgres
+    working_dir: /u/apps/bullsandcows
+    environment:
+      RAILS_ENV: test
+    env_file:
+      - '.env.postgres'
+      - '.env.backend'
+      - '.env.backend.secret'
+    command: bundle exec rspec -fd
