@@ -123,15 +123,18 @@ class TelegramDispatcher
           TelegramMessenger.game_created(game)
 
         when CommandRegExp::GUESS
-          guess = GameEngineService.guess(channel, message.from.username, $~['guess'])
+          game = GameService.find_by_channel!(channel)
+          guess = GameEngineService.guess(game, message.from.username, $~['guess'])
           TelegramMessenger.guess(guess)
 
         when CommandRegExp::HINT
-          letter = GameEngineService.hint(channel)
+          game = GameService.find_by_channel!(channel)
+          letter = GameEngineService.hint(game)
           TelegramMessenger.hint(letter)
 
         when CommandRegExp::HINT_ALPHA
-          letter = GameEngineService.hint(channel, $~['letter'])
+          game = GameService.find_by_channel!(channel)
+          letter = GameEngineService.hint(game, $~['letter'])
           letter.present? ? TelegramMessenger.hint($~['letter']) : TelegramMessenger.no_hint($~['letter'])
 
         when CommandRegExp::TRIES
@@ -143,7 +146,7 @@ class TelegramDispatcher
           TelegramMessenger.best(guesses)
 
         when CommandRegExp::BEST_DIGIT
-          guesses = GameEngineService.best(channel,  $~['best'])
+          guesses = GameEngineService.best(channel,  $~['best'].to_i)
           TelegramMessenger.best(guesses)
 
         when CommandRegExp::ZERO
@@ -159,7 +162,8 @@ class TelegramDispatcher
 
         when CommandRegExp::STOP
           if GameEngineService.stop_permitted?(message)
-            game = GameEngineService.stop(channel)
+            game = GameService.find_by_channel!(channel)
+            GameService.stop!(game)
             TelegramMessenger.game_stop(game)
           else
             TelegramMessenger.no_permissions_to_stop_game
@@ -172,11 +176,11 @@ class TelegramDispatcher
           TelegramMessenger.unknown_command(message)
 
         else
-          game = Game.where(channel: channel).last
-          if game.present? && !game.finished?
-            guess = GameEngineService.guess(channel, message.from.username, command)
+          begin
+            game = GameService.find_by_channel!(channel)
+            guess = GameEngineService.guess(game, message.from.username, command)
             TelegramMessenger.guess(guess)
-          else
+          rescue Errors:: GameNotStartedException
             TelegramMessenger.new_game?
           end
       end

@@ -21,35 +21,33 @@ class GameEngineService
       GameService.create(channel, secret, source)
     end
 
-    def guess(channel, username, word)
-      game = GameService.find!(channel)
-
+    def guess(game, username, word)
       GameService.validate_game!(game)
       GameService.validate_guess!(game, word)
 
       GameService.guess(game, username, word)
     end
 
-    def hint(channel, letter = nil)
-      game = GameService.find!(channel)
+    def hint(game, letter = nil)
+      game = GameService.find_by_id!(game.id)
 
       GameService.validate_game!(game)
       GameService.hint(game, letter)
     end
 
     def tries(channel)
-      game = GameService.find!(channel)
+      game = GameService.find_by_channel!(channel)
       game.guesses
     end
 
     def best(channel, limit = 8)
-      game = GameService.find!(channel)
-      game.guesses.sort.first(limit.to_i)
+      game = GameService.find_by_channel!(channel)
+      game.best(limit)
     end
 
-    def zero(channel)
-      game = GameService.find!(channel)
-      game.guesses.where(bulls: 0, cows: 0)
+    def zero(channel, limit = 5)
+      game = GameService.find_by_channel!(channel)
+      game.zero(limit)
     end
 
     def get_language_or_default(language = nil)
@@ -88,13 +86,6 @@ class GameEngineService
 
         message.chat.type == 'group' ? status == 'creator' || status == 'administrator' : status == 'member'
       end
-    end
-
-    def stop(channel)
-      game = GameService.find!(channel)
-      GameService.stop!(game)
-
-      game
     end
   end
 

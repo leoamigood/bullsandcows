@@ -5,6 +5,26 @@ FactoryGirl.define do
     source :telegram
   end
 
+  trait :web do
+    source :web
+  end
+
+  trait :created do
+    status :created
+  end
+
+  trait :running do
+    status :running
+  end
+
+  trait :finished do
+    status :finished
+  end
+
+  trait :aborted do
+    status :aborted
+  end
+
   trait :with_tries do
     after :create do |game|
       FactoryGirl.create(:guess, word: 'tomato', game: game, bulls: 0, cows: 1)

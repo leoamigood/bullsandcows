@@ -39,11 +39,11 @@ describe GameEngineService, type: :service do
   end
 
   context 'given a game with a secret word' do
-    let!(:game) { create(:game, :telegram, :telegram, secret: 'secret', channel: channel) }
+    let!(:game) { create(:game, :telegram, secret: 'secret', channel: channel) }
 
     it 'reveals one random letter in a secret' do
       expect {
-        expect(GameEngineService.hint(channel)).to satisfy {
+        expect(GameEngineService.hint(game)).to satisfy {
             |letter| game.secret.include?(letter)
         }
       }.to change{ game.reload.hints }.by(1)
@@ -51,7 +51,7 @@ describe GameEngineService, type: :service do
 
     it 'returns specified matching letter in a secret' do
       expect {
-        expect(GameEngineService.hint(channel, 's')).to satisfy {
+        expect(GameEngineService.hint(game, 's')).to satisfy {
             |letter| game.secret.include?(letter)
         }
       }.to change{ game.reload.hints }.by(1)
@@ -59,7 +59,7 @@ describe GameEngineService, type: :service do
 
     it 'returns nil for specified NON matching letter in a secret' do
       expect {
-        expect(GameEngineService.hint(channel, 'x')).to be_nil
+        expect(GameEngineService.hint(game, 'x')).to be_nil
       }.to change{ game.reload.hints }.by(1)
     end
   end

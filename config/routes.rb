@@ -54,10 +54,12 @@ Rails.application.routes.draw do
   #     resources :products
   #   end
 
-  resources :games, :only => [:create, :show], defaults: { format: 'json' } do
-    resources :guesses, :only => [:create] do
-      post :action => 'create', :on => :collection
+  resources :games, :only => [:create, :show, :update] do
+    resources :guesses, :only => [:create, :index] do
+      get :action => 'best', :on => :collection, constraints: { query_string: /best=/ }
+      get :action => 'zero', :on => :collection, constraints: { query_string: /zero=/ }
     end
+    resources :hints, :only => [:create]
   end
 
   namespace :hooks do
