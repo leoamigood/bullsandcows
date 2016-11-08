@@ -3,6 +3,7 @@ class Game < ActiveRecord::Base
   belongs_to :dictionary
 
   enum status: [:created, :running, :finished, :aborted]
+  enum source: { telegram: 'telegram', web: 'web' }
 
   def best(limit = nil)
     limit.present? ? guesses.sort.first(limit.to_i) : guesses

@@ -19,6 +19,13 @@ class GameService
       game
     end
 
+    def find(options = {})
+      options.each { |k, v|
+        options[k] = Game.statuses[v] if k == :status
+      }
+      Game.all.where(options.compact)
+    end
+
     def guess(game, username, word)
       guess = Guess.where(game_id: game.id, word: word).take
       if (guess.nil?)

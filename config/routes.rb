@@ -54,7 +54,7 @@ Rails.application.routes.draw do
   #     resources :products
   #   end
 
-  resources :games, :only => [:create, :show, :update] do
+  resources :games, :only => [:create, :index, :show, :update] do
     resources :guesses, :only => [:create, :index] do
       get :action => 'best', :on => :collection, constraints: { query_string: /best=/ }
       get :action => 'zero', :on => :collection, constraints: { query_string: /zero=/ }

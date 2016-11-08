@@ -1,6 +1,10 @@
 class BaseApiController < ApplicationController
   before_action :set_default_response_format
 
+  rescue_from Errors::ValidationException do |ex|
+    render json: { error: ex.message }, status: 500
+  end
+
   rescue_from Errors::GameNotExistsException do |ex|
     render json: { error: ex.message }, status: 500
   end

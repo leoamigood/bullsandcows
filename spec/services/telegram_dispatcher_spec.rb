@@ -22,7 +22,7 @@ describe TelegramDispatcher, type: :service do
         expect(TelegramDispatcher.handle(message)).to be
         expect(TelegramMessenger).to have_received(:send_message).with(chat_id, /Welcome to Bulls and Cows!/).once
         expect(TelegramMessenger).to have_received(:send_message).with(chat_id, 'Select game level:', markup).once
-      }.to change(TelegramDispatcher::CommandQueue, :size).by(2)
+      }.to change(Telegram::CommandQueue, :size).by(2)
     end
   end
 
@@ -51,7 +51,7 @@ describe TelegramDispatcher, type: :service do
     before do
       allow(TelegramMessenger).to receive(:answerCallbackQuery)
       allow(TelegramMessenger).to receive(:send_message).and_return(Telegram::Bot::Types::Message.new)
-      allow(TelegramDispatcher::CommandQueue).to receive(:execute)
+      allow(Telegram::CommandQueue).to receive(:execute)
 
       callbackQuery.stub_chain(:message, :chat, :id).and_return(chat_id)
     end
@@ -559,106 +559,106 @@ describe TelegramDispatcher, type: :service do
   end
 end
 
-describe TelegramDispatcher::CommandQueue do
+describe Telegram::CommandQueue do
 
   context 'given empty command queue' do
     after do
-      TelegramDispatcher::CommandQueue.clear
+      Telegram::CommandQueue.clear
     end
 
     it 'checks if queue is empty' do
       expect{
-        expect(TelegramDispatcher::CommandQueue.empty?).to be true
-      }.not_to change(TelegramDispatcher::CommandQueue, :size)
+        expect(Telegram::CommandQueue.empty?).to be true
+      }.not_to change(Telegram::CommandQueue, :size)
     end
 
     it 'adds a code block' do
       expect{
-        TelegramDispatcher::CommandQueue.push{ 'pushed block' }
-        expect(TelegramDispatcher::CommandQueue.empty?).to be false
-      }.to change(TelegramDispatcher::CommandQueue, :size).by(1)
+        Telegram::CommandQueue.push{ 'pushed block' }
+        expect(Telegram::CommandQueue.empty?).to be false
+      }.to change(Telegram::CommandQueue, :size).by(1)
     end
 
     it 'fails to remove code block from empty queue' do
       expect{
-        expect(TelegramDispatcher::CommandQueue.pop).not_to be
-      }.not_to change(TelegramDispatcher::CommandQueue, :size)
+        expect(Telegram::CommandQueue.pop).not_to be
+      }.not_to change(Telegram::CommandQueue, :size)
     end
 
   end
 
   context 'given one code block in command queue' do
     before do
-      TelegramDispatcher::CommandQueue.push{ 'block to pop' }
+      Telegram::CommandQueue.push{ 'block to pop' }
     end
 
     after do
-      TelegramDispatcher::CommandQueue.clear
+      Telegram::CommandQueue.clear
     end
 
     it 'executes and removed code block' do
       expect{
-        expect(TelegramDispatcher::CommandQueue.execute).to eq('block to pop')
-      }.to change(TelegramDispatcher::CommandQueue, :size).by(-1)
+        expect(Telegram::CommandQueue.execute).to eq('block to pop')
+      }.to change(Telegram::CommandQueue, :size).by(-1)
     end
 
     it 'removes code block' do
       expect{
-        block = TelegramDispatcher::CommandQueue.pop
+        block = Telegram::CommandQueue.pop
         expect(block).to be
         expect(block.call).to eq('block to pop')
-      }.to change(TelegramDispatcher::CommandQueue, :size).by(-1)
+      }.to change(Telegram::CommandQueue, :size).by(-1)
     end
   end
 
   context 'given two code blocks in command queue' do
     before do
-      TelegramDispatcher::CommandQueue.push{ 'code block 1' }
-      TelegramDispatcher::CommandQueue.push{ 'code block 2' }
+      Telegram::CommandQueue.push{ 'code block 1' }
+      Telegram::CommandQueue.push{ 'code block 2' }
     end
 
     after do
-      TelegramDispatcher::CommandQueue.clear
+      Telegram::CommandQueue.clear
     end
 
     it 'gives total amount of blocks' do
       expect{
-        expect(TelegramDispatcher::CommandQueue.size).to eq(2)
-      }.not_to change(TelegramDispatcher::CommandQueue, :size)
+        expect(Telegram::CommandQueue.size).to eq(2)
+      }.not_to change(Telegram::CommandQueue, :size)
     end
 
     it 'gets and removes first pushed code block (FIFO)' do
       expect{
-        block = TelegramDispatcher::CommandQueue.pop
+        block = Telegram::CommandQueue.pop
         expect(block).to be
         expect(block.call).to eq('code block 2')
-      }.to change(TelegramDispatcher::CommandQueue, :size).by(-1)
+      }.to change(Telegram::CommandQueue, :size).by(-1)
     end
 
     it 'gets and removes first pushed code block (LIFO)' do
       expect{
-        block = TelegramDispatcher::CommandQueue.shift
+        block = Telegram::CommandQueue.shift
         expect(block).to be
         expect(block.call).to eq('code block 1')
-      }.to change(TelegramDispatcher::CommandQueue, :size).by(-1)
+      }.to change(Telegram::CommandQueue, :size).by(-1)
     end
 
     it 'removes all code blocks' do
       expect{
-        expect(TelegramDispatcher::CommandQueue.clear).to be_empty
-      }.to change(TelegramDispatcher::CommandQueue, :size).by(-2)
+        expect(Telegram::CommandQueue.clear).to be_empty
+      }.to change(Telegram::CommandQueue, :size).by(-2)
     end
 
     it 'checks if queue is empty' do
       expect{
-        expect(TelegramDispatcher::CommandQueue.empty?).to be_falsey
-      }.not_to change(TelegramDispatcher::CommandQueue, :size)
+        expect(Telegram::CommandQueue.empty?).to be_falsey
+      }.not_to change(Telegram::CommandQueue, :size)
     end
 
     it 'executes and removed first pushed code block' do
       expect{
-        expect(TelegramDispatcher::CommandQueue.execute).to eq('code block 1')
-      }.to change(TelegramDispatcher::CommandQueue, :size).by(-1)
+        expect(Telegram::CommandQueue.execute).to eq('code block 1')
+      }.to change(Telegram::CommandQueue, :size).by(-1)
     end
 
   end

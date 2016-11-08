@@ -155,7 +155,7 @@ class TelegramMessenger
       "Nothing I can do with *#{message}*. For help try _/help_"
     end
 
-    def new_game?
+    def new_game_ask
       'Go ahead and _/create_ a new game. For help try _/help_'
     end
 
