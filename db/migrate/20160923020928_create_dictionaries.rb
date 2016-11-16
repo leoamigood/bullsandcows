@@ -4,7 +4,7 @@ class CreateDictionaries < ActiveRecord::Migration
     t.string  :lang, limit: 2
     t.boolean :enabled, default: true
 
-    t.timestamps nill: false
+    t.timestamps null: false
   end
 
   def change

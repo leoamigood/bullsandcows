@@ -60,26 +60,30 @@ describe GamesController, :type => :request do
       expect(json['games'].count).to eq(2)
     end
 
-    it 'fails to get games with non existing status' do
+    it 'gets no games with non existing status' do
       get '/games?status=missing&source=web'
 
-      expect(response).not_to be_success
-      expect(response).to have_http_status(500)
+      expect(response).to be_success
+      expect(response).to have_http_status(200)
 
       expect(json).to be
-      expect(json['error']).to be
-      expect(json['games']).not_to be
+      expect(json['error']).not_to be
+
+      expect(json['games']).to be
+      expect(json['games']).to be_empty
     end
 
-    it 'fails to get games with non existing source' do
+    it 'gets no games with non existing source' do
       get '/games?status=created&source=mail'
 
-      expect(response).not_to be_success
-      expect(response).to have_http_status(500)
+      expect(response).to be_success
+      expect(response).to have_http_status(200)
 
       expect(json).to be
-      expect(json['error']).to be
-      expect(json['games']).not_to be
+      expect(json['error']).not_to be
+
+      expect(json['games']).to be
+      expect(json['games']).to be_empty
     end
 
 

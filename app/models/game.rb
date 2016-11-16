@@ -2,7 +2,7 @@ class Game < ActiveRecord::Base
   has_many :guesses
   belongs_to :dictionary
 
-  enum status: [:created, :running, :finished, :aborted]
+  enum status: { created: 'created', running: 'running', finished: 'finished', aborted: 'aborted' }
   enum source: { telegram: 'telegram', web: 'web' }
 
   def best(limit = nil)

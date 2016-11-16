@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20161012131330) do
+ActiveRecord::Schema.define(version: 20161111144248) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -20,15 +20,15 @@ ActiveRecord::Schema.define(version: 20161012131330) do
     t.string   "source",     limit: 64
     t.string   "lang",       limit: 2
     t.boolean  "enabled",               default: true
-    t.datetime "created_at"
-    t.datetime "updated_at"
+    t.datetime "created_at",                           null: false
+    t.datetime "updated_at",                           null: false
   end
 
   create_table "games", force: :cascade do |t|
     t.string   "secret",        limit: 64
-    t.integer  "status",                   default: 0
-    t.datetime "created_at"
-    t.datetime "updated_at"
+    t.string   "status",                   default: "created"
+    t.datetime "created_at",                                   null: false
+    t.datetime "updated_at",                                   null: false
     t.string   "channel"
     t.string   "source"
     t.integer  "hints",                    default: 0
@@ -43,8 +43,8 @@ ActiveRecord::Schema.define(version: 20161012131330) do
     t.integer  "cows"
     t.integer  "attempts",   default: 0
     t.boolean  "exact"
-    t.datetime "created_at"
-    t.datetime "updated_at"
+    t.datetime "created_at",             null: false
+    t.datetime "updated_at",             null: false
     t.string   "username"
   end
 
@@ -64,8 +64,8 @@ ActiveRecord::Schema.define(version: 20161012131330) do
     t.string   "language",      default: "RU"
     t.string   "complexity",    default: "easy"
     t.integer  "dictionary_id"
-    t.datetime "created_at"
-    t.datetime "updated_at"
+    t.datetime "created_at",                     null: false
+    t.datetime "updated_at",                     null: false
   end
 
 end

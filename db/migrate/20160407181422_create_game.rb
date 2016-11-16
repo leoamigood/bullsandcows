@@ -4,7 +4,7 @@ class CreateGame < ActiveRecord::Migration
       t.string  :secret, limit: 64
       t.integer :status, default: 0
 
-      t.timestamps nill: false
+      t.timestamps null: false
     end
   end
 end

@@ -20,9 +20,6 @@ class GameService
     end
 
     def find(options = {})
-      options.each { |k, v|
-        options[k] = Game.statuses[v] if k == :status
-      }
       Game.all.where(options.compact)
     end
 
