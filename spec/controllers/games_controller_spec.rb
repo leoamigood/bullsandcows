@@ -2,10 +2,9 @@ require 'rails_helper'
 
 describe GamesController, :type => :request do
   it 'creates game with the secret word' do
-    post '/games', secret: 'hostel'
-
-    expect(response).to be_success
-    expect(response).to have_http_status(200)
+    expect {
+      post '/games', secret: 'hostel'
+    }.to change(Game, :count).by(1) and expect_ok
 
     expect(json).to be
     expect(json['game']).to be
@@ -28,10 +27,9 @@ describe GamesController, :type => :request do
     let!(:aborted_tel_ru)  { create :game, :aborted, :with_tries, secret: 'оборона', source: :telegram, dictionary: ru }
 
     it 'gets games collection' do
-      get '/games'
-
-      expect(response).to be_success
-      expect(response).to have_http_status(200)
+      expect {
+        get '/games'
+      }.not_to change(Game, :count) and expect_ok
 
       expect(json).to be
       expect(json['games']).to be
@@ -39,10 +37,9 @@ describe GamesController, :type => :request do
     end
 
     it 'gets only finished games' do
-      get '/games?status=finished'
-
-      expect(response).to be_success
-      expect(response).to have_http_status(200)
+      expect {
+        get '/games?status=finished'
+      }.not_to change(Game, :count) and expect_ok
 
       expect(json).to be
       expect(json['games']).to be
@@ -50,10 +47,9 @@ describe GamesController, :type => :request do
     end
 
     it 'gets only telegram games' do
-      get '/games?source=telegram'
-
-      expect(response).to be_success
-      expect(response).to have_http_status(200)
+      expect {
+        get '/games?source=telegram'
+      }.not_to change(Game, :count) and expect_ok
 
       expect(json).to be
       expect(json['games']).to be
@@ -61,10 +57,9 @@ describe GamesController, :type => :request do
     end
 
     it 'gets no games with non existing status' do
-      get '/games?status=missing&source=web'
-
-      expect(response).to be_success
-      expect(response).to have_http_status(200)
+      expect {
+        get '/games?status=missing&source=web'
+      }.not_to change(Game, :count) and expect_ok
 
       expect(json).to be
       expect(json['error']).not_to be
@@ -74,10 +69,9 @@ describe GamesController, :type => :request do
     end
 
     it 'gets no games with non existing source' do
-      get '/games?status=created&source=mail'
-
-      expect(response).to be_success
-      expect(response).to have_http_status(200)
+      expect {
+        get '/games?status=created&source=mail'
+      }.not_to change(Game, :count) and expect_ok
 
       expect(json).to be
       expect(json['error']).not_to be
@@ -88,10 +82,9 @@ describe GamesController, :type => :request do
 
 
     it 'gets games and ignores unknown filter parameters' do
-      get '/games?unknown=value'
-
-      expect(response).to be_success
-      expect(response).to have_http_status(200)
+      expect {
+        get '/games?unknown=value'
+      }.not_to change(Game, :count) and expect_ok
 
       expect(json).to be
       expect(json['games']).to be
@@ -104,10 +97,9 @@ describe GamesController, :type => :request do
     let!(:game) { create :game, :running, :with_tries, secret: 'hostel', source: 'web', dictionary: dictionary }
 
     it 'gets game details' do
-      get "/games/#{game.id}"
-
-      expect(response).to be_success
-      expect(response).to have_http_status(200)
+      expect {
+        get "/games/#{game.id}"
+      }.not_to change(Game, :count) and expect_ok
 
       expect(json).to be
       expect(json['game']).to be
@@ -124,10 +116,9 @@ describe GamesController, :type => :request do
 
     let!(:non_existent_game_id) { 832473246 }
     it 'replies with http status 404 on get for non existent game' do
-      get "/games/#{non_existent_game_id}"
-
-      expect(response).not_to be_success
-      expect(response).to have_http_status(404)
+      expect {
+        get "/games/#{non_existent_game_id}"
+      }.not_to change(Game, :count) and expect_not_found
 
       expect(json).to be
       expect(json['error']).to be
@@ -136,10 +127,9 @@ describe GamesController, :type => :request do
     end
 
     it 'aborts the game' do
-      put "/games/#{game.id}", status: 'aborted'
-
-      expect(response).to be_success
-      expect(response).to have_http_status(200)
+      expect {
+        put "/games/#{game.id}", status: 'aborted'
+      }.not_to change(Game, :count) and expect_ok
 
       expect(json).to be
       expect(json['game']).to be

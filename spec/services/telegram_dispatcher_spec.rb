@@ -77,7 +77,7 @@ describe TelegramDispatcher, type: :service do
 
     it 'replies with a prompt to specify word length' do
       expect(TelegramDispatcher.handle(message)).to be
-      expect(TelegramMessenger).to have_received(:send_message).with(chat_id, 'How many letters would it be?', markup)
+      expect(TelegramMessenger).to have_received(:send_message).with(chat_id, 'How many letters will it be?', markup)
     end
   end
 

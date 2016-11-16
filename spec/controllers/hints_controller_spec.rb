@@ -8,11 +8,7 @@ describe HintsController, :type => :request  do
     it 'asks for any letter hint' do
       expect {
         post "/games/#{game.id}/hints"
-        game.reload
-      }.to change(game, :hints).by(1)
-
-      expect(response).to be_success
-      expect(response).to have_http_status(200)
+      }.to change{ game.reload.hints }.by(1) and expect_ok
 
       expect(json).to be
       expect(json['hint']).to be
@@ -27,11 +23,7 @@ describe HintsController, :type => :request  do
     it 'for a specified existent letter hint' do
       expect {
         post "/games/#{game.id}/hints", hint: 't'
-        game.reload
-      }.to change(game, :hints).by(1)
-
-      expect(response).to be_success
-      expect(response).to have_http_status(200)
+      }.to change{ game.reload.hints }.by(1) and expect_ok
 
       expect(json).to be
       expect(json['hint']).to be
@@ -44,11 +36,7 @@ describe HintsController, :type => :request  do
     it 'for a specified non existent letter hint' do
       expect {
         post "/games/#{game.id}/hints", hint: 'z'
-        game.reload
-      }.to change(game, :hints).by(1)
-
-      expect(response).to be_success
-      expect(response).to have_http_status(200)
+      }.to change{ game.reload.hints }.by(1) and expect_ok
 
       expect(json).to be
       expect(json['hint']).to be

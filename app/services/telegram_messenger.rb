@@ -44,7 +44,7 @@ class TelegramMessenger
       }
       markup = Telegram::Bot::Types::InlineKeyboardMarkup.new(inline_keyboard: kb)
 
-      send_message(channel, 'How many letters would it be?', markup)
+      send_message(channel, 'How many letters will it be?', markup)
     end
 
     def game_created(game)
