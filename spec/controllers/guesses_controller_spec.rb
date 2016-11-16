@@ -1,6 +1,7 @@
 require 'rails_helper'
 
 describe GuessesController, :type => :request  do
+
   context 'with a game started' do
     let!(:dictionary) { create :dictionary, lang: 'EN'}
     let!(:game) { create :game, :running, :with_tries, secret: 'hostel', source: 'web', dictionary: dictionary }
@@ -8,10 +9,7 @@ describe GuessesController, :type => :request  do
     it 'submits non exact guess word' do
       expect {
         post "/games/#{game.id}/guesses", guess: 'corpus'
-      }.to change(Guess, :count).by(1)
-
-      expect(response).to be_success
-      expect(response).to have_http_status(200)
+      }.to change(Guess, :count).by(1) and expect_ok
 
       expect(json).to be
       expect(json['guess']).to be
@@ -28,10 +26,7 @@ describe GuessesController, :type => :request  do
     it 'submits exact guess word' do
       expect {
         post "/games/#{game.id}/guesses", guess: 'hostel'
-      }.to change(Guess, :count).by(1)
-
-      expect(response).to be_success
-      expect(response).to have_http_status(200)
+      }.to change(Guess, :count).by(1) and expect_ok
 
       expect(json).to be
       expect(json['guess']).to be
@@ -48,10 +43,7 @@ describe GuessesController, :type => :request  do
     it 'gets all previously submitted guesses' do
       expect {
         get "/games/#{game.id}/guesses"
-      }.not_to change(game, :status)
-
-      expect(response).to be_success
-      expect(response).to have_http_status(200)
+      }.not_to change(game, :status) and expect_ok
 
       expect(json).to be
       expect(json['guesses']).to be
@@ -63,10 +55,7 @@ describe GuessesController, :type => :request  do
     it 'gets N best guesses submitted guesses' do
       expect {
         get "/games/#{game.id}/guesses?best=3"
-      }.not_to change(game, :status)
-
-      expect(response).to be_success
-      expect(response).to have_http_status(200)
+      }.not_to change(game, :status) and expect_ok
 
       expect(json).to be
       expect(json['best']).to be
@@ -75,13 +64,10 @@ describe GuessesController, :type => :request  do
       expect(json['game_link']).to match("/games/#{game.id}")
     end
 
-    it 'gets more than available best submitted guesses' do
+    it 'gets max available best submitted guesses' do
       expect {
         get "/games/#{game.id}/guesses?best=15"
-      }.not_to change(game, :status)
-
-      expect(response).to be_success
-      expect(response).to have_http_status(200)
+      }.not_to change(game, :status) and expect_ok
 
       expect(json).to be
       expect(json['best']).to be
@@ -93,10 +79,7 @@ describe GuessesController, :type => :request  do
     it 'gets ALL best submitted guesses' do
       expect {
         get "/games/#{game.id}/guesses?best="
-      }.not_to change(game, :status)
-
-      expect(response).to be_success
-      expect(response).to have_http_status(200)
+      }.not_to change(game, :status) and expect_ok
 
       expect(json).to be
       expect(json['best']).to be
@@ -108,10 +91,7 @@ describe GuessesController, :type => :request  do
     it 'gets N zero submitted guesses' do
       expect {
         get "/games/#{game.id}/guesses?zero=1"
-      }.not_to change(game, :status)
-
-      expect(response).to be_success
-      expect(response).to have_http_status(200)
+      }.not_to change(game, :status) and expect_ok
 
       expect(json).to be
       expect(json['zero']).to be
@@ -120,13 +100,10 @@ describe GuessesController, :type => :request  do
       expect(json['game_link']).to match("/games/#{game.id}")
     end
 
-    it 'gets more than available zero submitted guesses' do
+    it 'gets max available zero submitted guesses' do
       expect {
         get "/games/#{game.id}/guesses?zero=15"
-      }.not_to change(game, :status)
-
-      expect(response).to be_success
-      expect(response).to have_http_status(200)
+      }.not_to change(game, :status) and expect_ok
 
       expect(json).to be
       expect(json['zero']).to be
@@ -138,10 +115,7 @@ describe GuessesController, :type => :request  do
     it 'gets ALL zero submitted guesses' do
       expect {
         get "/games/#{game.id}/guesses?zero="
-      }.not_to change(game, :status)
-
-      expect(response).to be_success
-      expect(response).to have_http_status(200)
+      }.not_to change(game, :status) and expect_ok
 
       expect(json).to be
       expect(json['zero']).to be
@@ -155,10 +129,7 @@ describe GuessesController, :type => :request  do
   it 'replies with http 404 on a guess for non existent game' do
     expect {
       post "/games/#{non_existent_game_id}/guesses", guess: 'corpus'
-    }.not_to change(Guess, :count)
-
-    expect(response).not_to be_success
-    expect(response).to have_http_status(404)
+    }.not_to change(Guess, :count) and expect_not_found
 
     expect(json).to be
     expect(json['error']).to be
@@ -173,10 +144,7 @@ describe GuessesController, :type => :request  do
     it 'submits a guess word' do
       expect {
         post "/games/#{game.id}/guesses", guess: 'corpus'
-      }.not_to change(Guess, :count)
-
-      expect(response).not_to be_success
-      expect(response).to have_http_status(500)
+      }.not_to change(Guess, :count) and expect_error
 
       expect(json).to be
       expect(json['error']).to be
