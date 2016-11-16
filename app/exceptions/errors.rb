@@ -6,7 +6,7 @@ module Errors
     end
   end
 
-  class GameNotExistsException < StandardError
+  class GameNotFoundException < StandardError
   end
 
   class GameNotStartedException < StandardError

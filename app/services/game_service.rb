@@ -7,14 +7,14 @@ class GameService
 
     def find_by_id!(game_id)
       game = Game.find_by_id(game_id)
-      raise Errors::GameNotExistsException.new("Failed to find game. Is game in progress? Game ID: #{game_id}") unless game.present?
+      raise Errors::GameNotFoundException.new("Failed to find game. Is game in progress? Game ID: #{game_id}") unless game.present?
 
       game
     end
 
     def find_by_channel!(channel)
       game = Game.where(channel: channel).last
-      raise Errors::GameNotExistsException.new("Failed to find game. Is game in progress? Channel ID: #{channel}") unless game.present?
+      raise Errors::GameNotFoundException.new("Failed to find game. Is game in progress? Channel ID: #{channel}") unless game.present?
 
       game
     end

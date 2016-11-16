@@ -5,8 +5,8 @@ class BaseApiController < ApplicationController
     render json: { error: ex.message }, status: 500
   end
 
-  rescue_from Errors::GameNotExistsException do |ex|
-    render json: { error: ex.message }, status: 500
+  rescue_from Errors::GameNotFoundException do |ex|
+    render json: { error: ex.message }, status: 404
   end
 
   rescue_from Errors::GameNotStartedException do |ex|

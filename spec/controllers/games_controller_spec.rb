@@ -123,11 +123,11 @@ describe GamesController, :type => :request do
     end
 
     let!(:non_existent_game_id) { 832473246 }
-    it 'fails to get non existent game' do
+    it 'replies with http status 404 on get for non existent game' do
       get "/games/#{non_existent_game_id}"
 
       expect(response).not_to be_success
-      expect(response).to have_http_status(500)
+      expect(response).to have_http_status(404)
 
       expect(json).to be
       expect(json['error']).to be

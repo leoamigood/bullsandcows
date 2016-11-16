@@ -152,13 +152,13 @@ describe GuessesController, :type => :request  do
   end
 
   let!(:non_existent_game_id) { 832473246 }
-  it 'submits a guess word for non existent game' do
+  it 'replies with http 404 on a guess for non existent game' do
     expect {
       post "/games/#{non_existent_game_id}/guesses", guess: 'corpus'
     }.not_to change(Guess, :count)
 
     expect(response).not_to be_success
-    expect(response).to have_http_status(500)
+    expect(response).to have_http_status(404)
 
     expect(json).to be
     expect(json['error']).to be

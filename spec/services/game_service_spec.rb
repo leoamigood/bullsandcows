@@ -51,7 +51,7 @@ describe GameService, type: :service do
     it 'throws exception finding non existent game by channel' do
       expect{
         GameService.find_by_channel!(unknown_channel)
-      }.to raise_error(Errors::GameNotExistsException)
+      }.to raise_error(Errors::GameNotFoundException)
     end
 
     it 'finds game by game id' do
@@ -70,7 +70,7 @@ describe GameService, type: :service do
 
         expect(found).to be
         expect(found).to eq(game)
-      }.to raise_error(Errors::GameNotExistsException)
+      }.to raise_error(Errors::GameNotFoundException)
     end
 
     it 'places non full match guess' do
