@@ -388,6 +388,39 @@ describe TelegramDispatcher, type: :service do
     end
   end
 
+  context 'when /suggest <letters> command received with letters matching available suggestion' do
+    let!(:game) { create(:game, :telegram, :with_tries, secret: 'secret', channel: chat_id, dictionary: dictionary) }
+
+    let!(:message) { Telegram::Bot::Types::Message.new(text: '/suggest re') }
+
+    before do
+      message.stub_chain(:chat, :id).and_return(chat_id)
+      message.stub_chain(:from, :username).and_return(user)
+    end
+
+    it 'suggests a word with a substring specified' do
+      expect {
+        expect(TelegramDispatcher.handle(message)).to include('Suggestion: _barrel_, *Bulls: 2*, *Cows: 0*')
+      }.to change{ game.guesses.count }.by(1)
+    end
+  end
+
+  context 'when /suggest <letters> command received not matching any suggestions' do
+    let!(:game) { create(:game, :telegram, :with_tries, secret: 'secret', channel: chat_id, dictionary: dictionary) }
+
+    let!(:message) { Telegram::Bot::Types::Message.new(text: '/suggest ku') }
+
+    before do
+      message.stub_chain(:chat, :id).and_return(chat_id)
+      message.stub_chain(:from, :username).and_return(user)
+    end
+
+    it 'finds no words to suggests based on a substring specified' do
+      expect {
+        expect(TelegramDispatcher.handle(message)).to include('Could not find any suggestions based on provided word letters _ku_')
+      }.not_to change{ game.guesses.count }
+    end
+  end
 
   context 'when /zero command received' do
     let!(:game) { create(:game, :telegram, :with_tries, secret: 'secret', channel: chat_id) }

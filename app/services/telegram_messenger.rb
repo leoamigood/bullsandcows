@@ -66,6 +66,14 @@ class TelegramMessenger
       "Secret word has NO letter _#{letter}_ in it"
     end
 
+    def suggestion(guess)
+      "Suggestion: _#{guess.word}_, *Bulls: #{guess.bulls}*, *Cows: #{guess.cows}*"
+    end
+
+    def no_suggestions(letters)
+      "Could not find any suggestions based on provided word letters _#{letters}_"
+    end
+
     def tries(guesses)
       unless guesses.empty?
         text = guesses.each_with_index.map do |guess, i|
