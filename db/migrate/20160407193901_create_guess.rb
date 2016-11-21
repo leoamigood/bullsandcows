@@ -8,7 +8,7 @@ class CreateGuess < ActiveRecord::Migration
       t.integer :attempts, default: 0
       t.boolean :exact
 
-      t.timestamps nill: false
+      t.timestamps null: false
     end
   end
 end

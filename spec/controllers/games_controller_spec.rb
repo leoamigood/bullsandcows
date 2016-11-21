@@ -1,14 +1,141 @@
 require 'rails_helper'
 
-describe GamesController do
-  let!(:hostel) { create(:noun, noun: 'hostel') }
+describe GamesController, :type => :request do
+  it 'creates game with the secret word' do
+    expect {
+      post '/games', secret: 'hostel'
+    }.to change(Game, :count).by(1) and expect_ok
 
-  it 'initializes games with a secret word' do
-    data = {
-        secret: 'hostel'
-    }
-    post :create, data
+    expect(json).to be
+    expect(json['game']).to be
+    expect(json['game']['source']).to eq('web')
+    expect(json['game']['status']).to eq('created')
+    expect(json['game']['secret']).to eq('******')
+    # expect(json['game']['language']).to eq('EN')
+    expect(json['game']['tries']).to eq(0)
+    expect(json['game']['hints']).to eq(0)
 
-    expect(response).to be_success
+    expect(json['game']['link']).to match('/games/\d+')
+  end
+
+  context 'with multiple games' do
+    let!(:en) { create :dictionary, lang: 'EN'}
+    let!(:ru) { create :dictionary, lang: 'RU'}
+    let!(:created_web_en)  { create :game, :created, :with_tries, secret: 'hostel', source: 'web', dictionary: en }
+    let!(:running_web_ru)  { create :game, :running, :with_tries, secret: 'почта', source: 'web', dictionary: ru }
+    let!(:finished_tel_en) { create :game, :finished, :with_tries, secret: 'magic', source: :telegram, dictionary: en }
+    let!(:aborted_tel_ru)  { create :game, :aborted, :with_tries, secret: 'оборона', source: :telegram, dictionary: ru }
+
+    it 'gets games collection' do
+      expect {
+        get '/games'
+      }.not_to change(Game, :count) and expect_ok
+
+      expect(json).to be
+      expect(json['games']).to be
+      expect(json['games'].count).to eq(4)
+    end
+
+    it 'gets only finished games' do
+      expect {
+        get '/games?status=finished'
+      }.not_to change(Game, :count) and expect_ok
+
+      expect(json).to be
+      expect(json['games']).to be
+      expect(json['games'].count).to eq(1)
+    end
+
+    it 'gets only telegram games' do
+      expect {
+        get '/games?source=telegram'
+      }.not_to change(Game, :count) and expect_ok
+
+      expect(json).to be
+      expect(json['games']).to be
+      expect(json['games'].count).to eq(2)
+    end
+
+    it 'gets no games with non existing status' do
+      expect {
+        get '/games?status=missing&source=web'
+      }.not_to change(Game, :count) and expect_ok
+
+      expect(json).to be
+      expect(json['error']).not_to be
+
+      expect(json['games']).to be
+      expect(json['games']).to be_empty
+    end
+
+    it 'gets no games with non existing source' do
+      expect {
+        get '/games?status=created&source=mail'
+      }.not_to change(Game, :count) and expect_ok
+
+      expect(json).to be
+      expect(json['error']).not_to be
+
+      expect(json['games']).to be
+      expect(json['games']).to be_empty
+    end
+
+
+    it 'gets games and ignores unknown filter parameters' do
+      expect {
+        get '/games?unknown=value'
+      }.not_to change(Game, :count) and expect_ok
+
+      expect(json).to be
+      expect(json['games']).to be
+      expect(json['games'].count).to eq(4)
+    end
+  end
+
+  context 'with game in progress with few guesses placed' do
+    let!(:dictionary) { create :dictionary, lang: 'EN'}
+    let!(:game) { create :game, :running, :with_tries, secret: 'hostel', source: 'web', dictionary: dictionary }
+
+    it 'gets game details' do
+      expect {
+        get "/games/#{game.id}"
+      }.not_to change(Game, :count) and expect_ok
+
+      expect(json).to be
+      expect(json['game']).to be
+
+      expect(json['game']['source']).to eq('web')
+      expect(json['game']['status']).to eq('running')
+      expect(json['game']['secret']).to eq('******')
+      expect(json['game']['language']).to eq('EN')
+      expect(json['game']['tries']).to eq(10)
+      expect(json['game']['hints']).to eq(0)
+
+      expect(json['game']['link']).to match('/games/\d+')
+    end
+
+    let!(:non_existent_game_id) { 832473246 }
+    it 'replies with http status 404 on get for non existent game' do
+      expect {
+        get "/games/#{non_existent_game_id}"
+      }.not_to change(Game, :count) and expect_not_found
+
+      expect(json).to be
+      expect(json['error']).to be
+
+      expect(json['game']).not_to be
+    end
+
+    it 'aborts the game' do
+      expect {
+        put "/games/#{game.id}", status: 'aborted'
+      }.not_to change(Game, :count) and expect_ok
+
+      expect(json).to be
+      expect(json['game']).to be
+
+      expect(json['game']['status']).to eq('aborted')
+      expect(json['game']['link']).to match('/games/\d+')
+    end
   end
 end

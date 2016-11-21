@@ -53,13 +53,17 @@ class TelegramMessenger
 
     def guess(guess)
       text = "Guess: _#{guess.word}_, *Bulls: #{guess.bulls}*, *Cows: #{guess.cows}*\n"
-      text += "Congratulations! You guessed it with *#{guess.game.guesses.length}* tries" if guess.game.finished?
+      text += "Congratulations! You guessed it with *#{guess.game.guesses.length}* tries" if guess.exact?
 
       text
     end
 
     def hint(letter)
       "Secret word has letter _#{letter}_ in it"
+    end
+
+    def no_hint(letter)
+      "Secret word has NO letter _#{letter}_ in it"
     end
 
     def tries(guesses)
@@ -151,7 +155,7 @@ class TelegramMessenger
       "Nothing I can do with *#{message}*. For help try _/help_"
     end
 
-    def new_game?
+    def new_game_ask
       'Go ahead and _/create_ a new game. For help try _/help_'
     end
 

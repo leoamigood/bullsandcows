@@ -8,4 +8,5 @@ end
 
 RSpec.configure do |config|
   config.include Requests::JsonHelpers, type: :request
+  config.include Requests::JsonHelpers, type: :controller
 end

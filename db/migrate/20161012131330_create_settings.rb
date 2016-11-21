@@ -6,7 +6,7 @@ class CreateSettings < ActiveRecord::Migration
       t.string  :complexity, default: 'easy'
       t.integer :dictionary_id
 
-      t.timestamps nill: false
+      t.timestamps null: false
     end
   end
 end

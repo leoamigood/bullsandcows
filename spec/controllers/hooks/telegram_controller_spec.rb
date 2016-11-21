@@ -1,11 +1,11 @@
 require 'rails_helper'
 
-describe Hooks::TelegramController do
+describe Hooks::TelegramController, :type => :request do
 
   context 'when receives telegram message with /start command' do
     before do
       allow(TelegramMessenger).to receive(:send_message)
-      allow(TelegramDispatcher::CommandQueue).to receive(:push)
+      allow(Telegram::CommandQueue).to receive(:push)
     end
 
     let!(:command) {
@@ -54,15 +54,18 @@ describe Hooks::TelegramController do
     }
 
     it 'responds with game start' do
-      post :update, command
+      post "/hooks/telegram/#{ENV['TELEGRAM_WEBHOOK']}", command
 
       expect(response).to be_success
       expect(response).to have_http_status(200)
 
-      expect(TelegramDispatcher::CommandQueue).to have_received(:push).twice
+      expect(Telegram::CommandQueue).to have_received(:push).twice
 
-      body = JSON.parse(response.body)
-      expect(body).to include('text' => '')
+      expect(json).to be
+      expect(json['text']).to eq('')
+      expect(json['chat_id']).to eq(169778030)
+      expect(json['parse_mode']).to eq('Markdown')
+      expect(json['method']).to eq('sendMessage')
     end
   end
 
@@ -113,13 +116,16 @@ describe Hooks::TelegramController do
     }
 
     it 'responds with help text' do
-      post :update, command
+      post "/hooks/telegram/#{ENV['TELEGRAM_WEBHOOK']}", command
 
       expect(response).to be_success
       expect(response).to have_http_status(200)
 
-      body = JSON.parse(response.body)
-      expect(body).to include('text' => /Here is the list of available commands/)
+      expect(json).to be
+      expect(json['text']).to match /Here is the list of available commands/
+      expect(json['chat_id']).to eq(169778030)
+      expect(json['parse_mode']).to eq('Markdown')
+      expect(json['method']).to eq('sendMessage')
     end
   end
 
@@ -195,13 +201,16 @@ describe Hooks::TelegramController do
       }
 
       it 'creates a game with selected level' do
-        post :update, command
+        post "/hooks/telegram/#{ENV['TELEGRAM_WEBHOOK']}", command
 
         expect(response).to be_success
         expect(response).to have_http_status(200)
 
-        body = JSON.parse(response.body)
-        expect(body).to include('text' => '')
+        expect(json).to be
+        expect(json['text']).to eq('')
+        expect(json['chat_id']).to eq(169778030)
+        expect(json['parse_mode']).to eq('Markdown')
+        expect(json['method']).to eq('sendMessage')
       end
     end
   end

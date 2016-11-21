@@ -5,17 +5,28 @@ class GameService
       Game.create({channel: channel, secret: secret.noun, level: secret.level, dictionary: secret.dictionary, source: source})
     end
 
-    def find!(channel)
-      game = Game.where(channel: channel).last
-      raise "Failed to find the game. Is game started for telegram message chat ID: #{channel}" unless game.present?
+    def find_by_id!(game_id)
+      game = Game.find_by_id(game_id)
+      raise Errors::GameNotFoundException.new("Failed to find game. Is game in progress? Game ID: #{game_id}") unless game.present?
 
       game
+    end
+
+    def find_by_channel!(channel)
+      game = Game.where(channel: channel).last
+      raise Errors::GameNotFoundException.new("Failed to find game. Is game in progress? Channel ID: #{channel}") unless game.present?
+
+      game
+    end
+
+    def find(options = {})
+      Game.all.where(options.compact)
     end
 
     def guess(game, username, word)
       guess = Guess.where(game_id: game.id, word: word).take
       if (guess.nil?)
-        match = GuessService.match(word, game.secret)
+        match = match(word, game.secret)
         guess = Guess.create(match.merge(game_id: game.id, username: username, attempts: 1))
 
         game.status = match[:exact].present? ? :finished : :running
@@ -27,23 +38,45 @@ class GameService
       guess
     end
 
-    def hint(game)
-      letter = game.secret[rand(game.secret.length)]
+    def match(guess, secret)
+      bulls = bulls(guess.split(''), secret.split(''))
+      cows = cows(guess.split(''), secret.split(''))
+
+      return {word: guess, bulls: bulls.compact.count, cows: cows.compact.count, exact: guess == secret}
+    end
+
+    def bulls(guess, secret)
+      guess.zip(secret).map { |(g, s)| g == s ? g : nil}
+    end
+
+    def cows(guess, secret)
+      bulls = bulls(guess, secret)
+      guess, secret = guess.zip(secret, bulls).
+          map{|g, s, b| b.present? ? [nil, nil] : [g, s]}.transpose
+
+      guess.each_with_index.map { |g, index|
+        (i = secret.index(g)) && secret[i] = nil
+        i.present? ? g : nil
+      }
+    end
+
+    def hint(game, letter = nil)
+      hint = letter.present? ? game.secret.split('').detect { |l| l == letter } : game.secret[rand(game.secret.length)]
       game.hints += 1
       game.save!
 
-      letter
+      hint
     end
 
     def stop!(game)
-      raise 'Game has already finished. Please start a new game using _/create_ command.' if game.finished?
+      raise 'Game has not started. Please start a new game using _/create_ command.' unless game.try(:in_progress?)
 
-      game.finished!
+      game.aborted!
       game.save!
     end
 
-    def is_running?(game)
-      raise 'Game has finished. Please start a new game using _/create_ command.' if game.finished?
+    def validate_game!(game)
+      raise Errors::GameNotStartedException.new(game, 'Game has not started. Please start a new game using _/create_ command.') unless game.in_progress?
     end
 
     def validate_guess!(game, guess)
