@@ -3,9 +3,9 @@ module Telegram
 
     class Guess
       class << self
-        def execute(channel, message, command)
+        def execute(channel, message, word)
           game = GameService.find_by_channel!(channel)
-          guess = GameEngineService.guess(game, message.from.username, command)
+          guess = GameEngineService.guess(game, message.from.username, word)
           TelegramMessenger.guess(guess)
         end
       end
