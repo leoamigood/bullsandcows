@@ -1,0 +1,204 @@
+FORMAT: 1A
+HOST: http://bullsandcows.heroku.com/
+
+# Bulls & Cows API
+
+Polls is a simple API allowing consumers to view polls and vote in them.
+
+## Games [/games{?status}]
+
+### List games [GET]
+
++ Parameters
+
+    + status (string, optional) - Game status to filter by.
+    
+        + Values
+        
+            + `created`
+            + `running`
+            + `finished`    
+            + `aborted`    
+    
++ Response 200 (application/json)
+
+        {
+            "games: [{
+                "link": "/games/2001",
+                "source": "web",
+                "status": "created",
+                "secret": "******",
+                "language": "EN",
+                "tries": 0,
+                "hints": 0
+            }, {
+                "link": "/games/2002",
+                "source": "web",
+                "status": "running",
+                "secret": "*****",
+                "language": "RU",
+                "tries": 4,
+                "hints": 1
+            }, {
+                "link": "/games/2003",
+                "source": "telegram",
+                "status": "finished",
+                "secret": "*****",
+                "language": "EN",
+                "tries": 10,
+                "hints": 2
+            }, {
+                "link": "/games/2004",
+                "source": "telegram",
+                "status": "aborted",
+                "secret": "*******",
+                "language": "RU",
+                "tries": 15,
+                "hints": 5
+            }]
+        }
+
+### Create a new game [POST]
+
++ Request (application/json)
+
+        {
+            "secret": "hostel"
+        }
+
++ Response 200 (application/json)
+
+        {
+            game: {
+                "link": "/games/2005",
+                "source": "web",
+                "status": "created",
+                "secret": "******",
+                "language": null,
+                "tries": 0,
+                "hints": 0
+            }
+        }
+
+## Specific Game [/games/{id}]
+
+### Show game details [GET]
+
++ Response 200 (application/json)
+
+        {
+            "game": {
+                "link": "/games/7",
+                "source": "web",
+                "status": "running",
+                "secret": "*****************",
+                "language": "EN",
+                "tries": 9,
+                "hints": 1
+            }
+        }
+
+### Stop running game [PUT]
+
++ Request (application/json)
+
+        {
+            "status": "aborted"
+        }
+
++ Response 200 (application/json)
+
+        {
+            "game": {
+                "link": "/games/7",
+                "source": "web",
+                "status": "aborted",
+                "secret": "manifesto",
+                "language": "EN",
+                "tries": 9,
+                "hints": 1
+            }
+        }
+
+## Guesses [/games/{id}/guesses{?best}{?zero}]
+
+### Get all guesses for a game [GET]
+
++ Parameters
+
+    + best (number, optional) - Max number of best game guesses.
+    + zero (number, optional) - Max number of zero game guesses.
+    
++ Response 200 (application/json)
+
+        {
+          "guesses": [
+            {
+              "link": "/games/1/guesses/1",
+              "word": "hostel",
+              "bulls": 4,
+              "cows": 0,
+              "attempts": 1,
+              "exact": false
+            },
+            {
+              "link": "/games/1/guesses/2",
+              "word": "mortal",
+              "bulls": 4,
+              "cows": 0,
+              "attempts": 1,
+              "exact": false
+            },
+            {
+              "link": "/games/1/guesses/3",
+              "word": "postal",
+              "bulls": 6,
+              "cows": 0,
+              "attempts": 1,
+              "exact": true
+            }
+          ],
+          "game_link": "/games/1"
+        }
+        
+### Submit guess word [POST]
+
++ Request (application/json)
+
+        {
+            "guess": "hostel"
+        }
+
++ Response 200 (application/json)
+
+        {
+          "guess": {
+            "link": "/games/1/guesses/1",
+            "word": "hostel",
+            "bulls": 4,
+            "cows": 0,
+            "attempts": 1,
+            "exact": false
+          },
+          "game_link": "/games/1"
+        }
+        
+## Hints [/games/{id}/hints]        
+
+### Request a game hint [POST]
+
++ Request (application/json)
+
+        {
+            "hint": "t"
+        }
+
++ Response 200 (application/json)
+
+        {
+          "hint": {
+            "letter": "t",
+            "match": true
+          },
+          "game_link": "/games/2"
+        }
