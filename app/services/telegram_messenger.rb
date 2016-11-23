@@ -44,7 +44,7 @@ class TelegramMessenger
       }
       markup = Telegram::Bot::Types::InlineKeyboardMarkup.new(inline_keyboard: kb)
 
-      send_message(channel, 'How many letters would it be?', markup)
+      send_message(channel, 'How many letters will it be?', markup)
     end
 
     def game_created(game)
@@ -64,6 +64,14 @@ class TelegramMessenger
 
     def no_hint(letter)
       "Secret word has NO letter _#{letter}_ in it"
+    end
+
+    def suggestion(guess)
+      "Suggestion: _#{guess.word}_, *Bulls: #{guess.bulls}*, *Cows: #{guess.cows}*"
+    end
+
+    def no_suggestions(letters)
+      "Could not find any suggestions based on provided word letters _#{letters}_"
     end
 
     def tries(guesses)

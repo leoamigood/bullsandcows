@@ -1,16 +1,17 @@
 module Telegram
   class Action
-    BEST   = '/best'
-    CREATE = '/create'
-    GUESS  = '/guess'
-    HELP   = '/help'
-    HINT   = '/hint'
-    LANG   = '/lang'
-    LEVEL  = '/level'
-    START  = '/start'
-    STOP   = '/stop'
-    TRIES  = '/tries'
-    ZERO   = '/zero'
+    BEST     = '/best'
+    CREATE   = '/create'
+    GUESS    = '/guess'
+    HELP     = '/help'
+    HINT     = '/hint'
+    LANG     = '/lang'
+    LEVEL    = '/level'
+    START    = '/start'
+    STOP     = '/stop'
+    SUGGEST  = '/suggest'
+    TRIES    = '/tries'
+    ZERO     = '/zero'
   end
 
   class CommandRoute
@@ -31,6 +32,7 @@ module Telegram
     LEVEL_ALPHA  = /^#{Action::LEVEL}#{BOT_REGEXP}\s+(?<level>[[:alpha:]]+)$/i
     START        = /^#{Action::START}#{BOT_REGEXP}$/i
     STOP         = /^#{Action::STOP}#{BOT_REGEXP}$/i
+    SUGGEST      = /^#{Action::SUGGEST}#{BOT_REGEXP}\s+(?<letters>[[:alpha:]]+)$/i
     TRIES        = /^#{Action::TRIES}#{BOT_REGEXP}$/i
     ZERO         = /^#{Action::ZERO}#{BOT_REGEXP}$/i
     OTHER        = /^\/.*/

@@ -29,10 +29,19 @@ class GameEngineService
     end
 
     def hint(game, letter = nil)
-      game = GameService.find_by_id!(game.id)
-
       GameService.validate_game!(game)
       GameService.hint(game, letter)
+    end
+
+    def suggest(game, username, letters)
+      suggestion = Noun.
+          where(dictionary_id: game.dictionary_id).
+          where('char_length(noun) = ?', game.secret.length).
+          where("noun LIKE '%#{letters}%'").
+          where("noun <> '#{game.secret}'").
+          order('RANDOM()').first
+
+      GameService.guess(game, username, suggestion.noun, suggestion = true) if suggestion.present?
     end
 
     def tries(channel)

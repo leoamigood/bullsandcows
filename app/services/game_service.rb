@@ -23,11 +23,11 @@ class GameService
       Game.all.where(options.compact)
     end
 
-    def guess(game, username, word)
+    def guess(game, username, word, suggestion = false)
       guess = Guess.where(game_id: game.id, word: word).take
       if (guess.nil?)
         match = match(word, game.secret)
-        guess = Guess.create(match.merge(game_id: game.id, username: username, attempts: 1))
+        guess = Guess.create!(match.merge(game_id: game.id, username: username, attempts: 1, suggestion: suggestion))
 
         game.status = match[:exact].present? ? :finished : :running
         game.save!

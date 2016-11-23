@@ -65,6 +65,9 @@ class TelegramDispatcher
         when Telegram::CommandRoute::HINT_ALPHA
           Telegram::Command::Hint.execute(channel, $~['letter'])
 
+        when Telegram::CommandRoute::SUGGEST
+          Telegram::Command::Suggest.execute(channel, message, $~['letters'])
+
         when Telegram::CommandRoute::TRIES
           guesses = GameEngineService.tries(channel)
           TelegramMessenger.tries(guesses)

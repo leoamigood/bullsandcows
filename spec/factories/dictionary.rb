@@ -10,7 +10,8 @@ FactoryGirl.define do
       FactoryGirl.create(:noun, noun: 'emergency', level: 3, dictionary: dictionary)
       FactoryGirl.create(:noun, noun: 'tomato',    level: 4, dictionary: dictionary)
       FactoryGirl.create(:noun, noun: 'ellipse',   level: 5, dictionary: dictionary)
-      FactoryGirl.create(:noun, noun: 'value',     level: 6, dictionary: dictionary)
+      FactoryGirl.create(:noun, noun: 'value',     level: 1, dictionary: dictionary)
+      FactoryGirl.create(:noun, noun: 'barrel',    level: 4, dictionary: dictionary)
     end
   end
 end
