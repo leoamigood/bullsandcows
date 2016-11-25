@@ -9,8 +9,8 @@ class GameEngineService
       settings = Setting.find_by_channel(channel) || Setting.new
 
       language = get_language_or_default(settings.language)
-      nouns = Noun.active.in_language(language)
 
+      nouns = Noun.active.in_language(language)
       nouns = nouns.where(:level => settings.levels) if settings.levels.present?
       raise "No words found in dictionaries with complexity: #{settings.complexity} and language: #{settings.language} " unless nouns.present?
 
