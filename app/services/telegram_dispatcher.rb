@@ -88,7 +88,7 @@ class TelegramDispatcher
           TelegramMessenger.ask_level(channel)
 
         when Telegram::CommandRoute::LEVEL_ALPHA
-          GameEngineService.settings(channel, {complexity: $~['level']})
+          GameEngineService.settings(channel, { complexity: $~['level'] })
           TelegramMessenger.level($~['level'])
 
         when Telegram::CommandRoute::STOP
