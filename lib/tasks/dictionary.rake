@@ -24,4 +24,15 @@ namespace :dictionary do
     end
   end
 
+  ##
+  # rake dictionary:levels[RU,hard,3,5]
+  task :levels, [:language, :complexity, :min_level, :max_level] => :environment do |t, args|
+    language = args[:language]
+    complexity = args[:complexity]
+    min_level, max_level = args[:min_level], args[:max_level]
+
+    dictionary = Dictionary.find_by_lang!(language)
+    DictionaryLevel.create!(dictionary_id: dictionary.id, complexity: complexity, min_level: min_level, max_level: max_level)
+  end
+
 end
