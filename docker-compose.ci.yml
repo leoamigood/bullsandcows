@@ -1,0 +1,25 @@
+version: '2'
+services:
+  postgres:
+    image: postgres:9.5.3
+    ports:
+      - "15432:5432"
+    env_file:
+      - '.env.postgres.test'
+
+  rspec:
+    build: .
+    volumes:
+      - .:/u/apps/bullsandcows
+    links:
+      - postgres
+    depends_on:
+      - postgres
+    working_dir: /u/apps/bullsandcows
+    environment:
+      RAILS_ENV: test
+    env_file:
+      - '.env.postgres.test'
+      - '.env.backend'
+      - '.env.backend.test'
+    command: bash -c "sleep 5 && rake db:setup && bundle exec rspec -fd"

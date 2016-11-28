@@ -12,7 +12,7 @@ services:
       - postgres
     working_dir: /u/apps/bullsandcows
     env_file:
-      - '.env.postgres'
+      - '.env.postgres.secret'
       - '.env.backend'
       - '.env.backend.secret'
   postgres:
@@ -20,7 +20,7 @@ services:
     ports:
       - "15432:5432"
     env_file:
-      - '.env.postgres'
+      - '.env.postgres.secret'
 
   rspec:
     build: .
@@ -34,7 +34,7 @@ services:
     environment:
       RAILS_ENV: test
     env_file:
-      - '.env.postgres'
+      - '.env.postgres.secret'
       - '.env.backend'
-      - '.env.backend.secret'
+      - '.env.backend.test'
     command: bundle exec rspec -fd
