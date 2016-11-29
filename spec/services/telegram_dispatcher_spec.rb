@@ -51,16 +51,35 @@ describe TelegramDispatcher, type: :service do
     before do
       allow(TelegramMessenger).to receive(:answerCallbackQuery)
       allow(TelegramMessenger).to receive(:send_message).and_return(Telegram::Bot::Types::Message.new)
-      allow(Telegram::CommandQueue).to receive(:execute)
 
       callbackQuery.stub_chain(:message, :chat, :id).and_return(chat_id)
     end
 
-    it 'creates setting with selected game language' do
-      expect {
-        expect(TelegramDispatcher.handle_callback_query(callbackQuery)).to be_nil
-        expect(TelegramMessenger).to have_received(:answerCallbackQuery).with(callbackQuery.id, 'Language was set to Russian').once
-      }.to change(Setting, :count).by(1)
+    context 'being last command in command queue' do
+      before do
+        allow(Telegram::CommandQueue).to receive(:present?).and_return(false)
+      end
+
+      it 'creates setting with selected game language and response with inline message' do
+        expect {
+          expect(TelegramDispatcher.handle_callback_query(callbackQuery)).to eq('Language was set to Russian')
+          expect(TelegramMessenger).not_to have_received(:answerCallbackQuery)
+        }.to change(Setting, :count).by(1)
+      end
+    end
+
+    context 'NOT being last command in command queue' do
+      before do
+        allow(Telegram::CommandQueue).to receive(:present?).and_return(true)
+        allow(Telegram::CommandQueue).to receive(:execute)
+      end
+
+      it 'creates setting with selected game language and response with status message' do
+        expect {
+          expect(TelegramDispatcher.handle_callback_query(callbackQuery)).to be_nil
+          expect(TelegramMessenger).to have_received(:answerCallbackQuery).with(callbackQuery.id, 'Language was set to Russian').once
+        }.to change(Setting, :count).by(1)
+      end
     end
   end
 
@@ -469,11 +488,17 @@ describe TelegramDispatcher, type: :service do
       callbackQuery.stub_chain(:message, :chat, :id).and_return(chat_id)
     end
 
-    it 'creates setting with selected game level' do
-      expect {
-        expect(TelegramDispatcher.handle_callback_query(callbackQuery)).to be_nil
-        expect(TelegramMessenger).to have_received(:answerCallbackQuery).with(callbackQuery.id, 'Game level was set to easy').once
-      }.to change(Setting, :count).by(1)
+    context 'being last command in command queue' do
+      before do
+        allow(Telegram::CommandQueue).to receive(:present?).and_return(false)
+      end
+
+      it 'creates setting with selected game level and response with inline message' do
+        expect {
+          expect(TelegramDispatcher.handle_callback_query(callbackQuery)).to eq('Game level was set to easy')
+          expect(TelegramMessenger).not_to have_received(:answerCallbackQuery)
+        }.to change(Setting, :count).by(1)
+      end
     end
   end
 
@@ -602,6 +627,7 @@ describe Telegram::CommandQueue do
     it 'checks if queue is empty' do
       expect{
         expect(Telegram::CommandQueue.empty?).to be true
+        expect(Telegram::CommandQueue.present?).to be false
       }.not_to change(Telegram::CommandQueue, :size)
     end
 
@@ -609,6 +635,7 @@ describe Telegram::CommandQueue do
       expect{
         Telegram::CommandQueue.push{ 'pushed block' }
         expect(Telegram::CommandQueue.empty?).to be false
+        expect(Telegram::CommandQueue.present?).to be true
       }.to change(Telegram::CommandQueue, :size).by(1)
     end
 
@@ -684,7 +711,7 @@ describe Telegram::CommandQueue do
 
     it 'checks if queue is empty' do
       expect{
-        expect(Telegram::CommandQueue.empty?).to be_falsey
+        expect(Telegram::CommandQueue.empty?).to be false
       }.not_to change(Telegram::CommandQueue, :size)
     end
 

@@ -30,6 +30,10 @@ module Telegram
       def empty?
         @queue.empty?
       end
+
+      def present?
+        @queue.present?
+      end
     end
   end
 end
