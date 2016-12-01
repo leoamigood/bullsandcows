@@ -11,17 +11,17 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20161124043519) do
+ActiveRecord::Schema.define(version: 20161130233904) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
   create_table "dictionaries", force: :cascade do |t|
-    t.string   "source",     limit: 64
+    t.string   "source",     limit: 255
     t.string   "lang",       limit: 2
-    t.boolean  "enabled",               default: true
-    t.datetime "created_at",                           null: false
-    t.datetime "updated_at",                           null: false
+    t.boolean  "enabled",                default: true
+    t.datetime "created_at",                            null: false
+    t.datetime "updated_at",                            null: false
   end
 
   create_table "dictionary_levels", force: :cascade do |t|

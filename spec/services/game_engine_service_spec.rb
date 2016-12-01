@@ -73,8 +73,8 @@ describe GameEngineService, type: :service do
 
   it 'raise error detecting unknown language' do
     expect{
-      GameEngineService.get_language_or_default('DE')
-    }.to raise_error('Language: DE is not available!')
+      GameEngineService.get_language_or_default('FR')
+    }.to raise_error('Language: FR is not available!')
   end
 
   context 'given no previously saved settings for user' do

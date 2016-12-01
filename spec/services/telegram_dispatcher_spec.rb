@@ -62,7 +62,7 @@ describe TelegramDispatcher, type: :service do
 
       it 'creates setting with selected game language and response with inline message' do
         expect {
-          expect(TelegramDispatcher.handle_callback_query(callbackQuery)).to eq('Language was set to Russian')
+          expect(TelegramDispatcher.handle_callback_query(callbackQuery)).to eq('Language was set to Русский')
           expect(TelegramMessenger).not_to have_received(:answerCallbackQuery)
         }.to change(Setting, :count).by(1)
       end
@@ -77,7 +77,7 @@ describe TelegramDispatcher, type: :service do
       it 'creates setting with selected game language and response with status message' do
         expect {
           expect(TelegramDispatcher.handle_callback_query(callbackQuery)).to be_nil
-          expect(TelegramMessenger).to have_received(:answerCallbackQuery).with(callbackQuery.id, 'Language was set to Russian').once
+          expect(TelegramMessenger).to have_received(:answerCallbackQuery).with(callbackQuery.id, 'Language was set to Русский').once
         }.to change(Setting, :count).by(1)
       end
     end

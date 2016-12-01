@@ -18,7 +18,7 @@ class TelegramMessenger
     end
 
     def ask_language(channel)
-      kb = %w(English Russian Italiano).each_with_object([]) { |lang, memo|
+      kb = %w(English Русский Italiano Deutsch).each_with_object([]) { |lang, memo|
         memo << Telegram::Bot::Types::InlineKeyboardButton.new(text: lang, callback_data: "/lang #{lang[0..1].upcase}")
       }
       markup = Telegram::Bot::Types::InlineKeyboardMarkup.new(inline_keyboard: [kb])
@@ -29,11 +29,13 @@ class TelegramMessenger
     def language(lang)
       case lang
         when Dictionary.langs[:RU]
-          language = 'Russian'
+          language = 'Русский'
         when Dictionary.langs[:EN]
           language = 'English'
         when Dictionary.langs[:IT]
           language = 'Italiano'
+        when Dictionary.langs[:DE]
+          language = 'Deutsch'
         else
           language = 'Unknown'
       end

@@ -15,12 +15,14 @@ namespace :dictionary do
     Noun.transaction do
       nouns = CSV.new(open(uri), :headers => :first_row)
       dictionary = Dictionary.create(lang: lang, source: uri)
-      Noun.import nouns.map { |row|
+      puts "Importing dictionary: #{lang}, source: #{uri}."
+      Noun.import nouns.each_with_index.map { |row, i|
         attributes = Noun.column_names.reduce({}) { |h, attr| h.merge(attr => row.field(attr)) }
+        print "Processing line #{i}, data: #{row}\r"
         Noun.new(attributes.merge(excluded: false, dictionary_id: dictionary.id))
       }
 
-      #update nouns set level = width_bucket(log(ipm * r), 0, 5.58, 5);
+      puts 'Dictionary imported successfully!'
     end
   end
 

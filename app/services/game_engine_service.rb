@@ -40,7 +40,7 @@ class GameEngineService
           where("noun <> '#{game.secret}'").
           order('RANDOM()').first
 
-      GameService.guess(game, username, suggestion.noun, suggestion = true) if suggestion.present?
+      GameService.guess(game, username, suggestion.noun.downcase, suggestion = true) if suggestion.present?
     end
 
     def tries(channel)
