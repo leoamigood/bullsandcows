@@ -8,11 +8,10 @@ class GameEngineService
     def create_by_number(channel, number, source)
       settings = Setting.find_by_channel(channel) || Setting.new
 
-      levels = get_level_by_complexity(settings.complexity)
       language = get_language_or_default(settings.language)
 
       nouns = Noun.active.in_language(language)
-      nouns = nouns.where(:level => levels) if levels.present?
+      nouns = nouns.where(:level => settings.levels) if settings.levels.present?
       raise "No words found in dictionaries with complexity: #{settings.complexity} and language: #{settings.language} " unless nouns.present?
 
       secret = nouns.where('char_length(noun) = ?', number).order('RANDOM()').first
@@ -41,7 +40,7 @@ class GameEngineService
           where("noun <> '#{game.secret}'").
           order('RANDOM()').first
 
-      GameService.guess(game, username, suggestion.noun, suggestion = true) if suggestion.present?
+      GameService.guess(game, username, suggestion.noun.downcase, suggestion = true) if suggestion.present?
     end
 
     def tries(channel)
@@ -64,19 +63,6 @@ class GameEngineService
       raise "Language: #{language} is not available!" unless lang.present?
 
       lang
-    end
-
-    def get_level_by_complexity(complexity)
-      case complexity
-        when 'easy'
-          [4, 5]
-        when 'medium'
-          [2, 3]
-        when 'hard'
-          [1, 2, 3]
-        else
-          nil
-      end
     end
 
     def settings(channel, attributes)

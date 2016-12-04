@@ -28,9 +28,13 @@ class TelegramDispatcher
       begin
         command = callback_query.data.downcase.to_s
         response = execute(command, callback_query.message.chat.id, callback_query)
-        TelegramMessenger.answerCallbackQuery(callback_query.id, response)
 
-        Telegram::CommandQueue.execute
+        if Telegram::CommandQueue.present?
+          TelegramMessenger.answerCallbackQuery(callback_query.id, response)
+          Telegram::CommandQueue.execute
+        else
+          response
+        end
       rescue => ex
         ex.message
       end
@@ -88,7 +92,7 @@ class TelegramDispatcher
           TelegramMessenger.ask_level(channel)
 
         when Telegram::CommandRoute::LEVEL_ALPHA
-          GameEngineService.settings(channel, {complexity: $~['level']})
+          GameEngineService.settings(channel, { complexity: $~['level'] })
           TelegramMessenger.level($~['level'])
 
         when Telegram::CommandRoute::STOP

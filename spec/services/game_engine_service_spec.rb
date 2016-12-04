@@ -12,17 +12,18 @@ describe GameEngineService, type: :service do
   end
 
   context 'given russian dictionary with word levels' do
-    let!(:dictionary) { create :dictionary, :words_with_levels, lang: 'RU'}
+    let!(:medium) { create :dictionary_level, :medium }
+    let!(:dictionary) { create :dictionary, :words_with_levels, levels: [medium], lang: 'RU' }
 
     context 'with complexity and language settings' do
-      let!(:settings) { create :setting, channel: channel, complexity: 'medium', language: 'RU'}
+      let!(:settings) { create :setting, channel: channel, dictionary: dictionary, complexity: 'medium', language: 'RU'}
 
       it 'create a game with specified amount of letters, complexity and language' do
         game = GameEngineService.create_by_number(channel, 6, :telegram)
 
         expect(game).to be
         expect(game.secret.length).to eq(6)
-        expect(game.level).to be_between(2, 3)
+        expect(game.level).to be_between(7, 9)
         expect(game.dictionary.RU?).to be(true)
       end
     end
@@ -64,13 +65,6 @@ describe GameEngineService, type: :service do
     end
   end
 
-
-  it 'resolve game level numeric value by complexity string' do
-    expect(GameEngineService.get_level_by_complexity('easy')).to eq([4, 5])
-    expect(GameEngineService.get_level_by_complexity('medium')).to eq([2, 3])
-    expect(GameEngineService.get_level_by_complexity('hard')).to eq([1, 2, 3])
-  end
-
   it 'get language or default language value' do
     expect(GameEngineService.get_language_or_default()).to eq('RU')
     expect(GameEngineService.get_language_or_default('EN')).to eq('EN')
@@ -79,8 +73,8 @@ describe GameEngineService, type: :service do
 
   it 'raise error detecting unknown language' do
     expect{
-      GameEngineService.get_language_or_default('IT')
-    }.to raise_error('Language: IT is not available!')
+      GameEngineService.get_language_or_default('FR')
+    }.to raise_error('Language: FR is not available!')
   end
 
   context 'given no previously saved settings for user' do
