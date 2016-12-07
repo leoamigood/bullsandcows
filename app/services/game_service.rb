@@ -73,6 +73,8 @@ class GameService
 
       game.aborted!
       game.save!
+
+      game
     end
 
     def validate_game!(game)

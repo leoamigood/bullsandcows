@@ -13,6 +13,12 @@ class TelegramMessenger
       end
     end
 
+    def getChatMember(channel, user_id)
+      Telegram::Bot::Client.run(TELEGRAM_TOKEN) do |bot|
+        bot.api.getChatMember(chat_id: channel, user_id: user_id)
+      end
+    end
+
     def welcome(channel)
       send_message(channel, 'Welcome to Bulls and Cows! Here be dragons! Well, the rules actually.')
     end
@@ -130,10 +136,6 @@ class TelegramMessenger
 
     def game_was_finished(game)
       'Game has already finished. Please start a new game using _/create_ command.'
-    end
-
-    def no_permissions_to_stop_game
-      'You are NOT allowed to _/stop_ this game. Only _admin_ or _creator_ is'
     end
 
     def help

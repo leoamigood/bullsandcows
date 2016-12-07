@@ -96,7 +96,9 @@ class TelegramDispatcher
           TelegramMessenger.level($~['level'])
 
         when Telegram::CommandRoute::STOP
-          Telegram::Command::Stop.execute(channel, message)
+          Telegram::Command::Stop.validate(message)
+          game = Telegram::Command::Stop.execute(channel)
+          TelegramMessenger.game_stop(game)
 
         when Telegram::CommandRoute::HELP
           TelegramMessenger.help

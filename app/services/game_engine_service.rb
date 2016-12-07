@@ -73,15 +73,6 @@ class GameEngineService
 
       setting
     end
-
-    def stop_permitted?(message)
-      Telegram::Bot::Client.run(TELEGRAM_TOKEN) do |bot|
-        member = bot.api.getChatMember({chat_id: message.chat.id, user_id: message.from.id})
-        status = member['result']['status']
-
-        message.chat.type == 'group' ? status == 'creator' || status == 'administrator' : status == 'member'
-      end
-    end
   end
 
 end

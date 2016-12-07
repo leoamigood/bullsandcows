@@ -513,7 +513,7 @@ describe TelegramDispatcher, type: :service do
 
     context 'when stop command is permitted' do
       before do
-        allow(GameEngineService).to receive(:stop_permitted?).and_return(true)
+        allow(Telegram::Validator).to receive(:permitted?).and_return(true)
       end
 
       it 'finishes the game, replies with a secret word' do
@@ -523,6 +523,20 @@ describe TelegramDispatcher, type: :service do
         }.to change(game, :status).to('aborted')
       end
     end
+
+    context 'when stop command is NOT permitted' do
+      before do
+        allow(Telegram::Validator).to receive(:permitted?).and_return(false)
+      end
+
+      it 'fails to finish the game, replies with a error message' do
+        expect {
+          expect(TelegramDispatcher.handle(message)).to include('You are NOT allowed to _/stop_ this game. Only _admin_ or _creator_ is')
+          game.reload
+        }.not_to change(game, :status)
+      end
+    end
+
   end
 
   context 'when /stop command includes bot name received' do
@@ -530,7 +544,7 @@ describe TelegramDispatcher, type: :service do
     let!(:game) { create(:game, :telegram, secret: 'secret', channel: chat_id) }
 
     before do
-      allow(GameEngineService).to receive(:stop_permitted?).and_return(true)
+      allow(Telegram::Validator).to receive(:permitted?).and_return(true)
       allow(GameService).to receive(:stop!)
       allow(TelegramMessenger).to receive(:game_was_finished)
 
