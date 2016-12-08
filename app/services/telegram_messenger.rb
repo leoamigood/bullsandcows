@@ -48,7 +48,7 @@ class TelegramMessenger
       "Language was set to #{language}"
     end
 
-    def ask_create_game(channel)
+    def ask_length(channel)
       kb = (4..8).each_with_object([]) { |n, memo|
         memo << Telegram::Bot::Types::InlineKeyboardButton.new(text: n, callback_data: "/create #{n}")
       }

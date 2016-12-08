@@ -7,7 +7,7 @@ describe Setting, type: :model do
     let!(:medium) { create :dictionary_level, :medium }
     let!(:hard) { create :dictionary_level, :hard }
 
-    let!(:dictionary) { create :dictionary, :words_with_levels, levels: [easy, medium, hard], lang: 'EN' }
+    let!(:dictionary) { create :dictionary, :english, levels: [easy, medium, hard], lang: 'EN' }
 
     context 'with complexity in settings' do
       let!(:settings) { create :setting, language: 'EN', dictionary: dictionary, complexity: 'hard'}

@@ -1,6 +1,7 @@
 require 'rails_helper'
 
 describe GamesController, :type => :request do
+
   it 'creates game with the secret word' do
     expect {
       post '/games', secret: 'hostel'
@@ -11,11 +12,46 @@ describe GamesController, :type => :request do
     expect(json['game']['source']).to eq('web')
     expect(json['game']['status']).to eq('created')
     expect(json['game']['secret']).to eq('******')
-    # expect(json['game']['language']).to eq('EN')
+
     expect(json['game']['tries']).to eq(0)
     expect(json['game']['hints']).to eq(0)
 
     expect(json['game']['link']).to match('/games/\d+')
+  end
+
+  context 'given dictionary in language with complexity levels' do
+    let!(:easy) { create :dictionary_level, :easy }
+    let!(:dictionary) { create :dictionary, :russian, levels: [easy] }
+
+    it 'creates game with randomly selected secret word where only language specified' do
+      expect {
+        post '/games', language: 'RU'
+      }.to change(Game, :count).by(1) and expect_ok
+
+      expect(json).to be
+      expect(json['game']).to be
+      expect(json['game']['status']).to eq('created')
+      expect(json['game']['secret']).to be
+      expect(json['game']['language']).to eq('RU')
+    end
+
+    it 'creates game with randomly selected secret word where length, language, complexity specified' do
+      data = {
+          length: 5,
+          language: 'RU',
+          complexity: 'easy'
+      }
+
+      expect {
+        post '/games', data
+      }.to change(Game, :count).by(1) and expect_ok
+
+      expect(json).to be
+      expect(json['game']).to be
+      expect(json['game']['status']).to eq('created')
+      expect(json['game']['secret']).to eq('*****')
+      expect(json['game']['language']).to eq('RU')
+    end
   end
 
   context 'with multiple games' do

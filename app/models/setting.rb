@@ -10,4 +10,8 @@ class Setting < ActiveRecord::Base
     [*level.min_level..level.max_level]
   end
 
+  def options
+    { language: language, complexity: complexity }
+  end
+
 end

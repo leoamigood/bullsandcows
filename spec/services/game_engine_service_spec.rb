@@ -1,10 +1,10 @@
 require 'rails_helper'
 
 describe GameEngineService, type: :service do
-  let!(:channel) { 169778030 }
+  let!(:channel) { Random.rand }
 
   it 'create a game with specified secret word' do
-    game = GameEngineService.create_by_word(channel, 'magic', :telegram)
+    game = GameEngineService.create_by_word(channel, :telegram, 'magic')
 
     expect(game).to be
     expect(game.secret).to eq('magic')
@@ -13,28 +13,31 @@ describe GameEngineService, type: :service do
 
   context 'given russian dictionary with word levels' do
     let!(:medium) { create :dictionary_level, :medium }
-    let!(:dictionary) { create :dictionary, :words_with_levels, levels: [medium], lang: 'RU' }
+    let!(:dictionary) { create :dictionary, :english, levels: [medium] }
 
-    context 'with complexity and language settings' do
-      let!(:settings) { create :setting, channel: channel, dictionary: dictionary, complexity: 'medium', language: 'RU'}
+    context 'with length, complexity and language' do
+      let!(:options) { { length: 5, complexity: 'medium', language: 'EN' } }
 
       it 'create a game with specified amount of letters, complexity and language' do
-        game = GameEngineService.create_by_number(channel, 6, :telegram)
+        game = GameEngineService.create_by_options(channel, :telegram, options)
 
         expect(game).to be
-        expect(game.secret.length).to eq(6)
+        expect(game.secret.length).to eq(5)
         expect(game.level).to be_between(7, 9)
-        expect(game.dictionary.RU?).to be(true)
+        expect(game.dictionary.EN?).to be(true)
       end
     end
 
-    context 'with missing language settings' do
-      let!(:settings) { create :setting, channel: channel, language: 'EN'}
+    context 'with word length, complexity but without language' do
+      let!(:options) { { length: 6, complexity: 'medium' } }
 
-      it 'fails to create a game when no words exist in specified language ' do
+      it 'creates a game in language available in dictionaries' do
         expect{
-          GameEngineService.create_by_number(channel, 6, :telegram)
-        }.to raise_error(/No words found in dictionaries/)
+          game = GameEngineService.create_by_options(channel, :telegram, options)
+
+          expect(game.secret.length).to eq(6)
+          expect(game.level).to be_between(7, 9)
+        }.to change(Game, :count).by 1
       end
     end
   end
@@ -63,18 +66,6 @@ describe GameEngineService, type: :service do
         expect(GameEngineService.hint(game, 'x')).to be_nil
       }.to change{ game.reload.hints }.by(1)
     end
-  end
-
-  it 'get language or default language value' do
-    expect(GameEngineService.get_language_or_default()).to eq('RU')
-    expect(GameEngineService.get_language_or_default('EN')).to eq('EN')
-    expect(GameEngineService.get_language_or_default('RU')).to eq('RU')
-  end
-
-  it 'raise error detecting unknown language' do
-    expect{
-      GameEngineService.get_language_or_default('FR')
-    }.to raise_error('Language: FR is not available!')
   end
 
   context 'given no previously saved settings for user' do

@@ -4,7 +4,7 @@ describe TelegramDispatcher, type: :service do
   let!(:user) { '@Amig0' }
   let!(:chat_id) { 169778030 }
 
-  let!(:dictionary) { create :dictionary, :words_with_levels, lang: 'RU'}
+  let!(:dictionary) { create :dictionary, :english, lang: 'RU'}
 
   context 'when /start command received' do
     let!(:message) { Telegram::Bot::Types::Message.new(text: '/start') }
@@ -149,7 +149,7 @@ describe TelegramDispatcher, type: :service do
 
     it 'handles bot name as optional part in command' do
       expect(TelegramDispatcher.handle(message))
-      expect(GameEngineService).to have_received(:create_by_word).with(chat_id, 'секрет', :telegram)
+      expect(GameEngineService).to have_received(:create_by_word).with(chat_id, :telegram, 'секрет')
     end
   end
 
