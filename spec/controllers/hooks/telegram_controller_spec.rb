@@ -134,7 +134,7 @@ describe Hooks::TelegramController, :type => :request do
       allow(TelegramMessenger).to receive(:answerCallbackQuery)
     end
 
-    let!(:dictionary) { create :dictionary, :words_with_levels, lang: 'RU'}
+    let!(:dictionary) { create :dictionary, :english, lang: 'RU'}
 
     context 'when receives telegram callback with /level <level> command' do
       let!(:command) {

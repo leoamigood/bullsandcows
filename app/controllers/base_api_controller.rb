@@ -13,6 +13,10 @@ class BaseApiController < ApplicationController
     render json: { game_link: Responses::Game.link(ex.game), error: ex.message }, status: 500
   end
 
+  rescue_from Errors::PermissionException do |ex|
+    render json: { error: ex.message }, status: 500
+  end
+
   def set_default_response_format
     request.format = :json
   end

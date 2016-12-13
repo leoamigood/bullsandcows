@@ -1,24 +1,29 @@
 class GamesController < BaseApiController
 
   def create
-    game = GameEngineService.create_by_word(session.id, validate[:secret], :web)
-    render json: { game: Responses::Game.new(game) }
+    if params[:secret].present?
+      game = GameEngineService.create_by_word(session.id, :web, validate_create[:secret])
+      render json: { game: Responses::Game.new(game) }
+    else
+      game = GameEngineService.create_by_options(session.id, :web, validate_create_by_options)
+      render json: { game: Responses::Game.new(game) }
+    end
   end
 
   def index
-    options = { status: filter[:status], source: filter[:source] }
-    games = GameService.find(options)
+    options = { status: validate_index[:status], source: validate_index[:source] }
+    games = GameService.find_games(options)
     render json: { games: games.map {|game| Responses::Game.new(game)} }
   end
 
   def show
-    game = GameService.find_by_id!(validate[:id])
+    game = GameService.find_by_id!(validate_show[:id])
     render json: { game: Responses::Game.new(game) }
   end
 
   def update
-    game = Game.find_by_id(validate[:id])
-    status = validate[:status]
+    game = Game.find_by_id(validate_update[:id])
+    status = validate_update[:status]
 
     case Game.statuses[status]
       when Game.statuses[:aborted]
@@ -30,12 +35,24 @@ class GamesController < BaseApiController
 
   private
 
-  def validate
-    params.permit(:id, :secret, :status)
+  def validate_create
+    params.permit(:secret)
   end
 
-  def filter
+  def validate_create_by_options
+    params.permit(:length, :language, :complexity)
+  end
+
+  def validate_index
     params.permit(:source, :status)
+  end
+
+  def validate_show
+    params.permit(:id)
+  end
+
+  def validate_update
+    params.permit(:id, :status)
   end
 
 end

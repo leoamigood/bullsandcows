@@ -1,40 +1,51 @@
 class GameService
 
   class << self
-    def create(channel, secret, source = nil)
-      Game.create({channel: channel, secret: secret.noun, level: secret.level, dictionary: secret.dictionary, source: source})
+    def create(channel, secret, source)
+      Game.create(
+          channel: channel,
+          secret: secret.noun,
+          level: secret.level,
+          dictionary: secret.dictionary,
+          source: source
+      )
     end
 
     def find_by_id!(game_id)
       game = Game.find_by_id(game_id)
-      raise Errors::GameNotFoundException.new("Failed to find game. Is game in progress? Game ID: #{game_id}") unless game.present?
+      raise Errors::GameNotFoundException.new(
+          "Failed to find game. Is game in progress? Game ID: #{game_id}"
+      ) unless game.present?
 
       game
     end
 
     def find_by_channel!(channel)
       game = Game.where(channel: channel).last
-      raise Errors::GameNotFoundException.new("Failed to find game. Is game in progress? Channel ID: #{channel}") unless game.present?
+      raise Errors::GameNotFoundException.new(
+          "Failed to find game. Is game in progress? Channel ID: #{channel}"
+      ) unless game.present?
 
       game
     end
 
-    def find(options = {})
+    def find_games(options = {})
       Game.all.where(options.compact)
     end
 
     def guess(game, username, word, suggestion = false)
-      guess = Guess.where(game_id: game.id, word: word).take
-      if (guess.nil?)
-        match = match(word, game.secret)
-        guess = Guess.create!(match.merge(game_id: game.id, username: username, attempts: 1, suggestion: suggestion))
+      guess = Guess.find_or_create_by(game_id: game.id, word: word) do |guess|
+        guess.attempts = 0
+        guess.username = username
+        guess.suggestion = suggestion
 
-        game.status = match[:exact].present? ? :finished : :running
-        game.save!
-      else
-        guess.attempts += 1
-        guess.save!
+        guess.update(match(word, game.secret))
       end
+
+      guess.attempts += 1
+      guess.save!
+
+      guess.exact? ? game.finished! : game.running!
       guess
     end
 
@@ -42,7 +53,7 @@ class GameService
       bulls = bulls(guess.split(''), secret.split(''))
       cows = cows(guess.split(''), secret.split(''))
 
-      return {word: guess, bulls: bulls.compact.count, cows: cows.compact.count, exact: guess == secret}
+      return { word: guess, bulls: bulls.compact.count, cows: cows.compact.count, exact: guess == secret }
     end
 
     def bulls(guess, secret)
@@ -69,10 +80,10 @@ class GameService
     end
 
     def stop!(game)
-      raise 'Game has not started. Please start a new game using _/create_ command.' unless game.try(:in_progress?)
+      raise 'Game has not started. Please start a new game using _/create_ command.' unless game.in_progress?
 
       game.aborted!
-      game.save!
+      game
     end
 
     def validate_game!(game)

@@ -8,7 +8,7 @@ module Telegram
           TelegramMessenger.ask_level(channel)
 
           Telegram::CommandQueue.push{ TelegramMessenger.ask_language(channel) }
-          Telegram::CommandQueue.push{ TelegramMessenger.ask_create_game(channel) }
+          Telegram::CommandQueue.push{ TelegramMessenger.ask_length(channel) }
         end
       end
     end

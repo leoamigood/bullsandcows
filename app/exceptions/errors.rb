@@ -18,4 +18,13 @@ module Errors
     end
   end
 
+  class PermissionException < StandardError
+  end
+
+  class GameCommandStopNotPermittedException < PermissionException
+    def initialize
+      super('You are NOT allowed to _/stop_ this game. Only _admin_ or _creator_ is')
+    end
+  end
+
 end
