@@ -24,5 +24,8 @@
 # Ignore local secure settings
 .env.*.secret
 
+# Ignore test coverate data
+coverage/
+
 *.bak
 .byebug_history
