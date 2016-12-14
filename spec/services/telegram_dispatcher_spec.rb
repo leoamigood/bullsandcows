@@ -375,7 +375,7 @@ describe TelegramDispatcher, type: :service do
     it 'reveals one letter in a secret' do
       expect {
         expect(TelegramDispatcher.handle(message)).to match(/Secret word has letter _\w_ in it/)
-      }.to change{ game.reload.hints }.by(1)
+      }.to change{ game.hints.count }.by(1)
     end
   end
 
@@ -392,7 +392,7 @@ describe TelegramDispatcher, type: :service do
       it 'reveals specified matching letter in a secret' do
         expect {
           expect(TelegramDispatcher.handle(message)).to match(/Secret word has letter _c_ in it/)
-        }.to change{ game.reload.hints }.by(1)
+        }.to change{ game.hints.count }.by(1)
       end
     end
 
@@ -402,7 +402,7 @@ describe TelegramDispatcher, type: :service do
       it 'reveals the fact that the specified letter is NOT in a secret' do
         expect {
           expect(TelegramDispatcher.handle(message)).to match(/Secret word has NO letter _x_ in it/)
-        }.to change{ game.reload.hints }.by(1)
+        }.to change{ game.hints.count }.by(1)
       end
     end
   end

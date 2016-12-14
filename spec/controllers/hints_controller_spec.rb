@@ -8,7 +8,7 @@ describe HintsController, :type => :request  do
     it 'asks for any letter hint' do
       expect {
         post "/games/#{game.id}/hints"
-      }.to change{ game.reload.hints }.by(1) and expect_ok
+      }.to change { game.hints.count }.by(1) and expect_ok
 
       expect(json).to be
       expect(json['hint']).to be
@@ -23,7 +23,7 @@ describe HintsController, :type => :request  do
     it 'for a specified existent letter hint' do
       expect {
         post "/games/#{game.id}/hints", hint: 't'
-      }.to change{ game.reload.hints }.by(1) and expect_ok
+      }.to change{ game.hints.count }.by(1) and expect_ok
 
       expect(json).to be
       expect(json['hint']).to be
@@ -36,7 +36,7 @@ describe HintsController, :type => :request  do
     it 'for a specified non existent letter hint' do
       expect {
         post "/games/#{game.id}/hints", hint: 'z'
-      }.to change{ game.reload.hints }.by(1) and expect_ok
+      }.to change{ game.hints.count }.by(1) and expect_ok
 
       expect(json).to be
       expect(json['hint']).to be
@@ -44,6 +44,28 @@ describe HintsController, :type => :request  do
       expect(json['hint']['letter']).to eq('z')
 
       expect(json['game_link']).to match("/games/#{game.id}")
+    end
+
+    context 'with game having hints submitted' do
+      let!(:hint1) { create :hint, game: game, letter: 'o', hint: 'o' }
+      let!(:hint2) { create :hint, game: game, letter: 'a', hint: nil }
+      let!(:hint3) { create :hint, game: game, letter: nil, hint: 's' }
+
+      it 'lists all submitted hints' do
+        expect {
+          get "/games/#{game.id}/hints"
+        }.not_to change(game, :status) and expect_ok
+
+        expect(json).to be
+        expect(json['hints']).to be
+        expect(json['hints'].count).to eq(3)
+
+        expect(json['hints'][0]).to include('letter' => 'o', 'match' => true)
+        expect(json['hints'][1]).to include('letter' => 'a', 'match' => false)
+        expect(json['hints'][2]).to include('letter' => 's', 'match' => true)
+
+        expect(json['game_link']).to match("/games/#{game.id}")
+      end
     end
   end
 end

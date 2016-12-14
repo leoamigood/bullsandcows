@@ -102,6 +102,34 @@ describe GameService, type: :service do
       }.to change(game.reload, :status).to('finished')
     end
 
+    it 'asks for a random letter as a hint' do
+      expect {
+        hint = GameService.hint(game)
+
+        expect(game.secret).to include(hint)
+        expect(game.hints.count).to eq(1)
+      }.to change(Hint, :count).by 1
+    end
+
+    it 'submits matching letter as a hint' do
+      expect {
+        hint = GameService.hint(game, 'l')
+
+        expect(hint).to eq('l')
+        expect(game.hints.count).to eq(1)
+        expect(game.secret).to include(hint)
+      }.to change(Hint, :count).by 1
+    end
+
+    it 'submits not matching letter as a hint' do
+      expect {
+        hint = GameService.hint(game, 'a')
+
+        expect(hint).to be_nil
+        expect(game.hints.count).to eq(1)
+      }.to change(Hint, :count).by 1
+    end
+
     it 'aborts the game' do
       GameService.stop!(game)
 

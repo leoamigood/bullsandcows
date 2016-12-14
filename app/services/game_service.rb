@@ -72,9 +72,8 @@ class GameService
     end
 
     def hint(game, letter = nil)
-      hint = letter.present? ? game.secret.split('').detect { |l| l == letter } : game.secret[rand(game.secret.length)]
-      game.hints += 1
-      game.save!
+      hint = letter.present? ? detect_letter(game.secret, letter) : random_letter(game.secret)
+      Hint.create!(game_id: game.id, letter: letter, hint: hint)
 
       hint
     end
@@ -93,6 +92,16 @@ class GameService
     def validate_guess!(game, guess)
       # raise "Guess _#{guess}_ is not in dictionary, please try another word." unless Noun.find_by_noun(guess).present?
       raise "Your guess word _#{guess}_ has to be *#{game.secret.length}* letters long." if game.secret.length != guess.length
+    end
+
+    private
+
+    def detect_letter(secret, letter)
+      secret.split('').detect { |l| l == letter }
+    end
+
+    def random_letter(secret)
+      secret[rand(secret.length)]
     end
   end
 

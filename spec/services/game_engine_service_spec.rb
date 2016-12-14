@@ -50,7 +50,7 @@ describe GameEngineService, type: :service do
         expect(GameEngineService.hint(game)).to satisfy {
             |letter| game.secret.include?(letter)
         }
-      }.to change{ game.reload.hints }.by(1)
+      }.to change{ game.hints.count }.by(1)
     end
 
     it 'returns specified matching letter in a secret' do
@@ -58,13 +58,13 @@ describe GameEngineService, type: :service do
         expect(GameEngineService.hint(game, 's')).to satisfy {
             |letter| game.secret.include?(letter)
         }
-      }.to change{ game.reload.hints }.by(1)
+      }.to change{ game.hints.count }.by(1)
     end
 
     it 'returns nil for specified NON matching letter in a secret' do
       expect {
         expect(GameEngineService.hint(game, 'x')).to be_nil
-      }.to change{ game.reload.hints }.by(1)
+      }.to change{ game.hints.count }.by(1)
     end
   end
 

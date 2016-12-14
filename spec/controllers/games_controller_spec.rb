@@ -130,7 +130,7 @@ describe GamesController, :type => :request do
 
   context 'with game in progress with few guesses placed' do
     let!(:dictionary) { create :dictionary, lang: 'EN'}
-    let!(:game) { create :game, :running, :with_tries, secret: 'hostel', source: 'web', dictionary: dictionary }
+    let!(:game) { create :game, :running, :with_tries, :with_hints, secret: 'hostel', source: 'web', dictionary: dictionary }
 
     it 'gets game details' do
       expect {
@@ -145,7 +145,7 @@ describe GamesController, :type => :request do
       expect(json['game']['secret']).to eq('******')
       expect(json['game']['language']).to eq('EN')
       expect(json['game']['tries']).to eq(10)
-      expect(json['game']['hints']).to eq(0)
+      expect(json['game']['hints']).to eq(3)
 
       expect(json['game']['link']).to match('/games/\d+')
     end

@@ -4,7 +4,11 @@ class GuessesController < BaseApiController
     game = GameService.find_by_id!(validate[:game_id])
     guess = GameEngineService.guess(game, validate[:username], validate[:guess])
 
-    render json: { guess: Responses::Guess.new(guess), game_link: Responses::Game.link(game) }
+    render json: {
+        guess: Responses::Guess.new(guess),
+        game_link: Responses::Game.link(game),
+        game_stats: Responses::Game.stats(game)
+    }
   end
 
   def index

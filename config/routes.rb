@@ -59,7 +59,7 @@ Rails.application.routes.draw do
       get :action => 'best', :on => :collection, constraints: { query_string: /best=/ }
       get :action => 'zero', :on => :collection, constraints: { query_string: /zero=/ }
     end
-    resources :hints, :only => [:create]
+    resources :hints, :only => [:create, :index]
   end
 
   namespace :hooks do
