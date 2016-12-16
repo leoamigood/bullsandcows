@@ -63,8 +63,25 @@ Polls is a simple API allowing consumers to view polls and vote in them.
 + Request (application/json)
 
         {
-            "secret": "hostel"
+            "secret": "hostel",
+            "length": 6,
+            "language": "EN",
+            "complexity": "medium"
         }
+        
++ Attributes
+
+        + secret: `The secret word when user provided` (string, optional)
+        + length: `Secret word length when computer generated` (integer, optional)
+        + language: `Secret word complexity when computer generated` "EN" (enum, optional)
+            + "RU"
+            + "IT"
+            + "DE"
+        + complexity: `Secret word language when computer generated` "medium" (enum optional)
+            + "easy"
+            + "medium"
+            + "hard"
+        
 
 + Response 200 (application/json)
 
@@ -180,11 +197,37 @@ Polls is a simple API allowing consumers to view polls and vote in them.
             "attempts": 1,
             "exact": false
           },
-          "game_link": "/games/1"
+          "game_link": "/games/1",
+          "game_stats": {
+            "tries": 11,
+            "hints": 3
+          }
         }
         
 ## Hints [/games/{id}/hints]        
 
+### Get all hints for a game  [GET]
+
++ Response 200 (application/json)
+
+        {
+          "hints": [
+            {
+              "letter": "t",
+              "match": true,
+            },
+            {
+              "letter": "a",
+              "match": false,
+            },
+            {
+              "letter": "s",
+              "match": true,
+            }
+          ]
+          "game_link": "/games/2"
+        }
+        
 ### Request a game hint [POST]
 
 + Request (application/json)
@@ -201,4 +244,4 @@ Polls is a simple API allowing consumers to view polls and vote in them.
             "match": true
           },
           "game_link": "/games/2"
-        }
+        }        
