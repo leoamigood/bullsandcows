@@ -39,4 +39,12 @@ FactoryGirl.define do
       FactoryGirl.create(:guess, word: 'staple', game: game, bulls: 1, cows: 2)
     end
   end
+
+  trait :with_hints do
+    after :create do |game|
+      FactoryGirl.create(:hint, game: game, letter: 'o', hint: 'o')
+      FactoryGirl.create(:hint, game: game, letter: 'a', hint: nil)
+      FactoryGirl.create(:hint, game: game, letter: nil, hint: 's')
+    end
+  end
 end

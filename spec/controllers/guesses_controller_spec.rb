@@ -4,7 +4,7 @@ describe GuessesController, :type => :request  do
 
   context 'with a game started' do
     let!(:dictionary) { create :dictionary, lang: 'EN'}
-    let!(:game) { create :game, :running, :with_tries, secret: 'hostel', source: 'web', dictionary: dictionary }
+    let!(:game) { create :game, :running, :with_tries, :with_hints, secret: 'hostel', source: 'web', dictionary: dictionary }
 
     it 'submits non exact guess word' do
       expect {
@@ -21,6 +21,7 @@ describe GuessesController, :type => :request  do
       expect(json['guess']['exact']).to be(false)
 
       expect(json['game_link']).to match("/games/#{game.id}")
+      expect(json['game_stats']).to include('tries' => 11, 'hints' => 3)
     end
 
     it 'submits exact guess word' do
@@ -38,6 +39,7 @@ describe GuessesController, :type => :request  do
       expect(json['guess']['exact']).to be(true)
 
       expect(json['game_link']).to match("/games/#{game.id}")
+      expect(json['game_stats']).to include('tries' => 11, 'hints' => 3)
     end
 
     it 'gets all previously submitted guesses' do
@@ -47,7 +49,7 @@ describe GuessesController, :type => :request  do
 
       expect(json).to be
       expect(json['guesses']).to be
-      expect(json['guesses'].count).to eq(game.guesses.count)
+      expect(json['guesses'].count).to eq(10)
 
       expect(json['game_link']).to match("/games/#{game.id}")
     end

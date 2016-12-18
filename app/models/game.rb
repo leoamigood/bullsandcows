@@ -1,6 +1,7 @@
 class Game < ActiveRecord::Base
-  has_many :guesses
   belongs_to :dictionary
+  has_many :guesses
+  has_many :hints
 
   enum status: { created: 'created', running: 'running', finished: 'finished', aborted: 'aborted' }
   enum source: { telegram: 'telegram', web: 'web' }
