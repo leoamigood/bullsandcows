@@ -3,9 +3,9 @@ require 'rails_helper'
 describe Setting, type: :model do
 
   context 'given a dictionary with levels' do
-    let!(:easy) { create :dictionary_level, :easy }
-    let!(:medium) { create :dictionary_level, :medium }
-    let!(:hard) { create :dictionary_level, :hard }
+    let!(:easy) { create :dictionary_level, :easy_en }
+    let!(:medium) { create :dictionary_level, :medium_en }
+    let!(:hard) { create :dictionary_level, :hard_en }
 
     let!(:dictionary) { create :dictionary, :english, levels: [easy, medium, hard], lang: 'EN' }
 

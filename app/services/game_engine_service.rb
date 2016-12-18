@@ -9,11 +9,11 @@ class GameEngineService
       nouns = Noun.active
       nouns = nouns.by_length(options[:length]) if options[:length].present?
       nouns = nouns.in_language(options[:language]) if options[:language].present?
-      nouns = nouns.by_complexity(options[:complexity]) if options[:complexity].present?
+      nouns = nouns.by_complexity(options[:language], options[:complexity]) if options[:complexity].present?
 
       secret = nouns.order('RANDOM()').first
 
-      raise 'Unable to create the game. Please try different parameters' unless secret.present?
+      raise Errors::GameCreateException.new('Unable to create game. Please try different parameters') unless secret.present?
 
       GameService.create(channel, secret, source)
     end

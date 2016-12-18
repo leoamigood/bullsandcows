@@ -28,10 +28,20 @@ describe Noun, type: :model do
     end
 
     context 'with english dictionary complexity levels' do
-      let!(:hard) { create :dictionary_level, :hard, dictionary_id: english.id }
+      let!(:hard) { create :dictionary_level, :hard_en, dictionary_id: english.id }
 
-      it 'get nouns with specified language' do
-        expect(Noun.by_complexity('hard').pluck(:level)).to all(be_between(10, 15))
+      it 'get nouns with specified language and complexity' do
+        expect(Noun.by_complexity('EN', 'hard').pluck(:level)).to all(be_between(10, 15))
+      end
+    end
+
+    context 'with russian and english dictionaries complexity levels' do
+      let!(:hard_ru) { create :dictionary_level, :hard_ru, dictionary_id: russian.id }
+      let!(:hard_en) { create :dictionary_level, :hard_en, dictionary_id: english.id }
+
+      it 'get nouns with levels according specified language and complexity' do
+        expect(Noun.by_complexity('RU', 'medium').pluck(:level)).to all(be_between(3, 4))
+        expect(Noun.by_complexity('EN', 'hard').pluck(:level)).to all(be_between(10, 15))
       end
     end
   end
