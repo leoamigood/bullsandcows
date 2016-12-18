@@ -11,8 +11,8 @@ describe GameEngineService, type: :service do
     expect(game.level).not_to be
   end
 
-  context 'given russian dictionary with word levels' do
-    let!(:medium) { create :dictionary_level, :medium }
+  context 'given english dictionary with word levels and dictionary complexity levels breakdown' do
+    let!(:medium) { create :dictionary_level, :medium_en }
     let!(:dictionary) { create :dictionary, :english, levels: [medium] }
 
     context 'with length, complexity and language' do
@@ -31,13 +31,10 @@ describe GameEngineService, type: :service do
     context 'with word length, complexity but without language' do
       let!(:options) { { length: 6, complexity: 'medium' } }
 
-      it 'creates a game in language available in dictionaries' do
+      it 'fails to create game without language' do
         expect{
-          game = GameEngineService.create_by_options(channel, :telegram, options)
-
-          expect(game.secret.length).to eq(6)
-          expect(game.level).to be_between(7, 9)
-        }.to change(Game, :count).by 1
+          GameEngineService.create_by_options(channel, :telegram, options)
+        }.to raise_error Errors::GameCreateException
       end
     end
   end

@@ -20,7 +20,7 @@ describe GamesController, :type => :request do
   end
 
   context 'given dictionary in language with complexity levels' do
-    let!(:easy) { create :dictionary_level, :easy }
+    let!(:easy) { create :dictionary_level, :easy_ru }
     let!(:dictionary) { create :dictionary, :russian, levels: [easy] }
 
     it 'creates game with randomly selected secret word where only language specified' do

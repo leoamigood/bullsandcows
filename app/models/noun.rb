@@ -5,6 +5,9 @@ class Noun < ActiveRecord::Base
 
   scope :by_length, -> (length) { where("CHAR_LENGTH(noun) = #{length}") }
   scope :in_language, -> (language) { joins(:dictionary).where(dictionaries: {lang: language}) }
-  scope :by_complexity, -> (complexity) { where(:level => DictionaryLevel.find_by_complexity!(complexity).levels) }
+
+  scope :by_complexity, -> (language, complexity) {
+    where(:level => DictionaryLevel.where(lang: language, complexity: complexity).take.try(:levels))
+  }
 
 end

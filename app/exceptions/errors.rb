@@ -18,6 +18,9 @@ module Errors
     end
   end
 
+  class GameCreateException < StandardError
+  end
+
   class PermissionException < StandardError
   end
 
