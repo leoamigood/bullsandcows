@@ -42,7 +42,7 @@ describe GuessesController, :type => :request  do
       expect(json['game_stats']).to include('tries' => 11, 'hints' => 3)
     end
 
-    it 'gets all previously submitted guesses' do
+    it 'gets previously submitted guesses' do
       expect {
         get "/games/#{game.id}/guesses"
       }.not_to change(game, :status) and expect_ok
@@ -50,6 +50,18 @@ describe GuessesController, :type => :request  do
       expect(json).to be
       expect(json['guesses']).to be
       expect(json['guesses'].count).to eq(10)
+
+      expect(json['game_link']).to match("/games/#{game.id}")
+    end
+
+    it 'gets second page of previously submitted guesses' do
+      expect {
+        get "/games/#{game.id}/guesses?page=2&per_page=5"
+      }.not_to change(game, :status) and expect_ok
+
+      expect(json).to be
+      expect(json['guesses']).to be
+      expect(json['guesses'].count).to eq(5)
 
       expect(json['game_link']).to match("/games/#{game.id}")
     end

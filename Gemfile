@@ -3,6 +3,7 @@ source 'https://rubygems.org'
 
 # Bundle edge Rails instead: gem 'rails', github: 'rails/rails'
 gem 'rails', '4.2.5'
+gem 'rails-api'
 # Use sqlite3 as the database for Active Record
 # gem 'sqlite3'
 # gem 'mysql2'
@@ -37,6 +38,8 @@ gem 'sdoc', '~> 0.4.0', group: :doc
 gem 'telegram-bot-ruby'
 gem 'activerecord-import', '~> 0.4.0'
 gem 'rack-cors', :require => 'rack/cors'
+gem 'kaminari'
+gem 'api-pagination'
 
 group :development, :test do
   # Call 'byebug' anywhere in the code to stop execution and get a debugger console
