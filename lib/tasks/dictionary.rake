@@ -34,7 +34,13 @@ namespace :dictionary do
     min_level, max_level = args[:min_level], args[:max_level]
 
     dictionary = Dictionary.find_by_lang!(language)
-    DictionaryLevel.create!(dictionary_id: dictionary.id, complexity: complexity, min_level: min_level, max_level: max_level)
+    DictionaryLevel.create!(
+        dictionary_id: dictionary.id,
+        complexity: complexity,
+        min_level: min_level,
+        max_level: max_level,
+        lang: language
+    )
   end
 
 end
