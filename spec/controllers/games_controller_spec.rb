@@ -116,6 +116,15 @@ describe GamesController, :type => :request do
       expect(json['games']).to be_empty
     end
 
+    it 'gets paginated games collection' do
+      expect {
+        get '/games?per_page=2'
+      }.not_to change(Game, :count) and expect_ok
+
+      expect(json).to be
+      expect(json['games']).to be
+      expect(json['games'].count).to eq(2)
+    end
 
     it 'gets games and ignores unknown filter parameters' do
       expect {

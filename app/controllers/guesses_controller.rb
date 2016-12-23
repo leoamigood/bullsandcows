@@ -1,4 +1,5 @@
 class GuessesController < BaseApiController
+  include Rails::Pagination
 
   def create
     game = GameService.find_by_id!(validate[:game_id])
@@ -13,8 +14,9 @@ class GuessesController < BaseApiController
 
   def index
     game = Game.find_by_id!(validate[:game_id])
+    guesses = paginate game.guesses
 
-    render json: { guesses: game.guesses.map {|guess| Responses::Guess.new(guess)}, game_link: Responses::Game.link(game) }
+    render json: { guesses: guesses.map {|guess| Responses::Guess.new(guess)}, game_link: Responses::Game.link(game) }
   end
 
   def best

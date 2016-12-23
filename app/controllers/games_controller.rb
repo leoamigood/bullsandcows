@@ -1,18 +1,19 @@
 class GamesController < BaseApiController
+  include Rails::Pagination
 
   def create
     if params[:secret].present?
-      game = GameEngineService.create_by_word(session.id, :web, validate_create[:secret])
+      game = GameEngineService.create_by_word(session[:id], :web, validate_create[:secret])
       render json: { game: Responses::Game.new(game) }
     else
-      game = GameEngineService.create_by_options(session.id, :web, validate_create_by_options)
+      game = GameEngineService.create_by_options(session[:id], :web, validate_create_by_options)
       render json: { game: Responses::Game.new(game) }
     end
   end
 
   def index
     options = { status: validate_index[:status], source: validate_index[:source] }
-    games = GameService.find_games(options)
+    games = paginate GameService.find_games(options)
     render json: { games: games.map {|game| Responses::Game.new(game)} }
   end
 
