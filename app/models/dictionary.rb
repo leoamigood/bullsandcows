@@ -1,5 +1,5 @@
 class Dictionary < ActiveRecord::Base
-  enum lang: {:EN => 'EN', :RU => 'RU', :IT => 'IT', :DE => 'DE'}
+  enum lang: {:EN => 'EN', :RU => 'RU', :IT => 'IT', :DE => 'DE', :FR => 'FR'}
 
   has_many :nouns
   has_many :levels, :class_name => :DictionaryLevel
