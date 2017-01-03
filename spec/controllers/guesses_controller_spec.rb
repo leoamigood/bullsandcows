@@ -17,8 +17,8 @@ describe GuessesController, :type => :request  do
       expect(json['guess']['word']).to eq('corpus')
       expect(json['guess']['bulls']).to eq(1)
       expect(json['guess']['cows']).to eq(1)
-      expect(json['guess']['attempts']).to eq(1)
       expect(json['guess']['exact']).to be(false)
+      expect(json['guess']['created']).to be
 
       expect(json['game_link']).to match("/games/#{game.id}")
       expect(json['game_stats']).to include('tries' => 11, 'hints' => 3)
@@ -35,8 +35,8 @@ describe GuessesController, :type => :request  do
       expect(json['guess']['word']).to eq('hostel')
       expect(json['guess']['bulls']).to eq(6)
       expect(json['guess']['cows']).to eq(0)
-      expect(json['guess']['attempts']).to eq(1)
       expect(json['guess']['exact']).to be(true)
+      expect(json['guess']['created']).to be
 
       expect(json['game_link']).to match("/games/#{game.id}")
       expect(json['game_stats']).to include('tries' => 11, 'hints' => 3)

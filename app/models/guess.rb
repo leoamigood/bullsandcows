@@ -15,4 +15,8 @@ class Guess < ActiveRecord::Base
 
     return guesses || @relation
   end
+
+  def ==(other)
+    self.eql?(other)
+  end
 end
