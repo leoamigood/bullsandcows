@@ -14,9 +14,9 @@ class GuessesController < BaseApiController
 
   def index
     game = Game.find_by_id!(validate[:game_id])
-    guesses = paginate game.guesses
+    guesses = game.guesses.since(validate[:since])
 
-    render json: { guesses: guesses.map {|guess| Responses::Guess.new(guess)}, game_link: Responses::Game.link(game) }
+    render json: { guesses: paginate(guesses).map {|guess| Responses::Guess.new(guess)}, game_link: Responses::Game.link(game) }
   end
 
   def best
@@ -36,7 +36,7 @@ class GuessesController < BaseApiController
   private
 
   def validate
-    params.permit(:game_id, :username, :guess)
+    params.permit(:game_id, :username, :guess, :since)
   end
 
   def filter_params

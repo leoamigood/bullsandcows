@@ -66,6 +66,18 @@ describe GuessesController, :type => :request  do
       expect(json['game_link']).to match("/games/#{game.id}")
     end
 
+    it 'gets previously submitted guesses since time' do
+      expect {
+        get "/games/#{game.id}/guesses?since=#{game.guesses.last.created_at - 5.seconds}"
+      }.not_to change(game, :status) and expect_ok
+
+      expect(json).to be
+      expect(json['guesses']).to be
+      expect(json['guesses'].count).to eq(6)
+
+      expect(json['game_link']).to match("/games/#{game.id}")
+    end
+
     it 'gets N best guesses submitted guesses' do
       expect {
         get "/games/#{game.id}/guesses?best=3"
