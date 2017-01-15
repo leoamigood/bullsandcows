@@ -6,8 +6,8 @@ module Responses
       @word = guess.word
       @bulls = guess.bulls
       @cows = guess.cows
-      @attempts = guess.attempts
       @exact = guess.exact
+      @created = guess.created_at
     end
 
     def link(guess)
