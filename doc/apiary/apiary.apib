@@ -137,12 +137,13 @@ Polls is a simple API allowing consumers to view polls and vote in them.
             }
         }
 
-## Guesses [/games/{id}/guesses{?best}{?zero}]
+## Guesses [/games/{id}/guesses{?since}{?best}{?zero}]
 
-### Get all guesses for a game [GET]
+### Get guesses for the game [GET]
 
 + Parameters
 
+    + since: `2017-01-05T12:30:00Z` (optional, string) - datetime filter for delta guesses
     + best (number, optional) - Max number of best game guesses.
     + zero (number, optional) - Max number of zero game guesses.
     
