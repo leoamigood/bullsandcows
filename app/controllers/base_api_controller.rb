@@ -21,6 +21,10 @@ class BaseApiController < ApplicationController
     render json: { error: ex.message }, status: 500
   end
 
+  rescue_from ActionController::ParameterMissing do |ex|
+    render json: { error: ex.message }, status: 500
+  end
+
   def set_default_response_format
     request.format = :json
   end

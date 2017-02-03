@@ -4,7 +4,8 @@ describe TelegramDispatcher, type: :service do
   let!(:user) { '@Amig0' }
   let!(:chat_id) { 169778030 }
 
-  let!(:dictionary) { create :dictionary, :english, lang: 'RU'}
+  let!(:english) { create :dictionary, :english}
+  let!(:medium) { create :dictionary_level, :easy_en }
 
   context 'when /start command received' do
     let!(:message) { Telegram::Bot::Types::Message.new(text: '/start') }
@@ -46,6 +47,7 @@ describe TelegramDispatcher, type: :service do
   end
 
   context 'when /lang command received with selected language' do
+    let!(:russian) { create :dictionary, :russian}
     let!(:callbackQuery) { Telegram::Bot::Types::CallbackQuery.new(id: 729191086489033331, data: '/lang RU') }
 
     before do
@@ -127,6 +129,7 @@ describe TelegramDispatcher, type: :service do
 
   context 'when /create <number> command received' do
     let!(:message) { Telegram::Bot::Types::Message.new(text: '/create 6') }
+    let!(:settings) { create :setting, channel: chat_id, language: 'EN', dictionary: english, complexity: 'easy'}
 
     before do
       message.stub_chain(:chat, :id).and_return(chat_id)
@@ -408,7 +411,7 @@ describe TelegramDispatcher, type: :service do
   end
 
   context 'when /suggest <letters> command received with letters matching available suggestion' do
-    let!(:game) { create(:game, :telegram, :with_tries, secret: 'secret', channel: chat_id, dictionary: dictionary) }
+    let!(:game) { create(:game, :telegram, :with_tries, secret: 'secret', channel: chat_id, dictionary: english) }
 
     let!(:message) { Telegram::Bot::Types::Message.new(text: '/suggest re') }
 
@@ -425,7 +428,7 @@ describe TelegramDispatcher, type: :service do
   end
 
   context 'when /suggest <letters> command received not matching any suggestions' do
-    let!(:game) { create(:game, :telegram, :with_tries, secret: 'secret', channel: chat_id, dictionary: dictionary) }
+    let!(:game) { create(:game, :telegram, :with_tries, secret: 'secret', channel: chat_id, dictionary: english) }
 
     let!(:message) { Telegram::Bot::Types::Message.new(text: '/suggest ku') }
 

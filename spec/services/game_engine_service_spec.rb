@@ -15,6 +15,12 @@ describe GameEngineService, type: :service do
     let!(:medium) { create :dictionary_level, :medium_en }
     let!(:dictionary) { create :dictionary, :english, levels: [medium] }
 
+    it 'fails to create a game with only word length' do
+      expect {
+        GameEngineService.create_by_options(channel, :telegram, length: 6)
+      }.to raise_error Errors::GameCreateException
+    end
+
     context 'with length, complexity and language' do
       let!(:options) { { length: 5, complexity: 'medium', language: 'EN' } }
 

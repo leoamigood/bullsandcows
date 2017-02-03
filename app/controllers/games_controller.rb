@@ -41,6 +41,9 @@ class GamesController < BaseApiController
   end
 
   def validate_create_by_options
+    params.require(:length)
+    params.require(:language)
+    params.require(:complexity)
     params.permit(:length, :language, :complexity)
   end
 
