@@ -29,14 +29,15 @@ class GameEngineService
       GameService.hint(game, letter)
     end
 
-    def suggest(game, username, letters)
+    def suggest(game, username, letters = nil)
       GameService.validate_game!(game)
-      suggestion = Noun.
+      nouns = Noun.
           where(dictionary_id: game.dictionary_id).
           where('char_length(noun) = ?', game.secret.length).
-          where("noun LIKE '%#{letters}%'").
-          where("noun <> '#{game.secret}'").
-          order('RANDOM()').first
+          where("noun <> '#{game.secret}'")
+
+      nouns = nouns.where("noun LIKE '%#{letters}%'") if letters.present?
+      suggestion = nouns.order('RANDOM()').first
 
       GameService.guess(game, username, suggestion.noun.downcase, suggestion = true) if suggestion.present?
     end
@@ -46,14 +47,14 @@ class GameEngineService
       game.guesses
     end
 
-    def best(channel, limit = 8)
+    def best(channel, limit)
       game = GameService.find_by_channel!(channel)
-      game.best(limit)
+      game.best(limit.try(:to_i))
     end
 
-    def zero(channel, limit = 5)
+    def zero(channel)
       game = GameService.find_by_channel!(channel)
-      game.zero(limit)
+      game.zero
     end
 
     def language(language)

@@ -64,9 +64,6 @@ class TelegramDispatcher
           Telegram::Command::Guess.execute(channel, message, $~['guess'])
 
         when Telegram::CommandRoute::HINT
-          Telegram::Command::Hint.execute(channel)
-
-        when Telegram::CommandRoute::HINT_ALPHA
           Telegram::Command::Hint.execute(channel, $~['letter'])
 
         when Telegram::CommandRoute::SUGGEST
@@ -77,11 +74,7 @@ class TelegramDispatcher
           TelegramMessenger.tries(guesses)
 
         when Telegram::CommandRoute::BEST
-          guesses = GameEngineService.best(channel)
-          TelegramMessenger.best(guesses)
-
-        when Telegram::CommandRoute::BEST_DIGIT
-          guesses = GameEngineService.best(channel,  $~['best'].to_i)
+          guesses = GameEngineService.best(channel, $~['best'].try(:to_i))
           TelegramMessenger.best(guesses)
 
         when Telegram::CommandRoute::ZERO

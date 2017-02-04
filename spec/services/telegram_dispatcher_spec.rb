@@ -410,6 +410,23 @@ describe TelegramDispatcher, type: :service do
     end
   end
 
+  context 'when /suggest command received' do
+    let!(:game) { create(:game, :telegram, secret: 'secret', channel: chat_id, dictionary: english) }
+
+    let!(:message) { Telegram::Bot::Types::Message.new(text: '/suggest') }
+
+    before do
+      message.stub_chain(:chat, :id).and_return(chat_id)
+      message.stub_chain(:from, :username).and_return(user)
+    end
+
+    it 'suggests a word with matching number of letters' do
+      expect {
+        expect(TelegramDispatcher.handle(message)).to match('Suggestion: _\w{6}_')
+      }.to change{ game.guesses.count }.by(1)
+    end
+  end
+
   context 'when /suggest <letters> command received with letters matching available suggestion' do
     let!(:game) { create(:game, :telegram, :with_tries, secret: 'secret', channel: chat_id, dictionary: english) }
 
