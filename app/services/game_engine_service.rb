@@ -29,6 +29,11 @@ class GameEngineService
       GameService.hint(game, letter)
     end
 
+    def open(game, number)
+      GameService.validate_game!(game)
+      GameService.open(game, number)
+    end
+
     def suggest(game, username, letters = nil)
       GameService.validate_game!(game)
       nouns = Noun.
@@ -63,7 +68,6 @@ class GameEngineService
 
       lang
     end
-
 
     def settings(channel, attributes)
       setting = Setting.find_or_create_by!(channel: channel)

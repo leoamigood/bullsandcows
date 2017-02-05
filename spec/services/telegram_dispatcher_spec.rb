@@ -410,6 +410,34 @@ describe TelegramDispatcher, type: :service do
     end
   end
 
+  context 'when /hint command received with a <number>' do
+    let!(:game) { create(:game, :telegram, :with_tries, secret: 'secret', channel: chat_id) }
+
+    before do
+      message.stub_chain(:chat, :id).and_return(chat_id)
+    end
+
+    context 'with a matching letter' do
+      let!(:message) { Telegram::Bot::Types::Message.new(text: '/hint 2') }
+
+      it 'reveals specified number of letter in a secret' do
+        expect {
+          expect(TelegramDispatcher.handle(message)).to match(/Secret word has letter _e_ in it/)
+        }.to change{ game.hints.count }.by(1)
+      end
+    end
+
+    context 'with a number that is over the max number of letters' do
+      let!(:message) { Telegram::Bot::Types::Message.new(text: '/hint 7') }
+
+      xit 'raises error that number is out of bounds' do
+        expect {
+          TelegramDispatcher.handle(message)
+        }.to raise_error
+      end
+    end
+  end
+
   context 'when /suggest command received' do
     let!(:game) { create(:game, :telegram, secret: 'secret', channel: chat_id, dictionary: english) }
 

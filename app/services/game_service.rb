@@ -78,6 +78,13 @@ class GameService
       hint
     end
 
+    def open(game, number)
+      hint = game.secret[number - 1]
+      Hint.create!(game_id: game.id, hint: hint)
+
+      hint
+    end
+
     def stop!(game)
       raise 'Game has not started. Please start a new game using _/create_ command.' unless game.in_progress?
 
@@ -90,7 +97,6 @@ class GameService
     end
 
     def validate_guess!(game, guess)
-      # raise "Guess _#{guess}_ is not in dictionary, please try another word." unless Noun.find_by_noun(guess).present?
       raise "Your guess word _#{guess}_ has to be *#{game.secret.length}* letters long." if game.secret.length != guess.length
     end
 

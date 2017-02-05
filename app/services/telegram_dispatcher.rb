@@ -63,8 +63,11 @@ class TelegramDispatcher
         when Telegram::CommandRoute::GUESS
           Telegram::Command::Guess.execute(channel, message, $~['guess'])
 
-        when Telegram::CommandRoute::HINT
-          Telegram::Command::Hint.execute(channel, $~['letter'])
+        when Telegram::CommandRoute::HINT_ALPHA
+          Telegram::Command::Hint.execute_by_letter(channel, $~['letter'])
+
+        when Telegram::CommandRoute::HINT_DIGIT
+          Telegram::Command::Hint.execute_by_number(channel, $~['number'])
 
         when Telegram::CommandRoute::SUGGEST
           Telegram::Command::Suggest.execute(channel, message, $~['letters'])
