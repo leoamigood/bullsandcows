@@ -23,18 +23,6 @@ describe GamesController, :type => :request do
     let!(:easy) { create :dictionary_level, :easy_ru }
     let!(:dictionary) { create :dictionary, :russian, levels: [easy] }
 
-    it 'creates game with randomly selected secret word where only language specified' do
-      expect {
-        post '/games', language: 'RU'
-      }.to change(Game, :count).by(1) and expect_ok
-
-      expect(json).to be
-      expect(json['game']).to be
-      expect(json['game']['status']).to eq('created')
-      expect(json['game']['secret']).to be
-      expect(json['game']['language']).to eq('RU')
-    end
-
     it 'creates game with randomly selected secret word where length, language, complexity specified' do
       data = {
           length: 5,
@@ -51,6 +39,12 @@ describe GamesController, :type => :request do
       expect(json['game']['status']).to eq('created')
       expect(json['game']['secret']).to eq('*****')
       expect(json['game']['language']).to eq('RU')
+    end
+
+    it 'fails to create game with with only language specified' do
+      expect {
+        post '/games', language: 'RU'
+      }.not_to change(Game, :count) and expect_error
     end
   end
 

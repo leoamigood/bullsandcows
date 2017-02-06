@@ -17,11 +17,11 @@ class Game < ActiveRecord::Base
   enum source: { telegram: 'telegram', web: 'web' }
 
   def best(limit = nil)
-    limit.present? ? guesses.sort.first(limit.to_i) : guesses
+    guesses.sort.first(limit || 8)
   end
 
   def zero(limit = nil)
-    limit.present? ? guesses.where(bulls: 0, cows: 0).first(limit.to_i) : guesses.where(bulls: 0, cows: 0)
+    guesses.where(bulls: 0, cows: 0).first(limit || 5)
   end
 
   def in_progress?

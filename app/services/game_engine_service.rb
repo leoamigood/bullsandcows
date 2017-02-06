@@ -6,12 +6,11 @@ class GameEngineService
     end
 
     def create_by_options(channel, source, options)
-      nouns = Noun.active
-      nouns = nouns.by_length(options[:length]) if options[:length].present?
-      nouns = nouns.in_language(options[:language]) if options[:language].present?
-      nouns = nouns.by_complexity(options[:language], options[:complexity]) if options[:complexity].present?
-
-      secret = nouns.order('RANDOM()').first
+      secret = Noun.active.
+          by_length(options[:length]).
+          in_language(options[:language]).
+          by_complexity(options[:language], options[:complexity]).
+          order('RANDOM()').first
 
       raise Errors::GameCreateException.new('Unable to create game. Please try different parameters') unless secret.present?
 
@@ -30,14 +29,20 @@ class GameEngineService
       GameService.hint(game, letter)
     end
 
-    def suggest(game, username, letters)
+    def open(game, number)
       GameService.validate_game!(game)
-      suggestion = Noun.
+      GameService.open(game, number)
+    end
+
+    def suggest(game, username, letters = nil)
+      GameService.validate_game!(game)
+      nouns = Noun.
           where(dictionary_id: game.dictionary_id).
           where('char_length(noun) = ?', game.secret.length).
-          where("noun LIKE '%#{letters}%'").
-          where("noun <> '#{game.secret}'").
-          order('RANDOM()').first
+          where("noun <> '#{game.secret}'")
+
+      nouns = nouns.where("noun LIKE '%#{letters}%'") if letters.present?
+      suggestion = nouns.order('RANDOM()').first
 
       GameService.guess(game, username, suggestion.noun.downcase, suggestion = true) if suggestion.present?
     end
@@ -47,14 +52,14 @@ class GameEngineService
       game.guesses
     end
 
-    def best(channel, limit = 8)
+    def best(channel, limit)
       game = GameService.find_by_channel!(channel)
-      game.best(limit)
+      game.best(limit.try(:to_i))
     end
 
-    def zero(channel, limit = 5)
+    def zero(channel)
       game = GameService.find_by_channel!(channel)
-      game.zero(limit)
+      game.zero
     end
 
     def language(language)
@@ -63,7 +68,6 @@ class GameEngineService
 
       lang
     end
-
 
     def settings(channel, attributes)
       setting = Setting.find_or_create_by!(channel: channel)

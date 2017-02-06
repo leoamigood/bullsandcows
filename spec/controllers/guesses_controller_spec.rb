@@ -102,14 +102,14 @@ describe GuessesController, :type => :request  do
       expect(json['game_link']).to match("/games/#{game.id}")
     end
 
-    it 'gets ALL best submitted guesses' do
+    it 'gets best submitted guesses' do
       expect {
         get "/games/#{game.id}/guesses?best="
       }.not_to change(game, :status) and expect_ok
 
       expect(json).to be
       expect(json['best']).to be
-      expect(json['best'].count).to eq(game.guesses.count)
+      expect(json['best'].count).to eq(8)
 
       expect(json['game_link']).to match("/games/#{game.id}")
     end

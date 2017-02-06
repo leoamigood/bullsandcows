@@ -4,7 +4,8 @@ describe TelegramDispatcher, type: :service do
   let!(:user) { '@Amig0' }
   let!(:chat_id) { 169778030 }
 
-  let!(:dictionary) { create :dictionary, :english, lang: 'RU'}
+  let!(:english) { create :dictionary, :english}
+  let!(:medium) { create :dictionary_level, :easy_en }
 
   context 'when /start command received' do
     let!(:message) { Telegram::Bot::Types::Message.new(text: '/start') }
@@ -46,6 +47,7 @@ describe TelegramDispatcher, type: :service do
   end
 
   context 'when /lang command received with selected language' do
+    let!(:russian) { create :dictionary, :russian}
     let!(:callbackQuery) { Telegram::Bot::Types::CallbackQuery.new(id: 729191086489033331, data: '/lang RU') }
 
     before do
@@ -127,6 +129,7 @@ describe TelegramDispatcher, type: :service do
 
   context 'when /create <number> command received' do
     let!(:message) { Telegram::Bot::Types::Message.new(text: '/create 6') }
+    let!(:settings) { create :setting, channel: chat_id, language: 'EN', dictionary: english, complexity: 'easy'}
 
     before do
       message.stub_chain(:chat, :id).and_return(chat_id)
@@ -407,8 +410,53 @@ describe TelegramDispatcher, type: :service do
     end
   end
 
+  context 'when /hint command received with a <number>' do
+    let!(:game) { create(:game, :telegram, :with_tries, secret: 'secret', channel: chat_id) }
+
+    before do
+      message.stub_chain(:chat, :id).and_return(chat_id)
+    end
+
+    context 'with a matching letter' do
+      let!(:message) { Telegram::Bot::Types::Message.new(text: '/hint 2') }
+
+      it 'reveals specified number of letter in a secret' do
+        expect {
+          expect(TelegramDispatcher.handle(message)).to match(/Secret word has letter _e_ in it/)
+        }.to change{ game.hints.count }.by(1)
+      end
+    end
+
+    context 'with a number that is over the max number of letters' do
+      let!(:message) { Telegram::Bot::Types::Message.new(text: '/hint 7') }
+
+      xit 'raises error that number is out of bounds' do
+        expect {
+          TelegramDispatcher.handle(message)
+        }.to raise_error
+      end
+    end
+  end
+
+  context 'when /suggest command received' do
+    let!(:game) { create(:game, :telegram, secret: 'secret', channel: chat_id, dictionary: english) }
+
+    let!(:message) { Telegram::Bot::Types::Message.new(text: '/suggest') }
+
+    before do
+      message.stub_chain(:chat, :id).and_return(chat_id)
+      message.stub_chain(:from, :username).and_return(user)
+    end
+
+    it 'suggests a word with matching number of letters' do
+      expect {
+        expect(TelegramDispatcher.handle(message)).to match('Suggestion: _\w{6}_')
+      }.to change{ game.guesses.count }.by(1)
+    end
+  end
+
   context 'when /suggest <letters> command received with letters matching available suggestion' do
-    let!(:game) { create(:game, :telegram, :with_tries, secret: 'secret', channel: chat_id, dictionary: dictionary) }
+    let!(:game) { create(:game, :telegram, :with_tries, secret: 'secret', channel: chat_id, dictionary: english) }
 
     let!(:message) { Telegram::Bot::Types::Message.new(text: '/suggest re') }
 
@@ -425,7 +473,7 @@ describe TelegramDispatcher, type: :service do
   end
 
   context 'when /suggest <letters> command received not matching any suggestions' do
-    let!(:game) { create(:game, :telegram, :with_tries, secret: 'secret', channel: chat_id, dictionary: dictionary) }
+    let!(:game) { create(:game, :telegram, :with_tries, secret: 'secret', channel: chat_id, dictionary: english) }
 
     let!(:message) { Telegram::Bot::Types::Message.new(text: '/suggest ku') }
 
