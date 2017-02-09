@@ -4,16 +4,22 @@ describe GameService, type: :service do
   let!(:user) { '@Amig0' }
   let!(:channel) { 169778030 }
 
-  context 'with a secret word' do
-    let!(:secret) { create(:noun, noun: 'secret')}
+  context 'with game not started' do
+    context 'with a secret word' do
+      let!(:secret) { create(:noun, noun: 'secret')}
 
-    it 'creates a game' do
-      game = GameService.create(channel, secret, :web)
+      it 'creates a game' do
+        game = GameService.create(channel, secret, :web)
 
-      expect(game).not_to be(nil)
-      expect(game.secret).to eq('secret')
-      expect(game.status).to eq('created')
-      expect(game.dictionary).to eq(nil)
+        expect(game).not_to be(nil)
+        expect(game.secret).to eq('secret')
+        expect(game.status).to eq('created')
+        expect(game.dictionary).to eq(nil)
+      end
+    end
+
+    it 'checks that game is not in progress' do
+      expect(GameService.in_progress?(channel)).to eq(false)
     end
   end
 
@@ -136,6 +142,17 @@ describe GameService, type: :service do
       expect(game.status).to eq('aborted')
     end
 
+    it 'checks that game is not in progress' do
+      expect(GameService.in_progress?(channel)).to eq(true)
+    end
+  end
+
+  context 'with a game finished' do
+    let!(:game) { create(:game, channel: channel, status: :finished)}
+
+    it 'checks that game is in progress' do
+      expect(GameService.in_progress?(channel)).to eq(false)
+    end
   end
 
   context 'with a secret word given' do
