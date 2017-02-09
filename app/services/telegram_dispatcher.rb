@@ -103,7 +103,7 @@ class TelegramDispatcher
           TelegramMessenger.unknown_command(message)
 
         else
-          Telegram::Command::Guess.execute(channel, message, command)
+          Telegram::Command::Guess.execute(channel, message, command) if GameService.in_progress?(channel)
       end
     end
 

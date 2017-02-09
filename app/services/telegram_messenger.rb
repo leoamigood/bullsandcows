@@ -71,11 +71,11 @@ class TelegramMessenger
     end
 
     def hint(letter)
-      "Secret word has letter _#{letter}_ in it"
+      "Secret word has letter *#{letter}* in it"
     end
 
     def no_hint(letter)
-      "Secret word has NO letter _#{letter}_ in it"
+      "Secret word has NO letter *#{letter}* in it"
     end
 
     def suggestion(guess)
@@ -142,26 +142,30 @@ class TelegramMessenger
 
     def help
 
-      # lang   - Use /lang to set secret word language
-      # create - Use /create [word]|[number] to create a game
-      # guess  - Use /guess <word> to place a guess for the secret
-      # tries  - Use /tries to show previous guess attempts
-      # best   - Use /best [number] to see top guesses
-      # hint   - Use /hint to reveal a random letter in a secret
-      # zero   - Use /zero to see guesses with zero matches
-      # level  - Use /level to set game complexity level
-      # stop   - Use /stop to abort the game and show secret
+      # start   - Use /start to start game bot
+      # level   - Use /level to set game complexity level
+      # lang    - Use /lang to set secret word language
+      # create  - Use /create [word]|[number] to create a game
+      # guess   - Use /guess <word> to place a guess for the secret
+      # tries   - Use /tries to show previous guess attempts
+      # best    - Use /best [number] to see top guesses
+      # zero    - Use /zero to see guesses with zero matches
+      # hint    - Use /hint to reveal a random letter in a secret
+      # suggest - Use /suggest [letters] for bot to suggest a word
+      # stop    - Use /stop to abort the game and show secret
 
       lines = [
           'Here is the list of available commands:',
+          'Use _/start_ to start the game bot',
+          'Use _/level_ to set game complexity level',
           'Use _/lang_ to set secret word language',
           'Use _/create [word]|[number]_ to create a game',
           'Use _/guess <word>_ to place a guess for the secret',
           'Use _/tries_ to show previous guess attempts',
           'Use _/best [number]_ to see top guesses',
-          'Use _/hint_ to reveal a random letter in a secret',
           'Use _/zero_ to see guesses with zero matches',
-          'Use _/level_ to set game complexity level',
+          'Use _/hint_ [letter]|[number] to reveal a letter in a secret',
+          'Use _/suggest_ [letters] for bot to suggest a word',
           'Use _/stop_ to abort the game and show secret'
       ]
       lines.join("\n")

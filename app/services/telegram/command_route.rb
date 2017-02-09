@@ -15,7 +15,7 @@ module Telegram
   end
 
   class CommandRoute
-    BOT_REGEXP = '(?:@BullsAndCowsWordsBot)?'
+    BOT_REGEXP = '(?:@\w+)?'
 
     BEST         = /^#{Action::BEST}#{BOT_REGEXP}\s*(?<best>[[:digit:]]+)?$/i
     CREATE       = /^#{Action::CREATE}#{BOT_REGEXP}$/i

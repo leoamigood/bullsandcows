@@ -92,6 +92,11 @@ class GameService
       game
     end
 
+    def in_progress?(channel)
+      game = Game.where(channel: channel).last
+      game.present? ? game.in_progress? : false
+    end
+
     def validate_game!(game)
       raise Errors::GameNotStartedException.new(game, 'Game has not started. Please start a new game using _/create_ command.') unless game.in_progress?
     end
