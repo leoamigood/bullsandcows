@@ -64,7 +64,7 @@ class TelegramMessenger
     end
 
     def guess(guess)
-      text = "Guess: _#{guess.word}_, *Bulls: #{guess.bulls}*, *Cows: #{guess.cows}*\n"
+      text = "Guess #{guess.game.guesses_count}: _#{guess.word}_, *Bulls: #{guess.bulls}*, *Cows: #{guess.cows}*\n"
       text += "Congratulations! You guessed it with *#{guess.game.guesses.length}* tries" if guess.exact?
 
       text

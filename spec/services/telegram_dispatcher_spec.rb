@@ -149,7 +149,7 @@ describe TelegramDispatcher, type: :service do
 
       it 'replies with guess result' do
         expect {
-          expect(TelegramDispatcher.handle(message)).to include('Guess: _flight_')
+          expect(TelegramDispatcher.handle(message)).to include('Guess 11: _flight_')
           expect(game.reload.running?).to eq(true)
         }.to change(Guess, :count).by(1)
       end
@@ -471,7 +471,7 @@ describe TelegramDispatcher, type: :service do
 
       it 'replies with guess result' do
         expect {
-          expect(TelegramDispatcher.handle(message)).to include('Guess: _flight_')
+          expect(TelegramDispatcher.handle(message)).to include('Guess 11: _flight_')
           expect(game.reload.running?).to eq(true)
         }.to change(Guess, :count).by(1)
       end
