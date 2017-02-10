@@ -492,6 +492,21 @@ describe TelegramDispatcher, type: :service do
         }.to change(Guess, :count).by(1)
       end
     end
+
+    context 'when non command multiple words is received with exact guess' do
+      let!(:message) { Telegram::Bot::Types::Message.new(text: 'hello world') }
+
+      before do
+        message.stub_chain(:chat, :id).and_return(chat_id)
+        message.stub_chain(:from, :username).and_return(user)
+      end
+
+      it 'ignore the message' do
+        expect {
+          expect(TelegramDispatcher.handle(message)).to be_nil
+        }.not_to change(Guess, :count)
+      end
+    end
   end
 
   context 'with russian secret word game' do

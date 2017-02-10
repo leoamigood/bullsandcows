@@ -63,6 +63,9 @@ class TelegramDispatcher
         when Telegram::CommandRoute::GUESS
           Telegram::Command::Guess.execute(channel, message, $~['guess'])
 
+        when Telegram::CommandRoute::WORD
+          Telegram::Command::Guess.execute(channel, message, command) if GameService.in_progress?(channel)
+
         when Telegram::CommandRoute::HINT_ALPHA
           Telegram::Command::Hint.execute_by_letter(channel, $~['letter'])
 
@@ -101,9 +104,6 @@ class TelegramDispatcher
 
         when Telegram::CommandRoute::OTHER
           TelegramMessenger.unknown_command(message)
-
-        else
-          Telegram::Command::Guess.execute(channel, message, command) if GameService.in_progress?(channel)
       end
     end
 
