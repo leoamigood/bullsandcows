@@ -60,7 +60,10 @@ class TelegramMessenger
     end
 
     def game_created(game)
-      "Game created with #{game.secret.length} letters in the secret word."
+      message = "Game created: #{game.secret.length} letters."
+      message += " Language: #{game.dictionary.lang}" if game.dictionary.present?
+
+      message
     end
 
     def guess(guess)

@@ -24,7 +24,7 @@ describe TelegramDispatcher, type: :service do
         expect {
           expect(TelegramDispatcher.handle(message)).to be
           expect(TelegramMessenger).to have_received(:send_message).with(chat_id, /Welcome to Bulls and Cows!/).once
-          expect(TelegramMessenger).to have_received(:send_message).with(chat_id, 'Select game level:', markup).once
+          expect(TelegramMessenger).to have_received(:send_message).with(chat_id, 'Select game language:', markup).once
         }.to change(Telegram::CommandQueue, :size).by(2)
       end
     end
@@ -54,19 +54,19 @@ describe TelegramDispatcher, type: :service do
       end
 
       it 'replies with a game created text' do
-        expect(TelegramDispatcher.handle(message)).to include('Game created with 6 letters in the secret word')
+        expect(TelegramDispatcher.handle(message)).to include('Game created: 6 letters')
       end
     end
 
     context 'when /create multiple spaces in between <word> command received' do
-      let!(:message) { Telegram::Bot::Types::Message.new(text: '/create         коитус') }
+      let!(:message) { Telegram::Bot::Types::Message.new(text: '/create коитус') }
 
       before do
         message.stub_chain(:chat, :id).and_return(chat_id)
       end
 
       it 'replies with a game created text' do
-        expect(TelegramDispatcher.handle(message)).to include('Game created with 6 letters in the secret word')
+        expect(TelegramDispatcher.handle(message)).to include('Game created: 6 letters.')
       end
     end
 
@@ -81,7 +81,7 @@ describe TelegramDispatcher, type: :service do
       end
 
       it 'replies with a game created text' do
-        expect(TelegramDispatcher.handle(message)).to include('Game created with 6 letters in the secret word')
+        expect(TelegramDispatcher.handle(message)).to include('Game created: 6 letters. Language: EN')
       end
     end
 
