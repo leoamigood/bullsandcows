@@ -1,7 +1,7 @@
 require 'rails_helper'
 
 describe GameEngineService, type: :service do
-  let!(:channel) { Random.rand }
+  let!(:channel) { Random.rand(@MAX_INT_VALUE) }
 
   it 'create a game with specified secret word' do
     game = GameEngineService.create_by_word(channel, :telegram, 'magic')

@@ -17,11 +17,11 @@ class GameEngineService
       GameService.create(channel, secret, source)
     end
 
-    def guess(game, username, word)
+    def guess(game, user, word)
       GameService.validate_game!(game)
       GameService.validate_guess!(game, word)
 
-      GameService.guess(game, username, word)
+      GameService.guess(game, user, word)
     end
 
     def hint(game, letter = nil)
@@ -34,7 +34,7 @@ class GameEngineService
       GameService.open(game, number)
     end
 
-    def suggest(game, username, letters = nil)
+    def suggest(game, user, letters = nil)
       GameService.validate_game!(game)
       nouns = Noun.
           where(dictionary_id: game.dictionary_id).
@@ -44,7 +44,7 @@ class GameEngineService
       nouns = nouns.where("noun LIKE '%#{letters}%'") if letters.present?
       suggestion = nouns.order('RANDOM()').first
 
-      GameService.guess(game, username, suggestion.noun.downcase, suggestion = true) if suggestion.present?
+      GameService.guess(game, user, suggestion.noun.downcase, suggestion = true) if suggestion.present?
     end
 
     def tries(channel)

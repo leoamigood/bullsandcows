@@ -40,6 +40,7 @@ gem 'activerecord-import', '~> 0.4.0'
 gem 'rack-cors', :require => 'rack/cors'
 gem 'kaminari'
 gem 'api-pagination'
+gem 'attr_extras'
 
 group :development, :test do
   # Call 'byebug' anywhere in the code to stop execution and get a debugger console
