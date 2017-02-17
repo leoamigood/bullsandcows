@@ -1,8 +1,8 @@
 require 'rails_helper'
 
 describe GameService, type: :service do
-  let!(:user) { '@Amig0' }
-  let!(:channel) { 169778030 }
+  let!(:channel) { Random.rand(@MAX_INT_VALUE) }
+  let!(:user) { User.new(Random.rand(@MAX_INT_VALUE), '@Amig0') }
 
   context 'with game not started' do
     context 'with a secret word' do

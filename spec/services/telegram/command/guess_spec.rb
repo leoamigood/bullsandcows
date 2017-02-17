@@ -2,7 +2,7 @@ require 'rails_helper'
 
 describe Telegram::Command::Guess, type: :service do
   context 'given created game' do
-    let!(:user) { '@Amig0' }
+    let!(:user) { User.new(id = Random.rand, name = '@Amig0') }
     let!(:channel) { 'telegram-game-channel' }
 
     let!(:game) { create(:game, :telegram, secret: 'secret', channel: channel) }
@@ -13,7 +13,8 @@ describe Telegram::Command::Guess, type: :service do
       allow(GameService).to receive(:find_by_channel!).and_return(game)
 
       message.stub_chain(:chat, :id).and_return(channel)
-      message.stub_chain(:from, :username).and_return(user)
+      message.stub_chain(:from, :id).and_return(user.id)
+      message.stub_chain(:from, :username).and_return(user.name)
 
       allow(TelegramMessenger).to receive(:guess)
     end

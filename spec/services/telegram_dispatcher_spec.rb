@@ -1,8 +1,8 @@
 require 'rails_helper'
 
 describe TelegramDispatcher, type: :service do
-  let!(:user) { '@Amig0' }
-  let!(:chat_id) { 169778030 }
+  let!(:channel) { Random.rand(@MAX_INT_VALUE) }
+  let!(:user) { User.new(id = Random.rand(@MAX_INT_VALUE), name = '@Amig0') }
 
   let!(:english) { create :dictionary, :english}
   let!(:russian) { create :dictionary, :russian}
@@ -15,7 +15,7 @@ describe TelegramDispatcher, type: :service do
       before do
         allow(TelegramMessenger).to receive(:send_message).and_return(Telegram::Bot::Types::Message.new)
 
-        message.stub_chain(:chat, :id).and_return(chat_id)
+        message.stub_chain(:chat, :id).and_return(channel)
       end
 
       let(:markup) { instance_of(Telegram::Bot::Types::InlineKeyboardMarkup) }
@@ -23,8 +23,8 @@ describe TelegramDispatcher, type: :service do
       it 'replies with a welcome text' do
         expect {
           expect(TelegramDispatcher.handle(message)).to be
-          expect(TelegramMessenger).to have_received(:send_message).with(chat_id, /Welcome to Bulls and Cows!/).once
-          expect(TelegramMessenger).to have_received(:send_message).with(chat_id, 'Select game language:', markup).once
+          expect(TelegramMessenger).to have_received(:send_message).with(channel, /Welcome to Bulls and Cows!/).once
+          expect(TelegramMessenger).to have_received(:send_message).with(channel, 'Select game language:', markup).once
         }.to change(Telegram::CommandQueue, :size).by(2)
       end
     end
@@ -35,14 +35,14 @@ describe TelegramDispatcher, type: :service do
       before do
         allow(TelegramMessenger).to receive(:send_message).and_return(Telegram::Bot::Types::Message.new)
 
-        message.stub_chain(:chat, :id).and_return(chat_id)
+        message.stub_chain(:chat, :id).and_return(channel)
       end
 
       let(:markup) { instance_of(Telegram::Bot::Types::InlineKeyboardMarkup) }
 
       it 'replies with a prompt to specify word length' do
         expect(TelegramDispatcher.handle(message)).to be
-        expect(TelegramMessenger).to have_received(:send_message).with(chat_id, 'How many letters will it be?', markup)
+        expect(TelegramMessenger).to have_received(:send_message).with(channel, 'How many letters will it be?', markup)
       end
     end
 
@@ -50,7 +50,7 @@ describe TelegramDispatcher, type: :service do
       let!(:message) { Telegram::Bot::Types::Message.new(text: '/create коитус') }
 
       before do
-        message.stub_chain(:chat, :id).and_return(chat_id)
+        message.stub_chain(:chat, :id).and_return(channel)
       end
 
       it 'replies with a game created text' do
@@ -62,7 +62,7 @@ describe TelegramDispatcher, type: :service do
       let!(:message) { Telegram::Bot::Types::Message.new(text: '/create коитус') }
 
       before do
-        message.stub_chain(:chat, :id).and_return(chat_id)
+        message.stub_chain(:chat, :id).and_return(channel)
       end
 
       it 'replies with a game created text' do
@@ -74,10 +74,10 @@ describe TelegramDispatcher, type: :service do
       let!(:message) { Telegram::Bot::Types::Message.new(text: '/create 6') }
 
       let!(:medium) { create :dictionary_level, :medium_en }
-      let!(:settings) { create :setting, channel: chat_id, language: 'EN', dictionary: english, complexity: 'medium'}
+      let!(:settings) { create :setting, channel: channel, language: 'EN', dictionary: english, complexity: 'medium'}
 
       before do
-        message.stub_chain(:chat, :id).and_return(chat_id)
+        message.stub_chain(:chat, :id).and_return(channel)
       end
 
       it 'replies with a game created text' do
@@ -92,12 +92,12 @@ describe TelegramDispatcher, type: :service do
         allow(GameEngineService).to receive(:create_by_word)
         allow(TelegramMessenger).to receive(:game_created)
 
-        message.stub_chain(:chat, :id).and_return(chat_id)
+        message.stub_chain(:chat, :id).and_return(channel)
       end
 
       it 'handles bot name as optional part in command' do
         expect(TelegramDispatcher.handle(message))
-        expect(GameEngineService).to have_received(:create_by_word).with(chat_id, :telegram, 'секрет')
+        expect(GameEngineService).to have_received(:create_by_word).with(channel, :telegram, 'секрет')
       end
     end
 
@@ -105,8 +105,8 @@ describe TelegramDispatcher, type: :service do
       let!(:message) { Telegram::Bot::Types::Message.new(text: 'secret') }
 
       before do
-        message.stub_chain(:chat, :id).and_return(chat_id)
-        message.stub_chain(:from, :username).and_return(user)
+        message.stub_chain(:chat, :id).and_return(channel)
+        message.stub_chain(:from, :username).and_return(user.name)
       end
 
       it 'ignores the message' do
@@ -118,14 +118,15 @@ describe TelegramDispatcher, type: :service do
   end
 
   context 'when game has just started and had guesses placed' do
-    let!(:game) { create(:game, :telegram, secret: 'secret', channel: chat_id, dictionary: english) }
+    let!(:game) { create(:game, :telegram, secret: 'secret', channel: channel, dictionary: english) }
 
     context 'when /suggest command received' do
       let!(:message) { Telegram::Bot::Types::Message.new(text: '/suggest') }
 
       before do
-        message.stub_chain(:chat, :id).and_return(chat_id)
-        message.stub_chain(:from, :username).and_return(user)
+        message.stub_chain(:chat, :id).and_return(channel)
+        message.stub_chain(:from, :id).and_return(user.id)
+        message.stub_chain(:from, :username).and_return(user.name)
       end
 
       it 'suggests a word with matching number of letters' do
@@ -137,14 +138,15 @@ describe TelegramDispatcher, type: :service do
   end
 
   context 'when game is in progress and has multiple guesses placed' do
-    let!(:game) { create(:game, :telegram, :with_tries, secret: 'secret', channel: chat_id, dictionary: english) }
+    let!(:game) { create(:game, :telegram, :with_tries, secret: 'secret', channel: channel, dictionary: english) }
 
     context 'when /guess command received with non-exact guess word' do
       let!(:message) { Telegram::Bot::Types::Message.new(text: '/guess flight') }
 
       before do
-        message.stub_chain(:chat, :id).and_return(chat_id)
-        message.stub_chain(:from, :username).and_return(user)
+        message.stub_chain(:chat, :id).and_return(channel)
+        message.stub_chain(:from, :id).and_return(user.id)
+        message.stub_chain(:from, :username).and_return(user.name)
       end
 
       it 'replies with guess result' do
@@ -159,8 +161,9 @@ describe TelegramDispatcher, type: :service do
       let!(:message) { Telegram::Bot::Types::Message.new(text: '/guess Secret') }
 
       before do
-        message.stub_chain(:chat, :id).and_return(chat_id)
-        message.stub_chain(:from, :username).and_return(user)
+        message.stub_chain(:chat, :id).and_return(channel)
+        message.stub_chain(:from, :id).and_return(user.id)
+        message.stub_chain(:from, :username).and_return(user.name)
       end
 
       it 'handles case sensitive case' do
@@ -175,8 +178,9 @@ describe TelegramDispatcher, type: :service do
       let!(:message) { Telegram::Bot::Types::Message.new(text: '/guess mistake') }
 
       before do
-        message.stub_chain(:chat, :id).and_return(chat_id)
-        message.stub_chain(:from, :username).and_return(user)
+        message.stub_chain(:chat, :id).and_return(channel)
+        message.stub_chain(:from, :id).and_return(user.id)
+        message.stub_chain(:from, :username).and_return(user.name)
       end
 
       it 'replies with error message' do
@@ -190,8 +194,9 @@ describe TelegramDispatcher, type: :service do
       let!(:message) { Telegram::Bot::Types::Message.new(text: '/guess secret') }
 
       before do
-        message.stub_chain(:chat, :id).and_return(chat_id)
-        message.stub_chain(:from, :username).and_return(user)
+        message.stub_chain(:chat, :id).and_return(channel)
+        message.stub_chain(:from, :id).and_return(user.id)
+        message.stub_chain(:from, :username).and_return(user.name)
       end
 
       it 'replies with congratulations' do
@@ -209,8 +214,9 @@ describe TelegramDispatcher, type: :service do
         allow(GameEngineService).to receive(:guess)
         allow(TelegramMessenger).to receive(:guess)
 
-        message.stub_chain(:chat, :id).and_return(chat_id)
-        message.stub_chain(:from, :username).and_return(user)
+        message.stub_chain(:chat, :id).and_return(channel)
+        message.stub_chain(:from, :id).and_return(user.id)
+        message.stub_chain(:from, :username).and_return(user.name)
       end
 
       it 'handles bot name as optional part in command' do
@@ -223,7 +229,7 @@ describe TelegramDispatcher, type: :service do
       let!(:message) { Telegram::Bot::Types::Message.new(text: '/tries') }
 
       before do
-        message.stub_chain(:chat, :id).and_return(chat_id)
+        message.stub_chain(:chat, :id).and_return(channel)
       end
 
       it 'replies previous guess tries' do
@@ -249,7 +255,7 @@ describe TelegramDispatcher, type: :service do
       let!(:message) { Telegram::Bot::Types::Message.new(text: '/best') }
 
       before do
-        message.stub_chain(:chat, :id).and_return(chat_id)
+        message.stub_chain(:chat, :id).and_return(channel)
       end
 
       it 'replies with top guesses' do
@@ -268,7 +274,7 @@ describe TelegramDispatcher, type: :service do
       let!(:message) { Telegram::Bot::Types::Message.new(text: '/best 3') }
 
       before do
-        message.stub_chain(:chat, :id).and_return(chat_id)
+        message.stub_chain(:chat, :id).and_return(channel)
       end
 
       it 'replies with top <limit> guesses' do
@@ -289,7 +295,7 @@ describe TelegramDispatcher, type: :service do
         allow(GameEngineService).to receive(:best)
         allow(TelegramMessenger).to receive(:best)
 
-        message.stub_chain(:chat, :id).and_return(chat_id)
+        message.stub_chain(:chat, :id).and_return(channel)
       end
 
       it 'handles bot name as optional part in command' do
@@ -302,7 +308,7 @@ describe TelegramDispatcher, type: :service do
       let!(:message) { Telegram::Bot::Types::Message.new(text: '/hint') }
 
       before do
-        message.stub_chain(:chat, :id).and_return(chat_id)
+        message.stub_chain(:chat, :id).and_return(channel)
       end
 
       it 'reveals one letter in a secret' do
@@ -314,7 +320,7 @@ describe TelegramDispatcher, type: :service do
 
     context 'when /hint command received with a <letter>' do
       before do
-        message.stub_chain(:chat, :id).and_return(chat_id)
+        message.stub_chain(:chat, :id).and_return(channel)
       end
 
       context 'with a matching letter' do
@@ -340,7 +346,7 @@ describe TelegramDispatcher, type: :service do
 
     context 'when /hint command received with a <number>' do
       before do
-        message.stub_chain(:chat, :id).and_return(chat_id)
+        message.stub_chain(:chat, :id).and_return(channel)
       end
 
       context 'with a matching letter' do
@@ -368,8 +374,9 @@ describe TelegramDispatcher, type: :service do
       let!(:message) { Telegram::Bot::Types::Message.new(text: '/suggest re') }
 
       before do
-        message.stub_chain(:chat, :id).and_return(chat_id)
-        message.stub_chain(:from, :username).and_return(user)
+        message.stub_chain(:chat, :id).and_return(channel)
+        message.stub_chain(:from, :id).and_return(user.id)
+        message.stub_chain(:from, :username).and_return(user.name)
       end
 
       it 'suggests a word with a substring specified' do
@@ -383,8 +390,9 @@ describe TelegramDispatcher, type: :service do
       let!(:message) { Telegram::Bot::Types::Message.new(text: '/suggest ku') }
 
       before do
-        message.stub_chain(:chat, :id).and_return(chat_id)
-        message.stub_chain(:from, :username).and_return(user)
+        message.stub_chain(:chat, :id).and_return(channel)
+        message.stub_chain(:from, :id).and_return(user.id)
+        message.stub_chain(:from, :username).and_return(user.name)
       end
 
       it 'finds no words to suggests based on a substring specified' do
@@ -398,7 +406,7 @@ describe TelegramDispatcher, type: :service do
       let!(:message) { Telegram::Bot::Types::Message.new(text: '/zero') }
 
       before do
-        message.stub_chain(:chat, :id).and_return(chat_id)
+        message.stub_chain(:chat, :id).and_return(channel)
       end
 
       it 'replies with guesses where bulls and cows have zero occurrences' do
@@ -414,7 +422,7 @@ describe TelegramDispatcher, type: :service do
       let!(:message) { Telegram::Bot::Types::Message.new(text: '/stop') }
 
       before do
-        message.stub_chain(:chat, :id).and_return(chat_id)
+        message.stub_chain(:chat, :id).and_return(channel)
       end
 
       context 'when stop command is permitted' do
@@ -452,7 +460,7 @@ describe TelegramDispatcher, type: :service do
         allow(GameService).to receive(:stop!)
         allow(TelegramMessenger).to receive(:game_was_finished)
 
-        message.stub_chain(:chat, :id).and_return(chat_id)
+        message.stub_chain(:chat, :id).and_return(channel)
       end
 
       it 'handles bot name as optional part in command' do
@@ -465,8 +473,9 @@ describe TelegramDispatcher, type: :service do
       let!(:message) { Telegram::Bot::Types::Message.new(text: 'flight') }
 
       before do
-        message.stub_chain(:chat, :id).and_return(chat_id)
-        message.stub_chain(:from, :username).and_return(user)
+        message.stub_chain(:chat, :id).and_return(channel)
+        message.stub_chain(:from, :id).and_return(user.id)
+        message.stub_chain(:from, :username).and_return(user.name)
       end
 
       it 'replies with guess result' do
@@ -481,8 +490,9 @@ describe TelegramDispatcher, type: :service do
       let!(:message) { Telegram::Bot::Types::Message.new(text: 'secret') }
 
       before do
-        message.stub_chain(:chat, :id).and_return(chat_id)
-        message.stub_chain(:from, :username).and_return(user)
+        message.stub_chain(:chat, :id).and_return(channel)
+        message.stub_chain(:from, :id).and_return(user.id)
+        message.stub_chain(:from, :username).and_return(user.name)
       end
 
       it 'replies with congratulations' do
@@ -497,8 +507,8 @@ describe TelegramDispatcher, type: :service do
       let!(:message) { Telegram::Bot::Types::Message.new(text: 'hello world') }
 
       before do
-        message.stub_chain(:chat, :id).and_return(chat_id)
-        message.stub_chain(:from, :username).and_return(user)
+        message.stub_chain(:chat, :id).and_return(channel)
+        message.stub_chain(:from, :username).and_return(user.name)
       end
 
       it 'ignore the message' do
@@ -510,7 +520,7 @@ describe TelegramDispatcher, type: :service do
   end
 
   context 'with russian secret word game' do
-    let!(:game) { create(:game, :telegram, secret: 'привет', channel: chat_id, dictionary: russian) }
+    let!(:game) { create(:game, :telegram, secret: 'привет', channel: channel, dictionary: russian) }
 
     context 'when /guess command received case sensitive unicode guess word' do
       let!(:privet) { create(:noun, noun: 'привет')}
@@ -518,8 +528,9 @@ describe TelegramDispatcher, type: :service do
       let!(:message) { Telegram::Bot::Types::Message.new(text: '/guess Привет') }
 
       before do
-        message.stub_chain(:chat, :id).and_return(chat_id)
-        message.stub_chain(:from, :username).and_return(user)
+        message.stub_chain(:chat, :id).and_return(channel)
+        message.stub_chain(:from, :id).and_return(user.id)
+        message.stub_chain(:from, :username).and_return(user.name)
       end
 
       it 'handles case sensitive unicode case' do
@@ -532,14 +543,15 @@ describe TelegramDispatcher, type: :service do
   end
 
   context 'when game has finished' do
-    let!(:game) { create(:game, :telegram, :with_tries, status: :finished, secret: 'secret', channel: chat_id) }
+    let!(:game) { create(:game, :telegram, :with_tries, status: :finished, secret: 'secret', channel: channel) }
 
     context 'when /guess command received after game has stopped' do
       let!(:message) { Telegram::Bot::Types::Message.new(text: '/guess secret') }
 
       before do
-        message.stub_chain(:chat, :id).and_return(chat_id)
-        message.stub_chain(:from, :username).and_return(user)
+        message.stub_chain(:chat, :id).and_return(channel)
+        message.stub_chain(:from, :id).and_return(user.id)
+        message.stub_chain(:from, :username).and_return(user.name)
       end
 
       it 'replies with error message' do
@@ -554,8 +566,8 @@ describe TelegramDispatcher, type: :service do
       let!(:message) { Telegram::Bot::Types::Message.new(text: 'secret') }
 
       before do
-        message.stub_chain(:chat, :id).and_return(chat_id)
-        message.stub_chain(:from, :username).and_return(user)
+        message.stub_chain(:chat, :id).and_return(channel)
+        message.stub_chain(:from, :username).and_return(user.name)
       end
 
       it 'ignores the message' do
@@ -573,7 +585,7 @@ describe TelegramDispatcher, type: :service do
     before do
       allow(TelegramMessenger).to receive(:send_message).and_return(Telegram::Bot::Types::Message.new)
 
-      message.stub_chain(:chat, :id).and_return(chat_id)
+      message.stub_chain(:chat, :id).and_return(channel)
     end
 
     let(:markup) { instance_of(Telegram::Bot::Types::InlineKeyboardMarkup) }
@@ -581,7 +593,7 @@ describe TelegramDispatcher, type: :service do
     it 'replies with prompt to submit game language' do
       expect {
         TelegramDispatcher.handle(message)
-        expect(TelegramMessenger).to have_received(:send_message).with(chat_id, 'Select game language:', markup)
+        expect(TelegramMessenger).to have_received(:send_message).with(channel, 'Select game language:', markup)
       }.not_to change(Game, :count)
     end
   end
@@ -593,7 +605,7 @@ describe TelegramDispatcher, type: :service do
       allow(TelegramMessenger).to receive(:answerCallbackQuery)
       allow(TelegramMessenger).to receive(:send_message).and_return(Telegram::Bot::Types::Message.new)
 
-      callbackQuery.stub_chain(:message, :chat, :id).and_return(chat_id)
+      callbackQuery.stub_chain(:message, :chat, :id).and_return(channel)
     end
 
     context 'being last command in command queue' do
@@ -630,7 +642,7 @@ describe TelegramDispatcher, type: :service do
     before do
       allow(TelegramMessenger).to receive(:send_message).and_return(Telegram::Bot::Types::Message.new)
 
-      message.stub_chain(:chat, :id).and_return(chat_id)
+      message.stub_chain(:chat, :id).and_return(channel)
     end
 
     let(:markup) { instance_of(Telegram::Bot::Types::InlineKeyboardMarkup) }
@@ -638,7 +650,7 @@ describe TelegramDispatcher, type: :service do
     it 'replies with prompt to submit game level' do
       expect {
         TelegramDispatcher.handle(message)
-        expect(TelegramMessenger).to have_received(:send_message).with(chat_id, 'Select game level:', markup)
+        expect(TelegramMessenger).to have_received(:send_message).with(channel, 'Select game level:', markup)
       }.not_to change(Game, :count)
     end
   end
@@ -650,7 +662,7 @@ describe TelegramDispatcher, type: :service do
       allow(TelegramMessenger).to receive(:answerCallbackQuery)
       allow(TelegramMessenger).to receive(:send_message).and_return(Telegram::Bot::Types::Message.new)
 
-      callbackQuery.stub_chain(:message, :chat, :id).and_return(chat_id)
+      callbackQuery.stub_chain(:message, :chat, :id).and_return(channel)
     end
 
     context 'being last command in command queue' do
@@ -671,7 +683,7 @@ describe TelegramDispatcher, type: :service do
     let!(:message) { Telegram::Bot::Types::Message.new(text: '/help') }
 
     before do
-      message.stub_chain(:chat, :id).and_return(chat_id)
+      message.stub_chain(:chat, :id).and_return(channel)
     end
 
     it 'replies with help message' do
@@ -696,7 +708,7 @@ describe TelegramDispatcher, type: :service do
     let!(:message) { Telegram::Bot::Types::Message.new(text: '/unknown') }
 
     before do
-      message.stub_chain(:chat, :id).and_return(chat_id)
+      message.stub_chain(:chat, :id).and_return(channel)
     end
 
     it 'replies with generic message' do
