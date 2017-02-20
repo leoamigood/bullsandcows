@@ -3,10 +3,10 @@ class GamesController < BaseApiController
 
   def create
     if params[:secret].present?
-      game = GameEngineService.create_by_word(session[:id], :web, validate_create[:secret])
+      game = GameEngineService.create_by_word(session[:id], session[:id], :web, validate_create[:secret])
       render json: { game: Responses::Game.new(game) }
     else
-      game = GameEngineService.create_by_options(session[:id], :web, validate_create_by_options)
+      game = GameEngineService.create_by_options(session[:id], session[:id], :web, validate_create_by_options)
       render json: { game: Responses::Game.new(game) }
     end
   end

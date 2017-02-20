@@ -1,25 +1,26 @@
 require 'rails_helper'
 
 describe Telegram::Validator, type: :service do
+  let!(:channel) { Random.rand(@MAX_INT_VALUE) }
 
-  let!(:actor) { Telegram::Bot::Types::User.new() }
+  let!(:creator) { User.new(id = Random.rand(@MAX_INT_VALUE), username = '@NYCTrooper') }
+  let!(:player) { User.new(id = Random.rand(@MAX_INT_VALUE), username = '@Amig0') }
+
+  let!(:game) { create(:game, :telegram, channel: channel, user_id: creator.id) }
+
   let!(:message) { Telegram::Bot::Types::Message.new(text: '/stop') }
-
-  before do
-    allow(TelegramMessenger).to receive(:getChatMember).and_return(actor)
-
-    message.stub_chain(:chat, :id)
-    message.stub_chain(:from, :id)
-  end
 
   context 'given direct chat message' do
     before do
+      TelegramMessenger.stub_chain(:getChatMember, :[], :[]).with('result').with('status').and_return('member')
+
       message.stub_chain(:chat, :type).and_return('individual')
-      actor.stub_chain(:[], :[]).with('result').with('status').and_return('member')
+      message.stub_chain(:chat, :id).and_return(channel)
+      message.stub_chain(:from, :id).and_return(creator.id)
     end
 
     it 'verifies player permissions to stop the game' do
-      expect(Telegram::Validator.permitted?(:stop, message)).to be true
+      expect(Telegram::Validator.permitted?(game, :stop, message)).to be true
     end
   end
 
@@ -30,41 +31,53 @@ describe Telegram::Validator, type: :service do
 
     context 'given message from a channel creator' do
       before do
-        actor.stub_chain(:[], :[]).with('result').with('status').and_return('creator')
+        TelegramMessenger.stub_chain(:getChatMember, :[], :[]).with('result').with('status').and_return('creator')
+
+        message.stub_chain(:chat, :id).and_return(channel)
+        message.stub_chain(:from, :id).and_return(creator.id)
       end
 
       it 'verifies permissions to stop the game' do
-        expect(Telegram::Validator.permitted?(:stop, message)).to be true
+        expect(Telegram::Validator.permitted?(game, :stop, message)).to be true
       end
     end
 
     context 'given message from a channel administrator' do
       before do
-        actor.stub_chain(:[], :[]).with('result').with('status').and_return('administrator')
+        TelegramMessenger.stub_chain(:getChatMember, :[], :[]).with('result').with('status').and_return('administrator')
+
+        message.stub_chain(:chat, :id).and_return(channel)
+        message.stub_chain(:from, :id).and_return(creator.id)
       end
 
       it 'verifies permissions to stop the game' do
-        expect(Telegram::Validator.permitted?(:stop, message)).to be true
+        expect(Telegram::Validator.permitted?(game, :stop, message)).to be true
       end
     end
 
     context 'given message from a game creator' do
       before do
-        actor.stub_chain(:[], :[]).with('result').with('status').and_return('member')
+        TelegramMessenger.stub_chain(:getChatMember, :[], :[]).with('result').with('status').and_return('member')
+
+        message.stub_chain(:chat, :id).and_return(channel)
+        message.stub_chain(:from, :id).and_return(creator.id)
       end
 
-      xit 'verifies permissions to stop the game' do
-        expect(Telegram::Validator.permitted?(:stop, message)).to be true
+      it 'verifies permissions to stop the game' do
+        expect(Telegram::Validator.permitted?(game, :stop, message)).to be true
       end
     end
 
     context 'given message from a game player' do
       before do
-        actor.stub_chain(:[], :[]).with('result').with('status').and_return('member')
+        TelegramMessenger.stub_chain(:getChatMember, :[], :[]).with('result').with('status').and_return('member')
+
+        message.stub_chain(:chat, :id).and_return(channel)
+        message.stub_chain(:from, :id).and_return(player.id)
       end
 
       it 'verifies permissions absence to stop the game' do
-        expect(Telegram::Validator.permitted?(:stop, message)).to be false
+        expect(Telegram::Validator.permitted?(game, :stop, message)).to be false
       end
     end
   end

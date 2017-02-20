@@ -9,7 +9,7 @@ describe GameService, type: :service do
       let!(:secret) { create(:noun, noun: 'secret')}
 
       it 'creates a game' do
-        game = GameService.create(channel, secret, :web)
+        game = GameService.create(channel, user.id, secret, :web)
 
         expect(game).not_to be(nil)
         expect(game.secret).to eq('secret')
@@ -27,7 +27,7 @@ describe GameService, type: :service do
     let!(:game) { create(:game, channel: channel,  secret: 'hostel')}
 
     it 'creates new game in the same channel' do
-      recreated = GameService.create(channel, Noun.new(noun: 'difference'), :web)
+      recreated = GameService.create(channel, user.id, Noun.new(noun: 'difference'), :web)
 
       expect(recreated).not_to be(nil)
       expect(recreated.secret).to eq('difference')
@@ -36,7 +36,7 @@ describe GameService, type: :service do
     end
 
     it 'creates new game in different channel' do
-      recreated = GameService.create('another-channel', Noun.new(noun: 'canal'), :web)
+      recreated = GameService.create('another-channel', user.id, Noun.new(noun: 'canal'), :web)
 
       expect(recreated).not_to be(nil)
       expect(recreated.secret).to eq('canal')

@@ -3,13 +3,11 @@ module Telegram
 
     class Stop
       class << self
-        def execute(channel)
+        def execute(channel, message)
           game = GameService.find_by_channel!(channel)
-          GameService.stop!(game)
-        end
 
-        def validate(message)
-          raise Errors::GameCommandStopNotPermittedException unless Telegram::Validator.permitted?(:stop, message)
+          raise Errors::GameCommandStopNotPermittedException unless Telegram::Validator.permitted?(game, :stop, message)
+          GameService.stop!(game)
         end
       end
     end

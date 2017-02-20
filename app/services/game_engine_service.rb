@@ -1,11 +1,11 @@
 class GameEngineService
 
   class << self
-    def create_by_word(channel, source, word)
-      GameService.create(channel, Noun.new(noun: word), source)
+    def create_by_word(channel, user_id, source, word)
+      GameService.create(channel, user_id, Noun.new(noun: word), source)
     end
 
-    def create_by_options(channel, source, options)
+    def create_by_options(channel, user_id, source, options)
       secret = Noun.active.
           by_length(options[:length]).
           in_language(options[:language]).
@@ -14,7 +14,7 @@ class GameEngineService
 
       raise Errors::GameCreateException.new('Unable to create game. Please try different parameters') unless secret.present?
 
-      GameService.create(channel, secret, source)
+      GameService.create(channel, user_id, secret, source)
     end
 
     def guess(game, user, word)

@@ -3,17 +3,17 @@ module Telegram
 
     class Create
       class << self
-        def execute(channel, options, strategy)
+        def execute(channel, message, options, strategy)
           Telegram::CommandQueue.clear
-          game = GameEngineService.method(strategy).call(channel, :telegram, options)
+          game = GameEngineService.method(strategy).call(channel, message.from.id, :telegram, options)
           TelegramMessenger.game_created(game)
         end
 
-        def create_by_options(channel, options)
+        def create_by_options(channel, message, options)
           settings = Setting.find_by_channel(channel)
           options = settings.options.merge(options) if settings.present?
 
-          execute(channel, options, :create_by_options)
+          execute(channel, message, options, :create_by_options)
         end
       end
     end

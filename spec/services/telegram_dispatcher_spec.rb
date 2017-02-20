@@ -51,6 +51,7 @@ describe TelegramDispatcher, type: :service do
 
       before do
         message.stub_chain(:chat, :id).and_return(channel)
+        message.stub_chain(:from, :id).and_return(user.id)
       end
 
       it 'replies with a game created text' do
@@ -63,6 +64,7 @@ describe TelegramDispatcher, type: :service do
 
       before do
         message.stub_chain(:chat, :id).and_return(channel)
+        message.stub_chain(:from, :id).and_return(user.id)
       end
 
       it 'replies with a game created text' do
@@ -78,6 +80,7 @@ describe TelegramDispatcher, type: :service do
 
       before do
         message.stub_chain(:chat, :id).and_return(channel)
+        message.stub_chain(:from, :id).and_return(user.id)
       end
 
       it 'replies with a game created text' do
@@ -93,11 +96,12 @@ describe TelegramDispatcher, type: :service do
         allow(TelegramMessenger).to receive(:game_created)
 
         message.stub_chain(:chat, :id).and_return(channel)
+        message.stub_chain(:from, :id).and_return(user.id)
       end
 
       it 'handles bot name as optional part in command' do
         expect(TelegramDispatcher.handle(message))
-        expect(GameEngineService).to have_received(:create_by_word).with(channel, :telegram, 'секрет')
+        expect(GameEngineService).to have_received(:create_by_word).with(channel, user.id, :telegram, 'секрет')
       end
     end
 

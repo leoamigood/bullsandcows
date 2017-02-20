@@ -55,10 +55,10 @@ class TelegramDispatcher
           TelegramMessenger.ask_length(channel)
 
         when Telegram::CommandRoute::CREATE_ALPHA
-          Telegram::Command::Create.execute(channel, $~['secret'], :create_by_word)
+          Telegram::Command::Create.execute(channel, message, $~['secret'], :create_by_word)
 
         when Telegram::CommandRoute::CREATE_DIGIT
-          Telegram::Command::Create.create_by_options(channel, length: $~['number'])
+          Telegram::Command::Create.create_by_options(channel, message, length: $~['number'])
 
         when Telegram::CommandRoute::GUESS
           Telegram::Command::Guess.execute(channel, message, $~['guess'])
@@ -95,8 +95,7 @@ class TelegramDispatcher
           TelegramMessenger.level($~['level'])
 
         when Telegram::CommandRoute::STOP
-          Telegram::Command::Stop.validate(message)
-          game = Telegram::Command::Stop.execute(channel)
+          game = Telegram::Command::Stop.execute(channel, message)
           TelegramMessenger.game_stop(game)
 
         when Telegram::CommandRoute::HELP
