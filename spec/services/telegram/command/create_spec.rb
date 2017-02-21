@@ -20,7 +20,7 @@ describe Telegram::Command::Create, type: :service do
     end
 
     it 'verifies create by word execution chain' do
-      Telegram::Command::Create.execute(channel, message, 'secret', :create_by_word,)
+      Telegram::Command::Create.execute(channel, message, word: 'secret', strategy: :by_word)
 
       expect(Telegram::CommandQueue).to have_received(:clear).with(no_args)
       expect(TelegramMessenger).to have_received(:game_created).with(
@@ -33,7 +33,7 @@ describe Telegram::Command::Create, type: :service do
       let!(:hard) { create :dictionary_level, :hard_ru }
 
       it 'creates game with specifies word length' do
-        Telegram::Command::Create.create_by_options(channel, message, length: 8)
+        Telegram::Command::Create.execute(channel, message, length: 8, strategy: :by_number)
 
         expect(Telegram::CommandQueue).to have_received(:clear).with(no_args)
         expect(TelegramMessenger).to have_received(:game_created).with(

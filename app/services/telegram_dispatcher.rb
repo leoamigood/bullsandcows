@@ -55,10 +55,10 @@ class TelegramDispatcher
           TelegramMessenger.ask_length(channel)
 
         when Telegram::CommandRoute::CREATE_ALPHA
-          Telegram::Command::Create.execute(channel, message, $~['secret'], :create_by_word)
+          Telegram::Command::Create.execute(channel, message, word: $~['secret'], strategy: :by_word)
 
         when Telegram::CommandRoute::CREATE_DIGIT
-          Telegram::Command::Create.create_by_options(channel, message, length: $~['number'])
+          Telegram::Command::Create.execute(channel, message, length: $~['number'], strategy: :by_number)
 
         when Telegram::CommandRoute::GUESS
           Telegram::Command::Guess.execute(channel, message, $~['guess'])
