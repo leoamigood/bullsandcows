@@ -5,7 +5,7 @@ module Telegram
       class << self
         def execute(channel, message, options, strategy)
           Telegram::CommandQueue.clear
-          game = GameEngineService.method(strategy).call(channel, message.from.id, :telegram, options)
+          game = GameEngineService.method(strategy).call(Realm::Telegram.new(channel, message.from.id), options)
           TelegramMessenger.game_created(game)
         end
 

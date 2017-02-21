@@ -4,6 +4,8 @@ describe TelegramDispatcher, type: :service do
   let!(:channel) { Random.rand(@MAX_INT_VALUE) }
   let!(:user) { User.new(id = Random.rand(@MAX_INT_VALUE), name = '@Amig0') }
 
+  let!(:realm) { build :realm, :telegram, channel: channel, user_id: user.id }
+
   let!(:english) { create :dictionary, :english}
   let!(:russian) { create :dictionary, :russian}
 
@@ -101,7 +103,7 @@ describe TelegramDispatcher, type: :service do
 
       it 'handles bot name as optional part in command' do
         expect(TelegramDispatcher.handle(message))
-        expect(GameEngineService).to have_received(:create_by_word).with(channel, user.id, :telegram, 'секрет')
+        expect(GameEngineService).to have_received(:create_by_word).with(realm, 'секрет')
       end
     end
 
@@ -122,7 +124,7 @@ describe TelegramDispatcher, type: :service do
   end
 
   context 'when game has just started and had guesses placed' do
-    let!(:game) { create(:game, :telegram, secret: 'secret', channel: channel, dictionary: english) }
+    let!(:game) { create(:game, :realm, secret: 'secret', realm: realm, dictionary: english) }
 
     context 'when /suggest command received' do
       let!(:message) { Telegram::Bot::Types::Message.new(text: '/suggest') }
@@ -142,7 +144,7 @@ describe TelegramDispatcher, type: :service do
   end
 
   context 'when game is in progress and has multiple guesses placed' do
-    let!(:game) { create(:game, :telegram, :with_tries, secret: 'secret', channel: channel, dictionary: english) }
+    let!(:game) { create(:game, :realm, :with_tries, secret: 'secret', realm: realm, dictionary: english) }
 
     context 'when /guess command received with non-exact guess word' do
       let!(:message) { Telegram::Bot::Types::Message.new(text: '/guess flight') }
@@ -524,7 +526,7 @@ describe TelegramDispatcher, type: :service do
   end
 
   context 'with russian secret word game' do
-    let!(:game) { create(:game, :telegram, secret: 'привет', channel: channel, dictionary: russian) }
+    let!(:game) { create(:game, :realm, secret: 'привет', realm: realm, dictionary: russian) }
 
     context 'when /guess command received case sensitive unicode guess word' do
       let!(:privet) { create(:noun, noun: 'привет')}
@@ -547,7 +549,7 @@ describe TelegramDispatcher, type: :service do
   end
 
   context 'when game has finished' do
-    let!(:game) { create(:game, :telegram, :with_tries, status: :finished, secret: 'secret', channel: channel) }
+    let!(:game) { create(:game, :realm, :with_tries, status: :finished, secret: 'secret', realm: realm) }
 
     context 'when /guess command received after game has stopped' do
       let!(:message) { Telegram::Bot::Types::Message.new(text: '/guess secret') }

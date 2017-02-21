@@ -4,8 +4,10 @@ describe GameEngineService, type: :service do
   let!(:channel) { Random.rand(@MAX_INT_VALUE) }
   let!(:user) { User.new(id = Random.rand(@MAX_INT_VALUE), username = '@Amig0') }
 
+  let!(:realm) { build :realm, :telegram, channel: channel, user_id: user.id }
+
   it 'create a game with specified secret word' do
-    game = GameEngineService.create_by_word(channel, user.id, :telegram, 'magic')
+    game = GameEngineService.create_by_word(realm, 'magic')
 
     expect(game).to be
     expect(game.secret).to eq('magic')
@@ -18,7 +20,7 @@ describe GameEngineService, type: :service do
 
     it 'fails to create a game with only word length' do
       expect {
-        GameEngineService.create_by_options(channel, user.id, :telegram, length: 6)
+        GameEngineService.create_by_options(realm, length: 6)
       }.to raise_error Errors::GameCreateException
     end
 
@@ -26,7 +28,7 @@ describe GameEngineService, type: :service do
       let!(:options) { { length: 5, complexity: 'medium', language: 'EN' } }
 
       it 'create a game with specified amount of letters, complexity and language' do
-        game = GameEngineService.create_by_options(channel, user.id, :telegram, options)
+        game = GameEngineService.create_by_options(realm, options)
 
         expect(game).to be
         expect(game.secret.length).to eq(5)
@@ -40,14 +42,14 @@ describe GameEngineService, type: :service do
 
       it 'fails to create game without language' do
         expect{
-          GameEngineService.create_by_options(channel, user.id, :telegram, options)
+          GameEngineService.create_by_options(realm, options)
         }.to raise_error Errors::GameCreateException
       end
     end
   end
 
   context 'given a game with a secret word' do
-    let!(:game) { create(:game, :telegram, secret: 'secret', channel: channel) }
+    let!(:game) { create(:game, :realm, secret: 'secret', realm: realm) }
 
     it 'reveals one random letter in a secret' do
       expect {
@@ -74,7 +76,7 @@ describe GameEngineService, type: :service do
 
   context 'given no previously saved settings for user' do
     it 'persist game complexity setting' do
-      setting = GameEngineService.settings(channel, {complexity: 'easy'})
+      setting = GameEngineService.settings(realm.channel, {complexity: 'easy'})
       expect(setting.complexity).to eq('easy')
     end
   end
@@ -83,7 +85,7 @@ describe GameEngineService, type: :service do
     let!(:setting) { create :setting, complexity: 'easy'}
 
     it 'persist game complexity setting' do
-      setting = GameEngineService.settings(channel, {complexity: 'hard'})
+      setting = GameEngineService.settings(realm.channel, {complexity: 'hard'})
       expect(setting.complexity).to eq('hard')
     end
   end

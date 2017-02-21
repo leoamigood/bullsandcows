@@ -156,6 +156,7 @@ class TelegramMessenger
       # hint    - Use /hint to reveal a random letter in a secret
       # suggest - Use /suggest [letters] for bot to suggest a word
       # stop    - Use /stop to abort the game and show secret
+      # help    - Usr /help to see this help
 
       lines = [
           'Here is the list of available commands:',
@@ -169,7 +170,8 @@ class TelegramMessenger
           'Use _/zero_ to see guesses with zero matches',
           'Use _/hint_ [letter]|[number] to reveal a letter in a secret',
           'Use _/suggest_ [letters] for bot to suggest a word',
-          'Use _/stop_ to abort the game and show secret'
+          'Use _/stop_ to abort the game and show secret',
+          'Use _/help_ to see this help'
       ]
       lines.join("\n")
     end

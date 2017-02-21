@@ -1,10 +1,13 @@
 require 'rails_helper'
 
 describe Telegram::Command::Hint, type: :service do
-  context 'given created game' do
-    let!(:channel) { 'telegram-game-channel' }
-    let!(:game) { create(:game, :telegram, secret: 'secret', channel: channel) }
+  let!(:channel) { Random.rand(@MAX_INT_VALUE) }
+  let!(:user) { User.new(Random.rand(@MAX_INT_VALUE), '@Amig0') }
 
+  let!(:realm) { build :realm, :telegram, channel: channel, user_id: user.id }
+
+  context 'given created game' do
+    let!(:game) { create(:game, :realm, secret: 'secret', realm: realm) }
 
     before do
       allow(GameService).to receive(:find_by_channel!).and_return(game)

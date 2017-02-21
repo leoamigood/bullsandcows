@@ -1,12 +1,12 @@
 require 'rails_helper'
 
 describe Telegram::Command::Guess, type: :service do
+  let!(:user) { User.new(id = Random.rand, name = '@Amig0') }
+  let!(:channel) { 'telegram-game-channel' }
+
+  let!(:game) { create(:game, source: :telegram, secret: 'secret', channel: channel) }
+
   context 'given created game' do
-    let!(:user) { User.new(id = Random.rand, name = '@Amig0') }
-    let!(:channel) { 'telegram-game-channel' }
-
-    let!(:game) { create(:game, :telegram, secret: 'secret', channel: channel) }
-
     let!(:message) { Telegram::Bot::Types::Message.new(text: 'hostel') }
 
     before do

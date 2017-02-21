@@ -4,12 +4,14 @@ describe GameService, type: :service do
   let!(:channel) { Random.rand(@MAX_INT_VALUE) }
   let!(:user) { User.new(Random.rand(@MAX_INT_VALUE), '@Amig0') }
 
+  let!(:realm) { build :realm, :web, channel: channel, user_id: user.id }
+
   context 'with game not started' do
     context 'with a secret word' do
       let!(:secret) { create(:noun, noun: 'secret')}
 
       it 'creates a game' do
-        game = GameService.create(channel, user.id, secret, :web)
+        game = GameService.create(realm, secret)
 
         expect(game).not_to be(nil)
         expect(game.secret).to eq('secret')
@@ -24,10 +26,10 @@ describe GameService, type: :service do
   end
 
   context 'with a game started' do
-    let!(:game) { create(:game, channel: channel,  secret: 'hostel')}
+    let!(:game) { create(:game, :realm,  secret: 'hostel', realm: realm)}
 
     it 'creates new game in the same channel' do
-      recreated = GameService.create(channel, user.id, Noun.new(noun: 'difference'), :web)
+      recreated = GameService.create(realm, Noun.new(noun: 'difference'))
 
       expect(recreated).not_to be(nil)
       expect(recreated.secret).to eq('difference')
@@ -36,7 +38,7 @@ describe GameService, type: :service do
     end
 
     it 'creates new game in different channel' do
-      recreated = GameService.create('another-channel', user.id, Noun.new(noun: 'canal'), :web)
+      recreated = GameService.create(Realm::Web.new('another-channel'), Noun.new(noun: 'canal'))
 
       expect(recreated).not_to be(nil)
       expect(recreated.secret).to eq('canal')
@@ -53,10 +55,9 @@ describe GameService, type: :service do
       }.not_to raise_error
     end
 
-    let!(:unknown_channel) { 'unknown-channel' }
     it 'throws exception finding non existent game by channel' do
       expect{
-        GameService.find_by_channel!(unknown_channel)
+        GameService.find_by_channel!('unknown-channel')
       }.to raise_error(Errors::GameNotFoundException)
     end
 
@@ -148,7 +149,7 @@ describe GameService, type: :service do
   end
 
   context 'with a game finished' do
-    let!(:game) { create(:game, channel: channel, status: :finished)}
+    let!(:game) { create(:game, :realm, status: :finished, realm: realm)}
 
     it 'checks that game is in progress' do
       expect(GameService.in_progress?(channel)).to eq(false)

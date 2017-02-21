@@ -1,14 +1,14 @@
 class GameService
 
   class << self
-    def create(channel, creator_id, secret, source)
+    def create(realm, secret)
       Game.create(
-          channel: channel,
-          user_id: creator_id,
+          channel: realm.channel,
+          user_id: realm.user_id,
           secret: secret.noun,
           level: secret.level,
           dictionary: secret.dictionary,
-          source: source
+          source: realm.source
       )
     end
 
