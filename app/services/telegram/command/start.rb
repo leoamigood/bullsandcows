@@ -1,3 +1,5 @@
+require 'aspector'
+
 module Telegram
   module Command
 
@@ -13,5 +15,15 @@ module Telegram
       end
     end
 
+    aspector(Start, class_methods: true) do
+      target do
+        def permit(*args, &block)
+          channel, message = *args
+          Telegram::Validator.validate!(Action::START, channel, message)
+        end
+      end
+
+      before :execute, :permit
+    end
   end
 end

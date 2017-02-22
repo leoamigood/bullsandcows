@@ -207,7 +207,7 @@ describe Hooks::TelegramController, :type => :request do
         expect(response).to have_http_status(200)
 
         expect(json).to be
-        expect(json['text']).to eq('Game level was set to easy')
+        expect(json['text']).to eq('Game level was set to easy.')
         expect(json['chat_id']).to eq(169778030)
         expect(json['parse_mode']).to eq('Markdown')
         expect(json['method']).to eq('sendMessage')

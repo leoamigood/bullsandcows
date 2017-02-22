@@ -2,6 +2,13 @@ class GameService
 
   class << self
     def create(realm, secret)
+      if (in_progress?(realm.channel))
+        raise Errors::GameCreateException.new(
+            'Cannot start new game. Finish or stop current game using _/stop_ command.',
+            recent_game(realm.channel)
+        )
+      end
+
       Game.create(
           channel: realm.channel,
           user_id: realm.user_id,
@@ -22,7 +29,8 @@ class GameService
     end
 
     def find_by_channel!(channel)
-      game = Game.where(channel: channel).last
+      game = recent_game(channel)
+
       raise Errors::GameNotFoundException.new(
           "Failed to find game. Is game in progress? Channel ID: #{channel}"
       ) unless game.present?
@@ -88,23 +96,20 @@ class GameService
     end
 
     def stop!(game)
-      raise 'Game has not started. Please start a new game using _/create_ command.' unless game.in_progress?
-
       game.aborted!
       game
     end
 
-    def in_progress?(channel)
-      game = Game.where(channel: channel).last
-      game.present? ? game.in_progress? : false
-    end
-
-    def validate_game!(game)
-      raise Errors::GameNotStartedException.new(game, 'Game has not started. Please start a new game using _/create_ command.') unless game.in_progress?
-    end
-
     def validate_guess!(game, guess)
       raise "Your guess word _#{guess}_ has to be *#{game.secret.length}* letters long." if game.secret.length != guess.length
+    end
+
+    def recent_game(channel)
+      Game.where(channel: channel).last
+    end
+
+    def in_progress?(channel)
+      !!recent_game(channel).try(:in_progress?)
     end
 
     private

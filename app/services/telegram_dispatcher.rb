@@ -46,13 +46,13 @@ class TelegramDispatcher
           Telegram::Command::Start.execute(channel)
 
         when Telegram::CommandRoute::LANG
-          TelegramMessenger.ask_language(channel)
+          Telegram::Command::Language.ask(channel)
 
         when Telegram::CommandRoute::LANG_ALPHA
           Telegram::Command::Language.execute(channel, $~['language'])
 
         when Telegram::CommandRoute::CREATE
-          TelegramMessenger.ask_length(channel)
+          Telegram::Command::Create.ask(channel)
 
         when Telegram::CommandRoute::CREATE_ALPHA
           Telegram::Command::Create.execute(channel, message, word: $~['secret'], strategy: :by_word)
@@ -67,36 +67,31 @@ class TelegramDispatcher
           Telegram::Command::Guess.execute(channel, message, command) if GameService.in_progress?(channel)
 
         when Telegram::CommandRoute::HINT_ALPHA
-          Telegram::Command::Hint.execute_by_letter(channel, $~['letter'])
+          Telegram::Command::Hint.execute(channel, letter: $~['letter'], strategy: :by_letter)
 
         when Telegram::CommandRoute::HINT_DIGIT
-          Telegram::Command::Hint.execute_by_number(channel, $~['number'])
+          Telegram::Command::Hint.execute(channel, number: $~['number'], strategy: :by_number)
 
         when Telegram::CommandRoute::SUGGEST
           Telegram::Command::Suggest.execute(channel, message, $~['letters'])
 
         when Telegram::CommandRoute::TRIES
-          guesses = GameEngineService.tries(channel)
-          TelegramMessenger.tries(guesses)
+          Telegram::Command::Tries.execute(channel)
 
         when Telegram::CommandRoute::BEST
-          guesses = GameEngineService.best(channel, $~['best'].try(:to_i))
-          TelegramMessenger.best(guesses)
+          Telegram::Command::Best.execute(channel, $~['best'])
 
         when Telegram::CommandRoute::ZERO
-          guesses = GameEngineService.zero(channel)
-          TelegramMessenger.zero(guesses)
+          Telegram::Command::Zero.execute(channel)
 
         when Telegram::CommandRoute::LEVEL
-          TelegramMessenger.ask_level(channel)
+          Telegram::Command::Level.ask(channel)
 
         when Telegram::CommandRoute::LEVEL_ALPHA
-          GameEngineService.settings(channel, { complexity: $~['level'] })
-          TelegramMessenger.level($~['level'])
+          Telegram::Command::Level.execute(channel, $~['level'])
 
         when Telegram::CommandRoute::STOP
-          game = Telegram::Command::Stop.execute(channel, message)
-          TelegramMessenger.game_stop(game)
+          Telegram::Command::Stop.execute(channel, message)
 
         when Telegram::CommandRoute::HELP
           TelegramMessenger.help

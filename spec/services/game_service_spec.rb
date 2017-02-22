@@ -26,15 +26,12 @@ describe GameService, type: :service do
   end
 
   context 'with a game started' do
-    let!(:game) { create(:game, :realm,  secret: 'hostel', realm: realm)}
+    let!(:game) { create(:game, :realm, secret: 'hostel', realm: realm)}
 
-    it 'creates new game in the same channel' do
-      recreated = GameService.create(realm, Noun.new(noun: 'difference'))
-
-      expect(recreated).not_to be(nil)
-      expect(recreated.secret).to eq('difference')
-      expect(recreated.status).to eq('created')
-      expect(recreated.dictionary).to eq(nil)
+    it 'fails to create new game in the same channel' do
+      expect{
+        GameService.create(realm, Noun.new(noun: 'difference'))
+      }.to raise_error(Errors::GameCreateException)
     end
 
     it 'creates new game in different channel' do

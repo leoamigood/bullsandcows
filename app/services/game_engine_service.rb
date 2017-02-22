@@ -18,24 +18,16 @@ class GameEngineService
     end
 
     def guess(game, user, word)
-      GameService.validate_game!(game)
       GameService.validate_guess!(game, word)
 
       GameService.guess(game, user, word)
     end
 
     def hint(game, letter = nil)
-      GameService.validate_game!(game)
       GameService.hint(game, letter)
     end
 
-    def open(game, number)
-      GameService.validate_game!(game)
-      GameService.open(game, number)
-    end
-
     def suggest(game, user, letters = nil)
-      GameService.validate_game!(game)
       nouns = Noun.
           where(dictionary_id: game.dictionary_id).
           where('char_length(noun) = ?', game.secret.length).

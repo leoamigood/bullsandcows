@@ -10,7 +10,9 @@ class HintsController < BaseApiController
   def index
     game = GameService.find_by_id!(validate[:game_id])
 
-    render json: { hints: game.hints.map {|hint| Responses::Hint.new(hint.letter, hint.hint)}, game_link: Responses::Game.link(game) }
+    render json: { hints: game.hints.map {|hint|
+      Responses::Hint.new(hint.letter, hint.hint)}, game_link: Responses::Game.link(game)
+    }
   end
 
   private

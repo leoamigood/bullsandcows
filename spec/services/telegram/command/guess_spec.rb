@@ -10,7 +10,7 @@ describe Telegram::Command::Guess, type: :service do
     let!(:message) { Telegram::Bot::Types::Message.new(text: 'hostel') }
 
     before do
-      allow(GameService).to receive(:find_by_channel!).and_return(game)
+      allow(GameService).to receive(:recent_game).and_return(game)
 
       message.stub_chain(:chat, :id).and_return(channel)
       message.stub_chain(:from, :id).and_return(user.id)
@@ -22,7 +22,6 @@ describe Telegram::Command::Guess, type: :service do
     it 'verifies guess execution chain' do
       Telegram::Command::Guess.execute(channel, message, message.text)
 
-      expect(GameService).to have_received(:find_by_channel!).with(channel)
       expect(TelegramMessenger).to have_received(:guess).with(
           have_attributes(game_id: game.id, word: 'hostel', username: '@Amig0')
       )

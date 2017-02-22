@@ -57,7 +57,7 @@ describe TelegramDispatcher, type: :service do
       end
 
       it 'replies with a game created text' do
-        expect(TelegramDispatcher.handle(message)).to include('Game created: 6 letters')
+        expect(TelegramDispatcher.handle(message)).to include('Game created: 6 letters.')
       end
     end
 
@@ -86,7 +86,7 @@ describe TelegramDispatcher, type: :service do
       end
 
       it 'replies with a game created text' do
-        expect(TelegramDispatcher.handle(message)).to include('Game created: 6 letters. Language: EN')
+        expect(TelegramDispatcher.handle(message)).to include('Game created: 6 letters. Language: EN.')
       end
     end
 
@@ -107,11 +107,174 @@ describe TelegramDispatcher, type: :service do
       end
     end
 
+    context 'when /level command received' do
+      let!(:message) { Telegram::Bot::Types::Message.new(text: '/level') }
+
+      before do
+        allow(TelegramMessenger).to receive(:send_message).and_return(Telegram::Bot::Types::Message.new)
+
+        message.stub_chain(:chat, :id).and_return(channel)
+      end
+
+      let(:markup) { instance_of(Telegram::Bot::Types::InlineKeyboardMarkup) }
+
+      it 'replies with prompt to submit game level' do
+        expect {
+          TelegramDispatcher.handle(message)
+          expect(TelegramMessenger).to have_received(:send_message).with(channel, 'Select game level:', markup)
+        }.not_to change(Game, :count)
+      end
+    end
+
+    context 'when /level command received with selected level' do
+      let!(:callbackQuery) { Telegram::Bot::Types::CallbackQuery.new(id: 729191086489033331, data: '/level easy') }
+
+      before do
+        allow(TelegramMessenger).to receive(:answerCallbackQuery)
+        allow(TelegramMessenger).to receive(:send_message).and_return(Telegram::Bot::Types::Message.new)
+
+        callbackQuery.stub_chain(:message, :chat, :id).and_return(channel)
+      end
+
+      context 'being last command in command queue' do
+        before do
+          allow(Telegram::CommandQueue).to receive(:present?).and_return(false)
+        end
+
+        it 'creates setting with selected game level and response with inline message' do
+          expect {
+            expect(TelegramDispatcher.handle_callback_query(callbackQuery)).to eq('Game level was set to easy.')
+            expect(TelegramMessenger).not_to have_received(:answerCallbackQuery)
+          }.to change(Setting, :count).by(1)
+        end
+      end
+
+      context 'NOT being last command in command queue' do
+        before do
+          allow(Telegram::CommandQueue).to receive(:present?).and_return(true)
+          allow(Telegram::CommandQueue).to receive(:execute)
+        end
+
+        it 'creates setting with selected game level and response with inline message' do
+          expect {
+            expect(TelegramDispatcher.handle_callback_query(callbackQuery)).to be_nil
+            expect(TelegramMessenger).to have_received(:answerCallbackQuery).with(callbackQuery.id, 'Game level was set to easy.').once
+          }.to change(Setting, :count).by(1)
+        end
+      end
+    end
+
+    context 'when /lang command received' do
+      let!(:message) { Telegram::Bot::Types::Message.new(text: '/lang') }
+
+      before do
+        allow(TelegramMessenger).to receive(:send_message).and_return(Telegram::Bot::Types::Message.new)
+
+        message.stub_chain(:chat, :id).and_return(channel)
+      end
+
+      let(:markup) { instance_of(Telegram::Bot::Types::InlineKeyboardMarkup) }
+
+      it 'replies with prompt to submit game language' do
+        expect {
+          TelegramDispatcher.handle(message)
+          expect(TelegramMessenger).to have_received(:send_message).with(channel, 'Select game language:', markup)
+        }.not_to change(Game, :count)
+      end
+    end
+
+    context 'when /lang command received with selected language' do
+      let!(:callbackQuery) { Telegram::Bot::Types::CallbackQuery.new(id: 729191086489033331, data: '/lang RU') }
+
+      before do
+        allow(TelegramMessenger).to receive(:answerCallbackQuery)
+        allow(TelegramMessenger).to receive(:send_message).and_return(Telegram::Bot::Types::Message.new)
+
+        callbackQuery.stub_chain(:message, :chat, :id).and_return(channel)
+      end
+
+      context 'being last command in command queue' do
+        before do
+          allow(Telegram::CommandQueue).to receive(:present?).and_return(false)
+        end
+
+        it 'creates setting with selected game language and response with inline message' do
+          expect {
+            expect(TelegramDispatcher.handle_callback_query(callbackQuery)).to eq('Language was set to Русский.')
+            expect(TelegramMessenger).not_to have_received(:answerCallbackQuery)
+          }.to change(Setting, :count).by(1)
+        end
+      end
+
+      context 'NOT being last command in command queue' do
+        before do
+          allow(Telegram::CommandQueue).to receive(:present?).and_return(true)
+          allow(Telegram::CommandQueue).to receive(:execute)
+        end
+
+        it 'creates setting with selected game language and response with status message' do
+          expect {
+            expect(TelegramDispatcher.handle_callback_query(callbackQuery)).to be_nil
+            expect(TelegramMessenger).to have_received(:answerCallbackQuery).with(callbackQuery.id, 'Language was set to Русский.').once
+          }.to change(Setting, :count).by(1)
+        end
+      end
+    end
+
+    context 'when /tries command received' do
+      let!(:message) { Telegram::Bot::Types::Message.new(text: '/tries') }
+
+      before do
+        allow(Telegram::Command::Tries).to receive(:execute)
+        message.stub_chain(:chat, :id).and_return(channel)
+      end
+
+      it 'errors out with message about no recent games available' do
+        expect {
+          expect(TelegramDispatcher.handle(message)).to include('No recent game to show _/tries_ guesses on.')
+          expect(Telegram::Command::Tries).not_to have_received(:execute)
+        }.not_to change(Guess, :count)
+      end
+    end
+
+    context 'when /best command received' do
+      let!(:message) { Telegram::Bot::Types::Message.new(text: '/best') }
+
+      before do
+        allow(Telegram::Command::Best).to receive(:execute)
+        message.stub_chain(:chat, :id).and_return(channel)
+      end
+
+      it 'errors out with message about no recent games available' do
+        expect {
+          expect(TelegramDispatcher.handle(message)).to include('No recent game to show _/best_ guesses on.')
+          expect(Telegram::Command::Best).not_to have_received(:execute)
+        }.not_to change(Guess, :count)
+      end
+    end
+
+    context 'when /zero command received' do
+      let!(:message) { Telegram::Bot::Types::Message.new(text: '/zero') }
+
+      before do
+        allow(Telegram::Command::Zero).to receive(:execute)
+        message.stub_chain(:chat, :id).and_return(channel)
+      end
+
+      it 'errors out with message about no recent games available' do
+        expect {
+          expect(TelegramDispatcher.handle(message)).to include('No recent game to show _/zero_ guesses on.')
+          expect(Telegram::Command::Zero).not_to have_received(:execute)
+        }.not_to change(Guess, :count)
+      end
+    end
+
     context 'when non command guess word received' do
       let!(:message) { Telegram::Bot::Types::Message.new(text: 'secret') }
 
       before do
         message.stub_chain(:chat, :id).and_return(channel)
+        message.stub_chain(:from, :id).and_return(user.id)
         message.stub_chain(:from, :username).and_return(user.name)
       end
 
@@ -123,8 +286,8 @@ describe TelegramDispatcher, type: :service do
     end
   end
 
-  context 'when game has just started and had guesses placed' do
-    let!(:game) { create(:game, :realm, secret: 'secret', realm: realm, dictionary: english) }
+  context 'when game has just started and had no guesses placed' do
+    let!(:game) { create(:game, :realm, secret: 'secret', realm: realm, status: :created, dictionary: english) }
 
     context 'when /suggest command received' do
       let!(:message) { Telegram::Bot::Types::Message.new(text: '/suggest') }
@@ -141,10 +304,42 @@ describe TelegramDispatcher, type: :service do
         }.to change{ game.guesses.count }.by(1)
       end
     end
+
+    context 'when /lang command received' do
+      let!(:message) { Telegram::Bot::Types::Message.new(text: '/lang') }
+
+      before do
+        allow(Telegram::Command::Language).to receive(:execute)
+        message.stub_chain(:chat, :id).and_return(channel)
+      end
+
+      it 'errors out with message about permissions' do
+        expect {
+          expect(TelegramDispatcher.handle(message)).to include('You are NOT allowed to change game language.')
+          expect(Telegram::Command::Language).not_to have_received(:execute)
+        }.not_to change(Game, :count)
+      end
+    end
+
+    context 'when /level command received' do
+      let!(:message) { Telegram::Bot::Types::Message.new(text: '/level') }
+
+      before do
+        allow(Telegram::Command::Level).to receive(:execute)
+        message.stub_chain(:chat, :id).and_return(channel)
+      end
+
+      it 'errors out with message about permissions' do
+        expect {
+          expect(TelegramDispatcher.handle(message)).to include('You are NOT allowed to change game level.')
+          expect(Telegram::Command::Level).not_to have_received(:execute)
+        }.not_to change(Game, :count)
+      end
+    end
   end
 
   context 'when game is in progress and has multiple guesses placed' do
-    let!(:game) { create(:game, :realm, :with_tries, secret: 'secret', realm: realm, dictionary: english) }
+    let!(:game) { create(:game, :realm, :with_tries, secret: 'secret', realm: realm,  status: :running, dictionary: english) }
 
     context 'when /guess command received with non-exact guess word' do
       let!(:message) { Telegram::Bot::Types::Message.new(text: '/guess flight') }
@@ -387,7 +582,7 @@ describe TelegramDispatcher, type: :service do
 
       it 'suggests a word with a substring specified' do
         expect {
-          expect(TelegramDispatcher.handle(message)).to include('Suggestion: _barrel_, *Bulls: 2*, *Cows: 0*')
+          expect(TelegramDispatcher.handle(message)).to include('Suggestion: _barrel_, *Bulls: 2*, *Cows: 0*.')
         }.to change{ game.guesses.count }.by(1)
       end
     end
@@ -418,8 +613,8 @@ describe TelegramDispatcher, type: :service do
       it 'replies with guesses where bulls and cows have zero occurrences' do
         expect {
           result = TelegramDispatcher.handle(message)
-          expect(result).to include('Zero letters in: *ballad*, Bulls: *0*, Cows: *0*')
-          expect(result).to include('Zero letters in: *quorum*, Bulls: *0*, Cows: *0*')
+          expect(result).to include('Zero letters in: *ballad*, Bulls: *0*, Cows: *0*.')
+          expect(result).to include('Zero letters in: *quorum*, Bulls: *0*, Cows: *0*.')
         }.not_to change(Guess, :count)
       end
     end
@@ -429,31 +624,30 @@ describe TelegramDispatcher, type: :service do
 
       before do
         message.stub_chain(:chat, :id).and_return(channel)
+        message.stub_chain(:chat, :type).and_return('group')
       end
 
-      context 'when stop command is permitted' do
+      context 'when /stop command is permitted' do
         before do
           allow(Telegram::Validator).to receive(:permitted?).and_return(true)
         end
 
         it 'finishes the game, replies with a secret word' do
           expect {
-            expect(TelegramDispatcher.handle(message)).to include('You give up? Here is the secret word *secret*')
-            game.reload
-          }.to change(game, :status).to('aborted')
+            expect(TelegramDispatcher.handle(message)).to include('You give up? Here is the secret word *secret*.')
+          }.to change{ game.reload.status }.to('aborted')
         end
       end
 
-      context 'when stop command is NOT permitted' do
+      context 'when /stop command is NOT permitted' do
         before do
           allow(Telegram::Validator).to receive(:permitted?).and_return(false)
         end
 
-        it 'fails to finish the game, replies with a error message' do
+        it 'fails to stop the game, replies with a error message' do
           expect {
-            expect(TelegramDispatcher.handle(message)).to include('You are NOT allowed to _/stop_ this game. Only _admin_ or _creator_ is')
-            game.reload
-          }.not_to change(game, :status)
+            expect(TelegramDispatcher.handle(message)).to include('You are NOT allowed to _/stop_ this game.')
+          }.not_to change{ game.reload.status }
         end
       end
     end
@@ -467,6 +661,7 @@ describe TelegramDispatcher, type: :service do
         allow(TelegramMessenger).to receive(:game_was_finished)
 
         message.stub_chain(:chat, :id).and_return(channel)
+        message.stub_chain(:chat, :type).and_return('group')
       end
 
       it 'handles bot name as optional part in command' do
@@ -525,8 +720,8 @@ describe TelegramDispatcher, type: :service do
     end
   end
 
-  context 'with russian secret word game' do
-    let!(:game) { create(:game, :realm, secret: 'привет', realm: realm, dictionary: russian) }
+  context 'with russian secret word game in progress' do
+    let!(:game) { create(:game, :realm, secret: 'привет', realm: realm,  status: :running, dictionary: russian) }
 
     context 'when /guess command received case sensitive unicode guess word' do
       let!(:privet) { create(:noun, noun: 'привет')}
@@ -549,10 +744,39 @@ describe TelegramDispatcher, type: :service do
   end
 
   context 'when game has finished' do
-    let!(:game) { create(:game, :realm, :with_tries, status: :finished, secret: 'secret', realm: realm) }
+    let!(:game) { create(:game, :realm, :with_tries, status: :finished, secret: 'secret',  status: :finished, realm: realm) }
 
-    context 'when /guess command received after game has stopped' do
+    context 'when /guess command received' do
       let!(:message) { Telegram::Bot::Types::Message.new(text: '/guess secret') }
+
+      before do
+        message.stub_chain(:chat, :id).and_return(channel)
+        message.stub_chain(:from, :id).and_return(user.id)
+      end
+
+      it 'replies with error message' do
+        expect {
+          expect(TelegramDispatcher.handle(message)).to include('Game is not running. Please _/start_ new game and try again.')
+        }.not_to change(Guess, :count)
+      end
+    end
+
+    context 'when /hint command received' do
+      let!(:message) { Telegram::Bot::Types::Message.new(text: '/hint') }
+
+      before do
+        message.stub_chain(:chat, :id).and_return(channel)
+      end
+
+      it 'replies with error message' do
+        expect {
+          expect(TelegramDispatcher.handle(message)).to include('Game is not running. Please _/start_ new game and try again.')
+        }.not_to change(Hint, :count)
+      end
+    end
+
+    context 'when /suggest command received' do
+      let!(:message) { Telegram::Bot::Types::Message.new(text: '/suggest') }
 
       before do
         message.stub_chain(:chat, :id).and_return(channel)
@@ -562,8 +786,135 @@ describe TelegramDispatcher, type: :service do
 
       it 'replies with error message' do
         expect {
-          expect(TelegramDispatcher.handle(message)).to include('Game has not started. Please start a new game using _/create_ command.')
-          expect(game.reload.finished?).to eq(true)
+          expect(TelegramDispatcher.handle(message)).to eq('Game is not running. Please _/start_ new game and try again.')
+        }.not_to change(Hint, :count)
+      end
+    end
+
+    context 'when /level command received' do
+      let!(:message) { Telegram::Bot::Types::Message.new(text: '/level') }
+
+      before do
+        allow(TelegramMessenger).to receive(:send_message).and_return(Telegram::Bot::Types::Message.new)
+
+        message.stub_chain(:chat, :id).and_return(channel)
+      end
+
+      let(:markup) { instance_of(Telegram::Bot::Types::InlineKeyboardMarkup) }
+
+      it 'replies with prompt to submit game level' do
+        expect {
+          TelegramDispatcher.handle(message)
+          expect(TelegramMessenger).to have_received(:send_message).with(channel, 'Select game level:', markup)
+        }.not_to change(Game, :count)
+      end
+    end
+
+    context 'when /level command received with selected level' do
+      let!(:callbackQuery) { Telegram::Bot::Types::CallbackQuery.new(id: 729191086489033331, data: '/level easy') }
+
+      before do
+        allow(TelegramMessenger).to receive(:answerCallbackQuery)
+        allow(TelegramMessenger).to receive(:send_message).and_return(Telegram::Bot::Types::Message.new)
+
+        callbackQuery.stub_chain(:message, :chat, :id).and_return(channel)
+      end
+
+      context 'being last command in command queue' do
+        before do
+          allow(Telegram::CommandQueue).to receive(:present?).and_return(false)
+        end
+
+        it 'creates setting with selected game level and response with inline message' do
+          expect {
+            expect(TelegramDispatcher.handle_callback_query(callbackQuery)).to eq('Game level was set to easy.')
+            expect(TelegramMessenger).not_to have_received(:answerCallbackQuery)
+          }.to change(Setting, :count).by(1)
+        end
+      end
+    end
+
+    context 'when /lang command received' do
+      let!(:message) { Telegram::Bot::Types::Message.new(text: '/lang') }
+
+      before do
+        allow(TelegramMessenger).to receive(:send_message).and_return(Telegram::Bot::Types::Message.new)
+
+        message.stub_chain(:chat, :id).and_return(channel)
+      end
+
+      let(:markup) { instance_of(Telegram::Bot::Types::InlineKeyboardMarkup) }
+
+      it 'replies with prompt to submit game language' do
+        expect {
+          TelegramDispatcher.handle(message)
+          expect(TelegramMessenger).to have_received(:send_message).with(channel, 'Select game language:', markup)
+        }.not_to change(Game, :count)
+      end
+    end
+
+    context 'when /lang command received with selected language' do
+      let!(:callbackQuery) { Telegram::Bot::Types::CallbackQuery.new(id: 729191086489033331, data: '/lang RU') }
+
+      before do
+        allow(TelegramMessenger).to receive(:answerCallbackQuery)
+        allow(TelegramMessenger).to receive(:send_message).and_return(Telegram::Bot::Types::Message.new)
+
+        callbackQuery.stub_chain(:message, :chat, :id).and_return(channel)
+      end
+
+      context 'being last command in command queue' do
+        before do
+          allow(Telegram::CommandQueue).to receive(:present?).and_return(false)
+        end
+
+        it 'creates setting with selected game language and response with inline message' do
+          expect {
+            expect(TelegramDispatcher.handle_callback_query(callbackQuery)).to eq('Language was set to Русский.')
+            expect(TelegramMessenger).not_to have_received(:answerCallbackQuery)
+          }.to change(Setting, :count).by(1)
+        end
+      end
+    end
+
+    context 'when /tries command received' do
+      let!(:message) { Telegram::Bot::Types::Message.new(text: '/tries') }
+
+      before do
+        message.stub_chain(:chat, :id).and_return(channel)
+      end
+
+      it 'replies with game guesses' do
+        expect {
+          expect(TelegramDispatcher.handle(message)).to match('Try .* Bulls: .* Cows: .*')
+        }.not_to change(Guess, :count)
+      end
+    end
+
+    context 'when /best command received' do
+      let!(:message) { Telegram::Bot::Types::Message.new(text: '/best') }
+
+      before do
+        message.stub_chain(:chat, :id).and_return(channel)
+      end
+
+      it 'replies with top guesses' do
+        expect {
+          expect(TelegramDispatcher.handle(message)).to match('Top .* Bulls: .* Cows: .*')
+        }.not_to change(Guess, :count)
+      end
+    end
+
+    context 'when /zero command received' do
+      let!(:message) { Telegram::Bot::Types::Message.new(text: '/zero') }
+
+      before do
+        message.stub_chain(:chat, :id).and_return(channel)
+      end
+
+      it 'replies with guesses where bulls and cows have zero occurrences' do
+        expect {
+          expect(TelegramDispatcher.handle(message)).to match('Zero letters in:')
         }.not_to change(Guess, :count)
       end
     end
@@ -581,106 +932,6 @@ describe TelegramDispatcher, type: :service do
           expect(TelegramDispatcher.handle(message)).to be_nil
           expect(game.reload.finished?).to eq(true)
         }.not_to change(Guess, :count)
-      end
-    end
-  end
-
-  context 'when /lang command received' do
-    let!(:message) { Telegram::Bot::Types::Message.new(text: '/lang') }
-
-    before do
-      allow(TelegramMessenger).to receive(:send_message).and_return(Telegram::Bot::Types::Message.new)
-
-      message.stub_chain(:chat, :id).and_return(channel)
-    end
-
-    let(:markup) { instance_of(Telegram::Bot::Types::InlineKeyboardMarkup) }
-
-    it 'replies with prompt to submit game language' do
-      expect {
-        TelegramDispatcher.handle(message)
-        expect(TelegramMessenger).to have_received(:send_message).with(channel, 'Select game language:', markup)
-      }.not_to change(Game, :count)
-    end
-  end
-
-  context 'when /lang command received with selected language' do
-    let!(:callbackQuery) { Telegram::Bot::Types::CallbackQuery.new(id: 729191086489033331, data: '/lang RU') }
-
-    before do
-      allow(TelegramMessenger).to receive(:answerCallbackQuery)
-      allow(TelegramMessenger).to receive(:send_message).and_return(Telegram::Bot::Types::Message.new)
-
-      callbackQuery.stub_chain(:message, :chat, :id).and_return(channel)
-    end
-
-    context 'being last command in command queue' do
-      before do
-        allow(Telegram::CommandQueue).to receive(:present?).and_return(false)
-      end
-
-      it 'creates setting with selected game language and response with inline message' do
-        expect {
-          expect(TelegramDispatcher.handle_callback_query(callbackQuery)).to eq('Language was set to Русский')
-          expect(TelegramMessenger).not_to have_received(:answerCallbackQuery)
-        }.to change(Setting, :count).by(1)
-      end
-    end
-
-    context 'NOT being last command in command queue' do
-      before do
-        allow(Telegram::CommandQueue).to receive(:present?).and_return(true)
-        allow(Telegram::CommandQueue).to receive(:execute)
-      end
-
-      it 'creates setting with selected game language and response with status message' do
-        expect {
-          expect(TelegramDispatcher.handle_callback_query(callbackQuery)).to be_nil
-          expect(TelegramMessenger).to have_received(:answerCallbackQuery).with(callbackQuery.id, 'Language was set to Русский').once
-        }.to change(Setting, :count).by(1)
-      end
-    end
-  end
-
-  context 'when /level command received' do
-    let!(:message) { Telegram::Bot::Types::Message.new(text: '/level') }
-
-    before do
-      allow(TelegramMessenger).to receive(:send_message).and_return(Telegram::Bot::Types::Message.new)
-
-      message.stub_chain(:chat, :id).and_return(channel)
-    end
-
-    let(:markup) { instance_of(Telegram::Bot::Types::InlineKeyboardMarkup) }
-
-    it 'replies with prompt to submit game level' do
-      expect {
-        TelegramDispatcher.handle(message)
-        expect(TelegramMessenger).to have_received(:send_message).with(channel, 'Select game level:', markup)
-      }.not_to change(Game, :count)
-    end
-  end
-
-  context 'when /level command received with selected level' do
-    let!(:callbackQuery) { Telegram::Bot::Types::CallbackQuery.new(id: 729191086489033331, data: '/level easy') }
-
-    before do
-      allow(TelegramMessenger).to receive(:answerCallbackQuery)
-      allow(TelegramMessenger).to receive(:send_message).and_return(Telegram::Bot::Types::Message.new)
-
-      callbackQuery.stub_chain(:message, :chat, :id).and_return(channel)
-    end
-
-    context 'being last command in command queue' do
-      before do
-        allow(Telegram::CommandQueue).to receive(:present?).and_return(false)
-      end
-
-      it 'creates setting with selected game level and response with inline message' do
-        expect {
-          expect(TelegramDispatcher.handle_callback_query(callbackQuery)).to eq('Game level was set to easy')
-          expect(TelegramMessenger).not_to have_received(:answerCallbackQuery)
-        }.to change(Setting, :count).by(1)
       end
     end
   end

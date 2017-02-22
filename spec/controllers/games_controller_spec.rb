@@ -165,7 +165,7 @@ describe GamesController, :type => :request do
       expect(json['game']).not_to be
     end
 
-    it 'aborts the game' do
+    it 'stops the game' do
       expect {
         put "/games/#{game.id}", status: 'aborted'
       }.not_to change(Game, :count) and expect_ok
@@ -176,5 +176,17 @@ describe GamesController, :type => :request do
       expect(json['game']['status']).to eq('aborted')
       expect(json['game']['link']).to match('/games/\d+')
     end
+
+    it 'fails to create new game and gets 500 error' do
+      expect {
+        post '/games', secret: 'magic'
+      }.not_to change(Game, :count) and expect_error
+
+      expect(json).to be
+      expect(json['error']).to be
+
+      expect(json['game_link']).to eq("/games/#{game.id}")
+    end
+
   end
 end
