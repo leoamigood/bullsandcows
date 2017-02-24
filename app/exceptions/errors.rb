@@ -6,28 +6,28 @@ module Errors
     end
   end
 
-  class GameNotFoundException < StandardError
-  end
-
-  class GameNotStartedException < StandardError
+  class GameException < StandardError
     attr_reader :game
 
-    def initialize(game, message)
+    def initialize(message, game = nil)
       @game = game
       super(message)
     end
   end
 
-  class GameCreateException < StandardError
+  class GameNotFoundException < GameException
   end
 
-  class PermissionException < StandardError
+  class GameCreateException < GameException
   end
 
-  class GameCommandStopNotPermittedException < PermissionException
-    def initialize
-      super('You are NOT allowed to _/stop_ this game. Only _admin_ or _creator_ is')
-    end
+  class GameNotRunningException < GameException
+  end
+
+  class PermissionException < GameException
+  end
+
+  class CommandNotPermittedException < PermissionException
   end
 
 end

@@ -47,7 +47,7 @@ class TelegramMessenger
         else
           language = 'Unknown'
       end
-      "Language was set to #{language}"
+      "Language was set to #{language}."
     end
 
     def ask_length(channel)
@@ -61,38 +61,38 @@ class TelegramMessenger
 
     def game_created(game)
       message = "Game created: #{game.secret.length} letters."
-      message += " Language: #{game.dictionary.lang}" if game.dictionary.present?
+      message += " Language: #{game.dictionary.lang}." if game.dictionary.present?
 
       message
     end
 
     def guess(guess)
-      text = "Guess #{guess.game.guesses_count}: _#{guess.word}_, *Bulls: #{guess.bulls}*, *Cows: #{guess.cows}*\n"
-      text += "Congratulations! You guessed it with *#{guess.game.guesses.length}* tries" if guess.exact?
+      text = "Guess #{guess.game.guesses_count}: _#{guess.word}_, *Bulls: #{guess.bulls}*, *Cows: #{guess.cows}*.\n"
+      text += "Congratulations! You guessed it with *#{guess.game.guesses.length}* tries." if guess.exact?
 
       text
     end
 
     def hint(letter)
-      "Secret word has letter *#{letter}* in it"
+      "Secret word has letter *#{letter}* in it."
     end
 
     def no_hint(letter)
-      "Secret word has NO letter *#{letter}* in it"
+      "Secret word has NO letter *#{letter}* in it."
     end
 
     def suggestion(guess)
-      "Suggestion: _#{guess.word}_, *Bulls: #{guess.bulls}*, *Cows: #{guess.cows}*"
+      "Suggestion: _#{guess.word}_, *Bulls: #{guess.bulls}*, *Cows: #{guess.cows}*."
     end
 
     def no_suggestions(letters)
-      "Could not find any suggestions based on provided word letters _#{letters}_"
+      "Could not find any suggestions based on provided word letters _#{letters}_."
     end
 
     def tries(guesses)
       unless guesses.empty?
         text = guesses.each_with_index.map do |guess, i|
-          "Try #{i + 1}: *#{guess.word}*, Bulls: *#{guess.bulls}*, Cows: *#{guess.cows}*"
+          "Try #{i + 1}: *#{guess.word}*, Bulls: *#{guess.bulls}*, Cows: *#{guess.cows}*."
         end
         text.join("\n")
       else
@@ -103,7 +103,7 @@ class TelegramMessenger
     def best(guesses)
       unless guesses.empty?
         text = guesses.each_with_index.map do |guess, i|
-          "Top #{i + 1}: *#{guess.word}*, Bulls: *#{guess.bulls}*, Cows: *#{guess.cows}*"
+          "Top #{i + 1}: *#{guess.word}*, Bulls: *#{guess.bulls}*, Cows: *#{guess.cows}*."
         end
         text.join("\n")
       else
@@ -114,7 +114,7 @@ class TelegramMessenger
     def zero(guesses)
       unless guesses.empty?
         text = guesses.each.map do |guess|
-          "Zero letters in: *#{guess.word}*, Bulls: *#{guess.bulls}*, Cows: *#{guess.cows}*"
+          "Zero letters in: *#{guess.word}*, Bulls: *#{guess.bulls}*, Cows: *#{guess.cows}*."
         end
         text.join("\n")
       else
@@ -132,11 +132,11 @@ class TelegramMessenger
     end
 
     def level(level)
-      "Game level was set to #{level}"
+      "Game level was set to #{level}."
     end
 
     def game_stop(game)
-      "You give up? Here is the secret word *#{game.secret}*"
+      "You give up? Here is the secret word *#{game.secret}*."
     end
 
     def game_was_finished(game)
@@ -156,6 +156,7 @@ class TelegramMessenger
       # hint    - Use /hint to reveal a random letter in a secret
       # suggest - Use /suggest [letters] for bot to suggest a word
       # stop    - Use /stop to abort the game and show secret
+      # help    - Usr /help to see this help
 
       lines = [
           'Here is the list of available commands:',
@@ -169,23 +170,24 @@ class TelegramMessenger
           'Use _/zero_ to see guesses with zero matches',
           'Use _/hint_ [letter]|[number] to reveal a letter in a secret',
           'Use _/suggest_ [letters] for bot to suggest a word',
-          'Use _/stop_ to abort the game and show secret'
+          'Use _/stop_ to abort the game and show secret',
+          'Use _/help_ to see this help'
       ]
       lines.join("\n")
     end
 
     def unknown_command(message)
-      "Nothing I can do with *#{message}*. For help try _/help_"
+      "Nothing I can do with *#{message}*. For help try _/help_."
     end
 
     def new_game_ask
-      'Go ahead and _/create_ a new game. For help try _/help_'
+      'Go ahead and _/create_ a new game. For help try _/help_.'
     end
 
     private
 
     def no_guesses_submitted
-      'There was no guesses so far. Go ahead and submit one with _/guess <word>_'
+      'There was no guesses so far. Go ahead and submit one with _/guess <word>_.'
     end
   end
 

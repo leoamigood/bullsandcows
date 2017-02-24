@@ -21,14 +21,14 @@ class GuessesController < BaseApiController
 
   def best
     game = Game.find_by_id!(validate[:game_id])
-    guesses = game.best(squash filter_params[:best])
+    guesses = game.best(squash(filter_params[:best], :to_i))
 
     render json: { best: guesses.map {|guess| Responses::Guess.new(guess)}, game_link: Responses::Game.link(game) }
   end
 
   def zero
     game = Game.find_by_id!(validate[:game_id])
-    guesses = game.zero(squash filter_params[:zero])
+    guesses = game.zero(squash(filter_params[:zero], :to_i))
 
     render json: { zero: guesses.map {|guess| Responses::Guess.new(guess)}, game_link: Responses::Game.link(game) }
   end
@@ -43,7 +43,7 @@ class GuessesController < BaseApiController
     params.permit(:best, :zero)
   end
 
-  def squash(s)
-    s.empty? ? nil : s.to_i
+  def squash(s, method)
+    s.empty? ? nil : s.send(method)
   end
 end

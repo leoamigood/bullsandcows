@@ -1,12 +1,10 @@
 FactoryGirl.define do
   factory :game
 
-  trait :telegram do
-    source :telegram
-  end
-
-  trait :web do
-    source :web
+  trait :realm do
+    initialize_with do
+      new(channel: realm.channel, user_id: realm.user_id, source: realm.source)
+    end
   end
 
   trait :created do

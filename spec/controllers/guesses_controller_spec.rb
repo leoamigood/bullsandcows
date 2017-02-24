@@ -167,7 +167,7 @@ describe GuessesController, :type => :request  do
   context 'with a game finished' do
     let!(:game) { create(:game, :finished, secret: 'hostel')}
 
-    it 'submits a guess word' do
+    xit 'submits a guess word' do
       expect {
         post "/games/#{game.id}/guesses", guess: 'corpus'
       }.not_to change(Guess, :count) and expect_error

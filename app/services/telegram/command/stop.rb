@@ -1,18 +1,27 @@
+require 'aspector'
+
 module Telegram
   module Command
 
     class Stop
       class << self
-        def execute(channel)
+        def execute(channel, message)
           game = GameService.find_by_channel!(channel)
           GameService.stop!(game)
-        end
-
-        def validate(message)
-          raise Errors::GameCommandStopNotPermittedException unless Telegram::Validator.permitted?(:stop, message)
+          TelegramMessenger.game_stop(game)
         end
       end
     end
 
+    aspector(Stop, class_methods: true) do
+      target do
+        def permit(*args, &block)
+          channel, message = *args
+          Telegram::Validator.validate!(Action::STOP, channel, message)
+        end
+      end
+
+      before :execute, :permit
+    end
   end
 end

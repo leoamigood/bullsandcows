@@ -1,40 +1,25 @@
 module Telegram
-  class Action
-    BEST     = '/best'
-    CREATE   = '/create'
-    GUESS    = '/guess'
-    HELP     = '/help'
-    HINT     = '/hint'
-    LANG     = '/lang'
-    LEVEL    = '/level'
-    START    = '/start'
-    STOP     = '/stop'
-    SUGGEST  = '/suggest'
-    TRIES    = '/tries'
-    ZERO     = '/zero'
-  end
-
   class CommandRoute
     BOT_REGEXP = '(?:@\w+)?'
 
-    BEST         = /^#{Action::BEST}#{BOT_REGEXP}\s*(?<best>[[:digit:]]+)?$/i
-    CREATE       = /^#{Action::CREATE}#{BOT_REGEXP}$/i
-    CREATE_ALPHA = /^#{Action::CREATE}#{BOT_REGEXP}\s+(?<secret>[[:alpha:]]+)$/i
-    CREATE_DIGIT = /^#{Action::CREATE}#{BOT_REGEXP}\s+(?<number>[[:digit:]]+)$/i
-    GUESS        = /^#{Action::GUESS}#{BOT_REGEXP}\s+(?<guess>[[:alpha:]]+)$/i
+    BEST         = /^#{Telegram::Command::Action::BEST}#{BOT_REGEXP}\s*(?<best>[[:digit:]]+)?$/i
+    CREATE       = /^#{Telegram::Command::Action::CREATE}#{BOT_REGEXP}$/i
+    CREATE_ALPHA = /^#{Telegram::Command::Action::CREATE}#{BOT_REGEXP}\s+(?<secret>[[:alpha:]]+)$/i
+    CREATE_DIGIT = /^#{Telegram::Command::Action::CREATE}#{BOT_REGEXP}\s+(?<number>[[:digit:]]+)$/i
+    GUESS        = /^#{Telegram::Command::Action::GUESS}#{BOT_REGEXP}\s+(?<guess>[[:alpha:]]+)$/i
     WORD         = /^(?<guess>[[:alpha:]]+)$/i
-    HELP         = /^#{Action::HELP}#{BOT_REGEXP}$/i
-    HINT_ALPHA   = /^#{Action::HINT}#{BOT_REGEXP}\s*(?<letter>[[:alpha:]])?$/i
-    HINT_DIGIT   = /^#{Action::HINT}#{BOT_REGEXP}\s+(?<number>[[:digit:]])$/i
-    LANG         = /^#{Action::LANG}#{BOT_REGEXP}$/i
-    LANG_ALPHA   = /^#{Action::LANG}#{BOT_REGEXP}\s+(?<language>[[:alpha:]]+)$/i
-    LEVEL        = /^#{Action::LEVEL}#{BOT_REGEXP}$/i
-    LEVEL_ALPHA  = /^#{Action::LEVEL}#{BOT_REGEXP}\s+(?<level>[[:alpha:]]+)$/i
-    START        = /^#{Action::START}#{BOT_REGEXP}$/i
-    STOP         = /^#{Action::STOP}#{BOT_REGEXP}$/i
-    SUGGEST      = /^#{Action::SUGGEST}#{BOT_REGEXP}\s*(?<letters>[[:alpha:]]+)?$/i
-    TRIES        = /^#{Action::TRIES}#{BOT_REGEXP}$/i
-    ZERO         = /^#{Action::ZERO}#{BOT_REGEXP}$/i
+    HELP         = /^#{Telegram::Command::Action::HELP}#{BOT_REGEXP}$/i
+    HINT_ALPHA   = /^#{Telegram::Command::Action::HINT}#{BOT_REGEXP}\s*(?<letter>[[:alpha:]])?$/i
+    HINT_DIGIT   = /^#{Telegram::Command::Action::HINT}#{BOT_REGEXP}\s+(?<number>[[:digit:]])$/i
+    LANG         = /^#{Telegram::Command::Action::LANG}#{BOT_REGEXP}$/i
+    LANG_ALPHA   = /^#{Telegram::Command::Action::LANG}#{BOT_REGEXP}\s+(?<language>[[:alpha:]]+)$/i
+    LEVEL        = /^#{Telegram::Command::Action::LEVEL}#{BOT_REGEXP}$/i
+    LEVEL_ALPHA  = /^#{Telegram::Command::Action::LEVEL}#{BOT_REGEXP}\s+(?<level>[[:alpha:]]+)$/i
+    START        = /^#{Telegram::Command::Action::START}#{BOT_REGEXP}$/i
+    STOP         = /^#{Telegram::Command::Action::STOP}#{BOT_REGEXP}$/i
+    SUGGEST      = /^#{Telegram::Command::Action::SUGGEST}#{BOT_REGEXP}\s*(?<letters>[[:alpha:]]+)?$/i
+    TRIES        = /^#{Telegram::Command::Action::TRIES}#{BOT_REGEXP}$/i
+    ZERO         = /^#{Telegram::Command::Action::ZERO}#{BOT_REGEXP}$/i
     OTHER        = /^\/.*/
   end
 end

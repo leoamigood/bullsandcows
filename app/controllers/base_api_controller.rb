@@ -5,20 +5,12 @@ class BaseApiController < ApplicationController
     render json: { error: ex.message }, status: 500
   end
 
-  rescue_from Errors::GameNotFoundException do |ex|
-    render json: { error: ex.message }, status: 404
-  end
-
-  rescue_from Errors::GameNotStartedException do |ex|
+  rescue_from Errors::GameException do |ex|
     render json: { game_link: Responses::Game.link(ex.game), error: ex.message }, status: 500
   end
 
-  rescue_from Errors::GameCreateException do |ex|
-    render json: { error: ex.message }, status: 500
-  end
-
-  rescue_from Errors::PermissionException do |ex|
-    render json: { error: ex.message }, status: 500
+  rescue_from Errors::GameNotFoundException do |ex|
+    render json: { error: ex.message }, status: 404
   end
 
   rescue_from ActionController::ParameterMissing do |ex|
