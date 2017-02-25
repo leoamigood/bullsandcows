@@ -7,7 +7,7 @@ module Telegram
     CREATE_ALPHA = /^#{Telegram::Command::Action::CREATE}#{BOT_REGEXP}\s+(?<secret>[[:alpha:]]+)$/i
     CREATE_DIGIT = /^#{Telegram::Command::Action::CREATE}#{BOT_REGEXP}\s+(?<number>[[:digit:]]+)$/i
     GUESS        = /^#{Telegram::Command::Action::GUESS}#{BOT_REGEXP}\s+(?<guess>[[:alpha:]]+)$/i
-    WORD         = /^(?<guess>[[:alpha:]]+)$/i
+    WORD         = /\A(?<guess>[[:alpha:]]+)\z/im
     HELP         = /^#{Telegram::Command::Action::HELP}#{BOT_REGEXP}$/i
     HINT_ALPHA   = /^#{Telegram::Command::Action::HINT}#{BOT_REGEXP}\s*(?<letter>[[:alpha:]])?$/i
     HINT_DIGIT   = /^#{Telegram::Command::Action::HINT}#{BOT_REGEXP}\s+(?<number>[[:digit:]])$/i

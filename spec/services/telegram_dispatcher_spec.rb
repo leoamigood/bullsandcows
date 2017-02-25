@@ -704,8 +704,23 @@ describe TelegramDispatcher, type: :service do
       end
     end
 
-    context 'when non command multiple words is received with exact guess' do
+    context 'when non command multiple words is received' do
       let!(:message) { Telegram::Bot::Types::Message.new(text: 'hello world') }
+
+      before do
+        message.stub_chain(:chat, :id).and_return(channel)
+        message.stub_chain(:from, :username).and_return(user.name)
+      end
+
+      it 'ignore the message' do
+        expect {
+          TelegramDispatcher.handle(message)
+        }.not_to change(Guess, :count)
+      end
+    end
+
+    context 'when multiline non command words is received' do
+      let!(:message) { Telegram::Bot::Types::Message.new(text: "line\nanother line\nthird") }
 
       before do
         message.stub_chain(:chat, :id).and_return(channel)
