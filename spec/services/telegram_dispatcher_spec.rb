@@ -1011,18 +1011,11 @@ describe Telegram::CommandQueue do
         expect(Telegram::CommandQueue.present?).to be true
       }.to change(Telegram::CommandQueue, :size).by(1)
     end
-
-    it 'fails to remove code block from empty queue' do
-      expect{
-        expect(Telegram::CommandQueue.pop).not_to be
-      }.not_to change(Telegram::CommandQueue, :size)
-    end
-
   end
 
   context 'given one code block in command queue' do
     before do
-      Telegram::CommandQueue.push{ 'block to pop' }
+      Telegram::CommandQueue.push{ 'block to execute' }
     end
 
     after do
@@ -1031,15 +1024,7 @@ describe Telegram::CommandQueue do
 
     it 'executes and removed code block' do
       expect{
-        expect(Telegram::CommandQueue.execute).to eq('block to pop')
-      }.to change(Telegram::CommandQueue, :size).by(-1)
-    end
-
-    it 'removes code block' do
-      expect{
-        block = Telegram::CommandQueue.pop
-        expect(block).to be
-        expect(block.call).to eq('block to pop')
+        expect(Telegram::CommandQueue.execute).to eq('block to execute')
       }.to change(Telegram::CommandQueue, :size).by(-1)
     end
   end
@@ -1058,22 +1043,6 @@ describe Telegram::CommandQueue do
       expect{
         expect(Telegram::CommandQueue.size).to eq(2)
       }.not_to change(Telegram::CommandQueue, :size)
-    end
-
-    it 'gets and removes first pushed code block (FIFO)' do
-      expect{
-        block = Telegram::CommandQueue.pop
-        expect(block).to be
-        expect(block.call).to eq('code block 2')
-      }.to change(Telegram::CommandQueue, :size).by(-1)
-    end
-
-    it 'gets and removes first pushed code block (LIFO)' do
-      expect{
-        block = Telegram::CommandQueue.shift
-        expect(block).to be
-        expect(block.call).to eq('code block 1')
-      }.to change(Telegram::CommandQueue, :size).by(-1)
     end
 
     it 'removes all code blocks' do

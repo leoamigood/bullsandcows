@@ -1,38 +1,50 @@
 module Telegram
   class CommandQueue
-    @queue = []
+    @asserted = true
+    @commands = []
+    @asserts = []
 
     class << self
       def push(&block)
-        @queue.push(block)
+        @commands.push(block)
+        self
       end
 
-      def pop
-        @queue.pop
+      def to_confirm(&block)
+        @asserts.push(block)
+      end
+
+      def assert(cls)
+        @asserted = !!@asserts.first.try(:call, cls)
+        @asserts.shift if asserted?
+
+        @asserted
+      end
+
+      def asserted?
+        @asserted
       end
 
       def execute
-        shift.try(:call)
-      end
-
-      def shift
-        @queue.shift
+        @asserted = false
+        @commands.shift.try(:call)
       end
 
       def size
-        @queue.size
+        @commands.size
       end
 
       def clear
-        @queue.clear
+        @commands.clear
+        @asserts.clear
       end
 
       def empty?
-        @queue.empty?
+        @commands.empty?
       end
 
       def present?
-        @queue.present?
+        @commands.present?
       end
     end
   end
