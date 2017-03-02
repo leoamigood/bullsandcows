@@ -5,7 +5,8 @@ describe Hooks::TelegramController, :type => :request do
   context 'when receives telegram message with /start command' do
     before do
       allow(TelegramMessenger).to receive(:send_message)
-      allow(Telegram::CommandQueue).to receive(:push)
+      allow(Telegram::CommandQueue).to receive(:callback)
+      allow(Telegram::CommandQueue).to receive(:push).and_return(Telegram::CommandQueue)
     end
 
     let!(:command) {
@@ -59,7 +60,8 @@ describe Hooks::TelegramController, :type => :request do
       expect(response).to be_success
       expect(response).to have_http_status(200)
 
-      expect(Telegram::CommandQueue).to have_received(:push).twice
+      expect(Telegram::CommandQueue).to have_received(:push).thrice
+      expect(Telegram::CommandQueue).to have_received(:callback).twice
 
       expect(json).to be
       expect(json['text']).to eq('')

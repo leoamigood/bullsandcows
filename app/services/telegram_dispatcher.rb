@@ -44,6 +44,7 @@ class TelegramDispatcher
       case command
         when Telegram::CommandRoute::START
           Telegram::Command::Start.execute(channel)
+          Telegram::CommandQueue.execute
 
         when Telegram::CommandRoute::LANG
           Telegram::Command::Language.ask(channel)

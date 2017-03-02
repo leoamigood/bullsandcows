@@ -27,7 +27,7 @@ describe TelegramDispatcher, type: :service do
           expect(TelegramDispatcher.handle(message)).to be
           expect(TelegramMessenger).to have_received(:send_message).with(channel, /Welcome to Bulls and Cows!/).once
           expect(TelegramMessenger).to have_received(:send_message).with(channel, 'Select game language:', markup).once
-        }.to change(Telegram::CommandQueue, :size).by(2)
+        }.to change(Telegram::CommandQueue, :size).by(3)
       end
     end
 
@@ -704,8 +704,23 @@ describe TelegramDispatcher, type: :service do
       end
     end
 
-    context 'when non command multiple words is received with exact guess' do
+    context 'when non command multiple words is received' do
       let!(:message) { Telegram::Bot::Types::Message.new(text: 'hello world') }
+
+      before do
+        message.stub_chain(:chat, :id).and_return(channel)
+        message.stub_chain(:from, :username).and_return(user.name)
+      end
+
+      it 'ignore the message' do
+        expect {
+          TelegramDispatcher.handle(message)
+        }.not_to change(Guess, :count)
+      end
+    end
+
+    context 'when multiline non command words is received' do
+      let!(:message) { Telegram::Bot::Types::Message.new(text: "line\nanother line\nthird") }
 
       before do
         message.stub_chain(:chat, :id).and_return(channel)
@@ -977,11 +992,15 @@ end
 
 describe Telegram::CommandQueue do
 
-  context 'given empty command queue' do
-    after do
-      Telegram::CommandQueue.clear
-    end
+  before do
+    Telegram::CommandQueue.clear
+  end
 
+  after do
+    Telegram::CommandQueue.clear
+  end
+
+  context 'given empty command queue' do
     it 'checks if queue is empty' do
       expect{
         expect(Telegram::CommandQueue.empty?).to be true
@@ -996,35 +1015,16 @@ describe Telegram::CommandQueue do
         expect(Telegram::CommandQueue.present?).to be true
       }.to change(Telegram::CommandQueue, :size).by(1)
     end
-
-    it 'fails to remove code block from empty queue' do
-      expect{
-        expect(Telegram::CommandQueue.pop).not_to be
-      }.not_to change(Telegram::CommandQueue, :size)
-    end
-
   end
 
   context 'given one code block in command queue' do
     before do
-      Telegram::CommandQueue.push{ 'block to pop' }
-    end
-
-    after do
-      Telegram::CommandQueue.clear
+      Telegram::CommandQueue.push{ 'block' +  ' to execute' }
     end
 
     it 'executes and removed code block' do
       expect{
-        expect(Telegram::CommandQueue.execute).to eq('block to pop')
-      }.to change(Telegram::CommandQueue, :size).by(-1)
-    end
-
-    it 'removes code block' do
-      expect{
-        block = Telegram::CommandQueue.pop
-        expect(block).to be
-        expect(block.call).to eq('block to pop')
+        expect(Telegram::CommandQueue.execute).to eq('block' + ' to execute')
       }.to change(Telegram::CommandQueue, :size).by(-1)
     end
   end
@@ -1035,30 +1035,10 @@ describe Telegram::CommandQueue do
       Telegram::CommandQueue.push{ 'code block 2' }
     end
 
-    after do
-      Telegram::CommandQueue.clear
-    end
-
     it 'gives total amount of blocks' do
       expect{
         expect(Telegram::CommandQueue.size).to eq(2)
       }.not_to change(Telegram::CommandQueue, :size)
-    end
-
-    it 'gets and removes first pushed code block (FIFO)' do
-      expect{
-        block = Telegram::CommandQueue.pop
-        expect(block).to be
-        expect(block.call).to eq('code block 2')
-      }.to change(Telegram::CommandQueue, :size).by(-1)
-    end
-
-    it 'gets and removes first pushed code block (LIFO)' do
-      expect{
-        block = Telegram::CommandQueue.shift
-        expect(block).to be
-        expect(block.call).to eq('code block 1')
-      }.to change(Telegram::CommandQueue, :size).by(-1)
     end
 
     it 'removes all code blocks' do
@@ -1078,8 +1058,6 @@ describe Telegram::CommandQueue do
         expect(Telegram::CommandQueue.execute).to eq('code block 1')
       }.to change(Telegram::CommandQueue, :size).by(-1)
     end
-
   end
-
 
 end
