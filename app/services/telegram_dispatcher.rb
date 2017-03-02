@@ -29,10 +29,12 @@ class TelegramDispatcher
         command = callback_query.data.downcase.to_s
         response = execute(command, callback_query.message.chat.id, callback_query)
 
-        TelegramMessenger.answerCallbackQuery(callback_query.id, response)
-        Telegram::CommandQueue.execute if Telegram::CommandQueue.asserted?
-
-        response
+        if Telegram::CommandQueue.present?
+          TelegramMessenger.answerCallbackQuery(callback_query.id, response)
+          Telegram::CommandQueue.execute
+        else
+          response
+        end
       rescue => ex
         ex.message
       end
@@ -42,6 +44,7 @@ class TelegramDispatcher
       case command
         when Telegram::CommandRoute::START
           Telegram::Command::Start.execute(channel)
+          Telegram::CommandQueue.execute
 
         when Telegram::CommandRoute::LANG
           Telegram::Command::Language.ask(channel)

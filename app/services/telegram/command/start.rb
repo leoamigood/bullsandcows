@@ -8,10 +8,9 @@ module Telegram
         def execute(channel)
           Telegram::CommandQueue.clear
           TelegramMessenger.welcome(channel)
-          TelegramMessenger.ask_language(channel)
 
-          Telegram::CommandQueue.to_confirm { |cls| cls == Telegram::Command::Language }
-          Telegram::CommandQueue.push{ TelegramMessenger.ask_level(channel) }.to_confirm { |cls| cls == Telegram::Command::Level }
+          Telegram::CommandQueue.push{ TelegramMessenger.ask_language(channel) }.callback { |cls| cls == Telegram::Command::Language }
+          Telegram::CommandQueue.push{ TelegramMessenger.ask_level(channel) }.callback { |cls| cls == Telegram::Command::Level }
           Telegram::CommandQueue.push{ TelegramMessenger.ask_length(channel) }
         end
       end

@@ -27,7 +27,7 @@ describe TelegramDispatcher, type: :service do
           expect(TelegramDispatcher.handle(message)).to be
           expect(TelegramMessenger).to have_received(:send_message).with(channel, /Welcome to Bulls and Cows!/).once
           expect(TelegramMessenger).to have_received(:send_message).with(channel, 'Select game language:', markup).once
-        }.to change(Telegram::CommandQueue, :size).by(2)
+        }.to change(Telegram::CommandQueue, :size).by(3)
       end
     end
 
@@ -992,11 +992,15 @@ end
 
 describe Telegram::CommandQueue do
 
-  context 'given empty command queue' do
-    after do
-      Telegram::CommandQueue.clear
-    end
+  before do
+    Telegram::CommandQueue.clear
+  end
 
+  after do
+    Telegram::CommandQueue.clear
+  end
+
+  context 'given empty command queue' do
     it 'checks if queue is empty' do
       expect{
         expect(Telegram::CommandQueue.empty?).to be true
@@ -1015,16 +1019,12 @@ describe Telegram::CommandQueue do
 
   context 'given one code block in command queue' do
     before do
-      Telegram::CommandQueue.push{ 'block to execute' }
-    end
-
-    after do
-      Telegram::CommandQueue.clear
+      Telegram::CommandQueue.push{ 'block' +  ' to execute' }
     end
 
     it 'executes and removed code block' do
       expect{
-        expect(Telegram::CommandQueue.execute).to eq('block to execute')
+        expect(Telegram::CommandQueue.execute).to eq('block' + ' to execute')
       }.to change(Telegram::CommandQueue, :size).by(-1)
     end
   end
@@ -1033,10 +1033,6 @@ describe Telegram::CommandQueue do
     before do
       Telegram::CommandQueue.push{ 'code block 1' }
       Telegram::CommandQueue.push{ 'code block 2' }
-    end
-
-    after do
-      Telegram::CommandQueue.clear
     end
 
     it 'gives total amount of blocks' do
@@ -1062,8 +1058,6 @@ describe Telegram::CommandQueue do
         expect(Telegram::CommandQueue.execute).to eq('code block 1')
       }.to change(Telegram::CommandQueue, :size).by(-1)
     end
-
   end
-
 
 end

@@ -42,10 +42,9 @@ describe Telegram::CommandQueue, type: :service do
   context 'given one command with assertion in a queue' do
     before do
       allow(GameEngineService).to receive(:settings)
-      allow(GameEngineService).to receive(:language).and_return('RU')
       allow(TelegramMessenger).to receive(:level)
 
-      Telegram::CommandQueue.push{ TelegramMessenger.ask_level(channel) }.to_confirm { |cls| cls == Telegram::Command::Level }
+      Telegram::CommandQueue.push{ TelegramMessenger.ask_level(channel) }.callback { |cls| cls == Telegram::Command::Level }
     end
 
     after do
@@ -64,25 +63,28 @@ describe Telegram::CommandQueue, type: :service do
       expect(Telegram::CommandQueue.present?).to be true
     end
 
-    context 'with already executed command' do
+    context 'when command had executed' do
       before do
         Telegram::CommandQueue.execute
       end
 
       it 'verify queue false assertion state' do
-        expect(Telegram::CommandQueue.asserted?).to be false
+        expect(Telegram::CommandQueue.size).to eq(1)
       end
 
-      xit 'verify queue /language command execution confirms assertion' do
+      let!(:dictionary) { create :dictionary, lang: 'RU'}
+      it 'verify queue /language command fails expected callback assertion' do
         expect{
           Telegram::Command::Language.execute(channel, 'RU')
-        }.not_to change(Telegram::CommandQueue, :asserted?)
+          expect(Telegram::CommandQueue.asserted?).to eq(false)
+        }.not_to change(Telegram::CommandQueue, :size)
       end
 
-      it 'verify queue /level command execution confirms assertion' do
+      it 'verify queue /level command executes with successful callback and assertion' do
         expect{
           Telegram::Command::Level.execute(channel, 'easy')
-        }.to change(Telegram::CommandQueue, :asserted?).to(true)
+          expect(Telegram::CommandQueue.asserted?).to eq(true)
+        }.to change(Telegram::CommandQueue, :size).by(-1)
       end
     end
   end
