@@ -20,6 +20,10 @@ describe TelegramDispatcher, type: :service do
         message.stub_chain(:chat, :id).and_return(channel)
       end
 
+      after do
+        Telegram::CommandQueue.clear
+      end
+
       let(:markup) { instance_of(Telegram::Bot::Types::InlineKeyboardMarkup) }
 
       it 'replies with a welcome text' do
@@ -990,74 +994,3 @@ describe TelegramDispatcher, type: :service do
 
 end
 
-describe Telegram::CommandQueue do
-
-  before do
-    Telegram::CommandQueue.clear
-  end
-
-  after do
-    Telegram::CommandQueue.clear
-  end
-
-  context 'given empty command queue' do
-    it 'checks if queue is empty' do
-      expect{
-        expect(Telegram::CommandQueue.empty?).to be true
-        expect(Telegram::CommandQueue.present?).to be false
-      }.not_to change(Telegram::CommandQueue, :size)
-    end
-
-    it 'adds a code block' do
-      expect{
-        Telegram::CommandQueue.push{ 'pushed block' }
-        expect(Telegram::CommandQueue.empty?).to be false
-        expect(Telegram::CommandQueue.present?).to be true
-      }.to change(Telegram::CommandQueue, :size).by(1)
-    end
-  end
-
-  context 'given one code block in command queue' do
-    before do
-      Telegram::CommandQueue.push{ 'block' +  ' to execute' }
-    end
-
-    it 'executes and removed code block' do
-      expect{
-        expect(Telegram::CommandQueue.execute).to eq('block' + ' to execute')
-      }.to change(Telegram::CommandQueue, :size).by(-1)
-    end
-  end
-
-  context 'given two code blocks in command queue' do
-    before do
-      Telegram::CommandQueue.push{ 'code block 1' }
-      Telegram::CommandQueue.push{ 'code block 2' }
-    end
-
-    it 'gives total amount of blocks' do
-      expect{
-        expect(Telegram::CommandQueue.size).to eq(2)
-      }.not_to change(Telegram::CommandQueue, :size)
-    end
-
-    it 'removes all code blocks' do
-      expect{
-        expect(Telegram::CommandQueue.clear).to be_empty
-      }.to change(Telegram::CommandQueue, :size).by(-2)
-    end
-
-    it 'checks if queue is empty' do
-      expect{
-        expect(Telegram::CommandQueue.empty?).to be false
-      }.not_to change(Telegram::CommandQueue, :size)
-    end
-
-    it 'executes and removed first pushed code block' do
-      expect{
-        expect(Telegram::CommandQueue.execute).to eq('code block 1')
-      }.to change(Telegram::CommandQueue, :size).by(-1)
-    end
-  end
-
-end
