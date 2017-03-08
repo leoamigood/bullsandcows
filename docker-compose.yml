@@ -3,7 +3,7 @@ services:
   backend:
     build: .
     volumes:
-      - .:/u/apps/bullsandcows
+      - .:/usr/src/app
     ports:
       - "3000:3000"
     links:
@@ -12,13 +12,20 @@ services:
     depends_on:
       - postgres
       - redis
-    working_dir: /u/apps/bullsandcows
+    working_dir: /usr/src/app
     environment:
       RAILS_ENV: development
     env_file:
       - '.env.backend'
       - '.env.backend.secret'
       - '.env.postgres.secret'
+    command: bundle exec rails s --binding 0.0.0.0
+  nginx:
+    image: nginx:1.11
+    ports:
+      - "80:80"
+    environment:
+      - NGINX_PORT=80
   postgres:
     image: postgres:9.5.3
     ports:
@@ -33,18 +40,18 @@ services:
   rspec:
     build: .
     volumes:
-      - .:/u/apps/bullsandcows
+      - .:/usr/src/app
     links:
       - postgres
       - redis
     depends_on:
       - postgres
       - redis
-    working_dir: /u/apps/bullsandcows
+    working_dir: /usr/src/app
     environment:
       RAILS_ENV: test
     env_file:
       - '.env.backend'
       - '.env.backend.test'
       - '.env.postgres.secret'
-    command: bundle exec rspec -fd
+    command: bash -c "rake db:setup && bundle exec rspec"

@@ -3,7 +3,7 @@ services:
   postgres:
     image: postgres:9.5.3
     ports:
-      - "15432:5432"
+      - "5432:5432"
     env_file:
       - '.env.postgres.test'
   redis:
@@ -12,15 +12,13 @@ services:
       - "16379:6379"
   rspec:
     build: .
-    volumes:
-      - .:/u/apps/bullsandcows
     links:
       - postgres
       - redis
     depends_on:
       - postgres
       - redis
-    working_dir: /u/apps/bullsandcows
+    working_dir: /usr/src/app
     environment:
       RAILS_ENV: test
     env_file:

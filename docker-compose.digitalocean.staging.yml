@@ -1,0 +1,30 @@
+version: '2'
+services:
+  backend:
+    build: .
+    ports:
+      - "3000:3000"
+    links:
+      - postgres
+    depends_on:
+      - postgres
+    working_dir: /usr/src/app
+    env_file:
+      - '.env.postgres.secret.digitalocean.staging'
+      - '.env.backend'
+      - '.env.backend.secret.digitalocean.staging'
+    environment: 
+      RAILS_ENV: production
+    command: bash -c "rm -f /usr/src/app/tmp/pids/server.pid && bundle exec rails s --binding 0.0.0.0"
+  nginx:
+    image: nginx:1.11
+    ports:
+      - "80:80"
+    environment:
+      - NGINX_PORT=80
+  postgres:
+    image: postgres:9.5.3
+    ports:
+      - "5432:5432"
+    env_file:
+      - '.env.postgres.secret.digitalocean.staging'
