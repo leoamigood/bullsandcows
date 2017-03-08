@@ -9,9 +9,9 @@ module Telegram
           Telegram::CommandQueue.clear
           TelegramMessenger.welcome(channel)
 
-          Telegram::CommandQueue.push{ TelegramMessenger.ask_language(channel) }.callback { |cls| cls == Telegram::Command::Language }
-          Telegram::CommandQueue.push{ TelegramMessenger.ask_level(channel) }.callback { |cls| cls == Telegram::Command::Level }
-          Telegram::CommandQueue.push{ TelegramMessenger.ask_length(channel) }
+          Telegram::CommandQueue.push(Proc.new{ |c| c == Telegram::Command::Language }) { TelegramMessenger.ask_language(channel) }
+          Telegram::CommandQueue.push(Proc.new{ |c| c == Telegram::Command::Level  }) { TelegramMessenger.ask_level(channel) }
+          Telegram::CommandQueue.push(Proc.new{ |c| c == Telegram::Command::Create  }) { TelegramMessenger.ask_length(channel) }
         end
       end
     end

@@ -2,6 +2,11 @@ module Telegram
 
   class CommandBlock < Proc
     attr_accessor :callback
+
+    def initialize(callback, &command)
+      @callback = callback
+      super(&command)
+    end
   end
 
   class CommandQueue
@@ -9,17 +14,13 @@ module Telegram
     @asserted = true
 
     class << self
-      def push(&command)
-        @queue.push(CommandBlock.new(&command))
+      def push(callback = nil, &command)
+        @queue.push CommandBlock.new(callback, &command)
         self
       end
 
-      def callback(&callback)
-        @queue.last.callback = callback
-      end
-
       def assert(cls)
-        return if empty?
+        return true if empty?
 
         @asserted = !!(peek.callback.try(:call, cls) && shift)
       end

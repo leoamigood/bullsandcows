@@ -10,8 +10,9 @@ module Telegram
         end
 
         def execute(channel, message, options)
-          Telegram::CommandQueue.clear
+          return unless Telegram::CommandQueue.assert(self)
 
+          Telegram::CommandQueue.clear
           case options[:strategy]
             when :by_word
               game = GameEngineService.create_by_word(Realm::Telegram.new(channel, message.from.id), options[:word])

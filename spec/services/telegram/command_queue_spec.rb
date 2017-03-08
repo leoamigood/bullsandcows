@@ -16,6 +16,10 @@ describe Telegram::CommandQueue, type: :service do
       expect(Telegram::CommandQueue.size).to eq(0)
     end
 
+    it 'verify successful assertion' do
+      expect(Telegram::CommandQueue.assert(self)).to be true
+    end
+
     it 'verify queue empty state' do
       expect(Telegram::CommandQueue.empty?).to be true
     end
@@ -44,7 +48,7 @@ describe Telegram::CommandQueue, type: :service do
       allow(GameEngineService).to receive(:settings)
       allow(TelegramMessenger).to receive(:level)
 
-      Telegram::CommandQueue.push{ TelegramMessenger.ask_level(channel) }.callback { |cls| cls == Telegram::Command::Level }
+      Telegram::CommandQueue.push(Proc.new{|cls| cls == Telegram::Command::Level }) { 'block' + ' to execute' }
     end
 
     after do
@@ -63,27 +67,30 @@ describe Telegram::CommandQueue, type: :service do
       expect(Telegram::CommandQueue.present?).to be true
     end
 
-    context 'when command had executed' do
+    context 'when command gets executed' do
       before do
-        Telegram::CommandQueue.execute
+        expect(Telegram::CommandQueue.execute).to eq('block to execute')
       end
 
-      it 'verify queue false assertion state' do
-        expect(Telegram::CommandQueue.size).to eq(1)
-      end
-
-      let!(:dictionary) { create :dictionary, lang: 'RU'}
-      it 'verify queue /language command fails expected callback assertion' do
+      it 'verify command to remain in a queue' do
         expect{
-          Telegram::Command::Language.execute(channel, 'RU')
-          expect(Telegram::CommandQueue.asserted?).to eq(false)
+          expect(Telegram::CommandQueue.present?).to be true
         }.not_to change(Telegram::CommandQueue, :size)
       end
 
-      it 'verify queue /level command executes with successful callback and assertion' do
+      it 'verify command /language fails expected callback assertion' do
+        expect{
+          Telegram::Command::Language.execute(channel, 'RU')
+          expect(Telegram::CommandQueue.asserted?).to eq(false)
+          expect(GameEngineService).not_to have_received(:settings)
+        }.not_to change(Telegram::CommandQueue, :size)
+      end
+
+      it 'verify command /level executes with successful callback and assertion' do
         expect{
           Telegram::Command::Level.execute(channel, 'easy')
           expect(Telegram::CommandQueue.asserted?).to eq(true)
+          expect(GameEngineService).to have_received(:settings)
         }.to change(Telegram::CommandQueue, :size).by(-1)
       end
     end

@@ -10,7 +10,7 @@ module Telegram
         end
 
         def execute(channel, level)
-          Telegram::CommandQueue.assert(self)
+          return unless Telegram::CommandQueue.assert(self)
 
           GameEngineService.settings(channel, { complexity: level })
           TelegramMessenger.level(level)

@@ -10,7 +10,7 @@ module Telegram
         end
 
         def execute(channel, language)
-          Telegram::CommandQueue.assert(self)
+          return unless Telegram::CommandQueue.assert(self)
 
           language = GameEngineService.language(language.upcase)
           dictionary = Dictionary.where(lang: language).order('RANDOM()').first
