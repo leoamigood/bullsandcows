@@ -1,7 +1,7 @@
 require 'aspector'
 
 module Telegram
-  module Command
+  module Action
 
     class Level
       class << self
@@ -10,23 +10,39 @@ module Telegram
         end
 
         def execute(channel, level)
-          return unless Telegram::CommandQueue.assert(self)
-
           GameEngineService.settings(channel, { complexity: level })
           TelegramMessenger.level(level)
+        end
+
+        def self?
+          "proc { |cls| cls == #{self.name} }"
         end
       end
     end
 
     aspector(Level, class_methods: true) do
       target do
+        def assert(*args, &block)
+          channel, message = *args
+          Telegram::CommandQueue::Queue.new(channel).assert(self)
+        end
+
         def permit(*args, &block)
           channel, message = *args
-          Telegram::Validator.validate!(Action::LEVEL, channel, message)
+          Telegram::Validator.validate!(Command::LEVEL, channel, message)
+        end
+
+        def pop(*args, &block)
+          msg, channel, message = *args
+          Telegram::CommandQueue::Queue.new(channel).pop
+
+          msg
         end
       end
 
+      before_filter :execute, :assert
       before :ask, :execute, :permit
+      after :execute, :pop
     end
   end
 end

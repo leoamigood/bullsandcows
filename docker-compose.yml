@@ -5,22 +5,30 @@ services:
     volumes:
       - .:/u/apps/bullsandcows
     ports:
-      - "13000:3000"
+      - "3000:3000"
     links:
       - postgres
+      - redis
     depends_on:
       - postgres
+      - redis
     working_dir: /u/apps/bullsandcows
+    environment:
+      RAILS_ENV: development
     env_file:
-      - '.env.postgres.secret'
       - '.env.backend'
       - '.env.backend.secret'
+      - '.env.postgres.secret'
   postgres:
     image: postgres:9.5.3
     ports:
-      - "15432:5432"
+      - "5432:5432"
     env_file:
       - '.env.postgres.secret'
+  redis:
+    image: redis:3.2
+    ports:
+      - "6379:6379"
 
   rspec:
     build: .
@@ -28,13 +36,15 @@ services:
       - .:/u/apps/bullsandcows
     links:
       - postgres
+      - redis
     depends_on:
       - postgres
+      - redis
     working_dir: /u/apps/bullsandcows
     environment:
       RAILS_ENV: test
     env_file:
-      - '.env.postgres.secret'
       - '.env.backend'
       - '.env.backend.test'
+      - '.env.postgres.secret'
     command: bundle exec rspec -fd

@@ -1,6 +1,6 @@
 module Telegram
-  module Command
-    module Action
+  module Action
+    module Command
       BEST     = '/best'
       CREATE   = '/create'
       GUESS    = '/guess'

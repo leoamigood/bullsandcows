@@ -1,6 +1,6 @@
 require 'rails_helper'
 
-describe Telegram::Command::Guess, type: :service do
+describe Telegram::Action::Guess, type: :service do
   let!(:user) { User.new(id = Random.rand, name = '@Amig0') }
   let!(:channel) { 'telegram-game-channel' }
 
@@ -20,7 +20,7 @@ describe Telegram::Command::Guess, type: :service do
     end
 
     it 'verifies guess execution chain' do
-      Telegram::Command::Guess.execute(channel, message, message.text)
+      Telegram::Action::Guess.execute(channel, message, message.text)
 
       expect(TelegramMessenger).to have_received(:guess).with(
           have_attributes(game_id: game.id, word: 'hostel', username: '@Amig0')

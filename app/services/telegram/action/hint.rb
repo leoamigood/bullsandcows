@@ -1,7 +1,7 @@
 require 'aspector'
 
 module Telegram
-  module Command
+  module Action
 
     class Hint
       class << self
@@ -25,7 +25,7 @@ module Telegram
       target do
         def permit(*args, &block)
           channel, message = *args
-          Telegram::Validator.validate!(Action::HINT, channel, message)
+          Telegram::Validator.validate!(Command::HINT, channel, message)
         end
       end
 

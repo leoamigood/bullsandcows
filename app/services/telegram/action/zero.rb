@@ -1,22 +1,22 @@
 require 'aspector'
 
 module Telegram
-  module Command
+  module Action
 
-    class Tries
+    class Zero
       class << self
         def execute(channel)
-          guesses = GameEngineService.tries(channel)
-          TelegramMessenger.tries(guesses)
+          guesses = GameEngineService.zero(channel)
+          TelegramMessenger.zero(guesses)
         end
       end
     end
 
-    aspector(Tries, class_methods: true) do
+    aspector(Zero, class_methods: true) do
       target do
         def permit(*args, &block)
           channel, message = *args
-          Telegram::Validator.validate!(Action::TRIES, channel, message)
+          Telegram::Validator.validate!(Command::ZERO, channel, message)
         end
       end
 
