@@ -12,7 +12,7 @@ class GamesController < BaseApiController
   end
 
   def index
-    options = { status: validate_index[:status], source: validate_index[:source] }
+    options = { status: validate_index[:status], channel: validate_index[:channel], source: validate_index[:source] }
     games = paginate GameService.find_games(options)
     render json: { games: games.map {|game| Responses::Game.new(game)} }
   end
@@ -51,7 +51,7 @@ class GamesController < BaseApiController
   end
 
   def validate_index
-    params.permit(:source, :status)
+    params.permit(:source, :channel, :status)
   end
 
   def validate_show

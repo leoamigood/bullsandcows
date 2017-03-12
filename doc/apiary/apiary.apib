@@ -5,21 +5,27 @@ HOST: http://bullsandcows.heroku.com/
 
 Polls is a simple API allowing consumers to view polls and vote in them.
 
-## Games [/games{?status}]
+## Games [/games{?status}{?channel}{?source}]
 
 ### List games [GET]
 
 + Parameters
 
-    + status (string, optional) - Game status to filter by.
-    
+    + status (string, optional) - Game status to filter by
         + Values
         
             + `created`
             + `running`
             + `finished`    
-            + `aborted`    
-    
+            + `aborted` 
+            
+    + channel (string, optional) - Channel to filter by (ex. user-session-id)
+    + source (string, optional) - Source to filter by
+        + Values
+        
+            + `web`
+            + `telegram` 
+            
 + Response 200 (application/json)
 
         {

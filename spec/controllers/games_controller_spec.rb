@@ -51,10 +51,10 @@ describe GamesController, :type => :request do
   context 'with multiple games' do
     let!(:en) { create :dictionary, lang: 'EN'}
     let!(:ru) { create :dictionary, lang: 'RU'}
-    let!(:created_web_en)  { create :game, :created, :with_tries, secret: 'hostel', source: 'web', dictionary: en }
-    let!(:running_web_ru)  { create :game, :running, :with_tries, secret: 'почта', source: 'web', dictionary: ru }
-    let!(:finished_tel_en) { create :game, :finished, :with_tries, secret: 'magic', source: :telegram, dictionary: en }
-    let!(:aborted_tel_ru)  { create :game, :aborted, :with_tries, secret: 'оборона', source: :telegram, dictionary: ru }
+    let!(:created_web_en)  { create :game, :created, :with_tries, secret: 'hostel', channel: 'user1-session-id', source: 'web', dictionary: en }
+    let!(:running_web_ru)  { create :game, :running, :with_tries, secret: 'почта', channel: 'user2-session-id', source: 'web', dictionary: ru }
+    let!(:finished_tel_en) { create :game, :finished, :with_tries, secret: 'magic', channel: 'user2-session-id', source: :telegram, dictionary: en }
+    let!(:aborted_tel_ru)  { create :game, :aborted, :with_tries, secret: 'оборона', channel: 'user1-session-id', source: :telegram, dictionary: ru }
 
     it 'gets games collection' do
       expect {
@@ -64,6 +64,19 @@ describe GamesController, :type => :request do
       expect(json).to be
       expect(json['games']).to be
       expect(json['games'].count).to eq(4)
+    end
+
+    it 'gets only games for channel' do
+      expect {
+        get '/games?channel=user1-session-id'
+      }.not_to change(Game, :count) and expect_ok
+
+      expect(json).to be
+      expect(json['games'].count).to eq(2)
+      expect(json['games']).to include(
+                                   include('link' => "/games/#{created_web_en.id}"),
+                                   include('link' => "/games/#{aborted_tel_ru.id}")
+                               )
     end
 
     it 'gets only finished games' do
