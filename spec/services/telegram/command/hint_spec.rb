@@ -1,6 +1,6 @@
 require 'rails_helper'
 
-describe Telegram::Command::Hint, type: :service do
+describe Telegram::Action::Hint, type: :service do
   let!(:channel) { Random.rand(@MAX_INT_VALUE) }
   let!(:user) { User.new(Random.rand(@MAX_INT_VALUE), '@Amig0') }
 
@@ -16,7 +16,7 @@ describe Telegram::Command::Hint, type: :service do
 
     let!(:letter) { 'r' }
     it 'verifies hint by letter execution chain' do
-      Telegram::Command::Hint.execute(channel, letter: 'r', strategy: :by_letter)
+      Telegram::Action::Hint.execute(channel, letter: 'r', strategy: :by_letter)
 
       expect(GameService).to have_received(:find_by_channel!).with(channel)
       expect(TelegramMessenger).to have_received(:hint).with(letter)
@@ -24,7 +24,7 @@ describe Telegram::Command::Hint, type: :service do
 
     let!(:number) { 4 }
     it 'verifies hint by number execution chain' do
-      Telegram::Command::Hint.execute(channel, number: number, strategy: :by_number)
+      Telegram::Action::Hint.execute(channel, number: number, strategy: :by_number)
 
       expect(GameService).to have_received(:find_by_channel!).with(channel)
       expect(TelegramMessenger).to have_received(:hint).with(letter)

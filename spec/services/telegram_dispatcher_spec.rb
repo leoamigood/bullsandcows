@@ -20,10 +20,6 @@ describe TelegramDispatcher, type: :service do
         message.stub_chain(:chat, :id).and_return(channel)
       end
 
-      after do
-        Telegram::CommandQueue.clear
-      end
-
       let(:markup) { instance_of(Telegram::Bot::Types::InlineKeyboardMarkup) }
 
       it 'replies with a welcome text' do
@@ -31,7 +27,7 @@ describe TelegramDispatcher, type: :service do
           expect(TelegramDispatcher.handle(message)).to be
           expect(TelegramMessenger).to have_received(:send_message).with(channel, /Welcome to Bulls and Cows!/).once
           expect(TelegramMessenger).to have_received(:send_message).with(channel, 'Select game language:', markup).once
-        }.to change(Telegram::CommandQueue, :size).by(3)
+        }.to change(Telegram::CommandQueue::Queue.new(channel), :size).by(3)
       end
     end
 
@@ -155,8 +151,8 @@ describe TelegramDispatcher, type: :service do
 
       context 'NOT being last command in command queue' do
         before do
-          allow(Telegram::CommandQueue).to receive(:present?).and_return(true)
-          allow(Telegram::CommandQueue).to receive(:execute)
+          allow_any_instance_of(Telegram::CommandQueue::Queue).to receive(:present?).and_return(true)
+          allow_any_instance_of(Telegram::CommandQueue::Queue).to receive(:execute)
         end
 
         it 'creates setting with selected game level and response with inline message' do
@@ -212,8 +208,8 @@ describe TelegramDispatcher, type: :service do
 
       context 'NOT being last command in command queue' do
         before do
-          allow(Telegram::CommandQueue).to receive(:present?).and_return(true)
-          allow(Telegram::CommandQueue).to receive(:execute)
+          allow_any_instance_of(Telegram::CommandQueue::Queue).to receive(:present?).and_return(true)
+          allow_any_instance_of(Telegram::CommandQueue::Queue).to receive(:execute)
         end
 
         it 'creates setting with selected game language and response with status message' do
@@ -229,14 +225,14 @@ describe TelegramDispatcher, type: :service do
       let!(:message) { Telegram::Bot::Types::Message.new(text: '/tries') }
 
       before do
-        allow(Telegram::Command::Tries).to receive(:execute)
+        allow(Telegram::Action::Tries).to receive(:execute)
         message.stub_chain(:chat, :id).and_return(channel)
       end
 
       it 'errors out with message about no recent games available' do
         expect {
           expect(TelegramDispatcher.handle(message)).to include('No recent game to show _/tries_ guesses on.')
-          expect(Telegram::Command::Tries).not_to have_received(:execute)
+          expect(Telegram::Action::Tries).not_to have_received(:execute)
         }.not_to change(Guess, :count)
       end
     end
@@ -245,14 +241,14 @@ describe TelegramDispatcher, type: :service do
       let!(:message) { Telegram::Bot::Types::Message.new(text: '/best') }
 
       before do
-        allow(Telegram::Command::Best).to receive(:execute)
+        allow(Telegram::Action::Best).to receive(:execute)
         message.stub_chain(:chat, :id).and_return(channel)
       end
 
       it 'errors out with message about no recent games available' do
         expect {
           expect(TelegramDispatcher.handle(message)).to include('No recent game to show _/best_ guesses on.')
-          expect(Telegram::Command::Best).not_to have_received(:execute)
+          expect(Telegram::Action::Best).not_to have_received(:execute)
         }.not_to change(Guess, :count)
       end
     end
@@ -261,14 +257,14 @@ describe TelegramDispatcher, type: :service do
       let!(:message) { Telegram::Bot::Types::Message.new(text: '/zero') }
 
       before do
-        allow(Telegram::Command::Zero).to receive(:execute)
+        allow(Telegram::Action::Zero).to receive(:execute)
         message.stub_chain(:chat, :id).and_return(channel)
       end
 
       it 'errors out with message about no recent games available' do
         expect {
           expect(TelegramDispatcher.handle(message)).to include('No recent game to show _/zero_ guesses on.')
-          expect(Telegram::Command::Zero).not_to have_received(:execute)
+          expect(Telegram::Action::Zero).not_to have_received(:execute)
         }.not_to change(Guess, :count)
       end
     end
@@ -313,14 +309,14 @@ describe TelegramDispatcher, type: :service do
       let!(:message) { Telegram::Bot::Types::Message.new(text: '/lang') }
 
       before do
-        allow(Telegram::Command::Language).to receive(:execute)
+        allow(Telegram::Action::Language).to receive(:execute)
         message.stub_chain(:chat, :id).and_return(channel)
       end
 
       it 'errors out with message about permissions' do
         expect {
           expect(TelegramDispatcher.handle(message)).to include('You are NOT allowed to change game language.')
-          expect(Telegram::Command::Language).not_to have_received(:execute)
+          expect(Telegram::Action::Language).not_to have_received(:execute)
         }.not_to change(Game, :count)
       end
     end
@@ -329,14 +325,14 @@ describe TelegramDispatcher, type: :service do
       let!(:message) { Telegram::Bot::Types::Message.new(text: '/level') }
 
       before do
-        allow(Telegram::Command::Level).to receive(:execute)
+        allow(Telegram::Action::Level).to receive(:execute)
         message.stub_chain(:chat, :id).and_return(channel)
       end
 
       it 'errors out with message about permissions' do
         expect {
           expect(TelegramDispatcher.handle(message)).to include('You are NOT allowed to change game level.')
-          expect(Telegram::Command::Level).not_to have_received(:execute)
+          expect(Telegram::Action::Level).not_to have_received(:execute)
         }.not_to change(Game, :count)
       end
     end

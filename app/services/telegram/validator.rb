@@ -2,7 +2,7 @@ module Telegram
   class Validator
 
     class << self
-      include Telegram::Command::Action
+      include Telegram::Action::Command
 
       def validate!(action, channel, message)
         game = GameService.recent_game(channel)

@@ -6,20 +6,25 @@ services:
       - "15432:5432"
     env_file:
       - '.env.postgres.test'
-
+  redis:
+    image: redis:3.2
+    ports:
+      - "16379:6379"
   rspec:
     build: .
     volumes:
       - .:/u/apps/bullsandcows
     links:
       - postgres
+      - redis
     depends_on:
       - postgres
+      - redis
     working_dir: /u/apps/bullsandcows
     environment:
       RAILS_ENV: test
     env_file:
-      - '.env.postgres.test'
       - '.env.backend'
       - '.env.backend.test'
+      - '.env.postgres.test'
     command: bash -c "sleep 5 && rake db:setup && bundle exec rspec -fd"

@@ -1,11 +1,16 @@
 require 'rails_helper'
 
 describe Hooks::TelegramController, :type => :request do
+  let!(:chat_id) { 169778030 }
+  let!(:queue) { Telegram::CommandQueue::Queue.new(chat_id) }
+
+  after do
+    queue.clear
+  end
 
   context 'when receives telegram message with /start command' do
     before do
       allow(TelegramMessenger).to receive(:send_message)
-      allow(Telegram::CommandQueue).to receive(:push)
     end
 
     let!(:command) {
@@ -14,12 +19,12 @@ describe Hooks::TelegramController, :type => :request do
           'message' => {
               'message_id' => 214,
               'from' => {
-                  'id' => 169778030,
+                  'id' => chat_id,
                   'first_name' => 'Leo',
                   'username' => 'Amig0'
           },
               'chat' => {
-                  'id' => 169778030,
+                  'id' => chat_id,
                   'first_name' => 'Leo',
                   'username' => 'Amig0',
                   'type' => 'private'
@@ -35,12 +40,12 @@ describe Hooks::TelegramController, :type => :request do
               'message' => {
                   'message_id' => 214,
                   'from' => {
-                      'id' => 169778030,
+                      'id' => chat_id,
                       'first_name' => 'Leo',
                       'username' => 'Amig0'
               },
                   'chat' => {
-                      'id' => 169778030,
+                      'id' => chat_id,
                       'first_name' => 'Leo',
                       'username' => 'Amig0',
                       'type' => 'private'
@@ -54,16 +59,16 @@ describe Hooks::TelegramController, :type => :request do
     }
 
     it 'responds with game start' do
-      post "/hooks/telegram/#{ENV['TELEGRAM_WEBHOOK']}", command
+      expect {
+        post "/hooks/telegram/#{ENV['TELEGRAM_WEBHOOK']}", command
+      }.to change(queue, :size).by(3)
 
       expect(response).to be_success
       expect(response).to have_http_status(200)
 
-      expect(Telegram::CommandQueue).to have_received(:push).thrice
-
       expect(json).to be
       expect(json['text']).to eq('')
-      expect(json['chat_id']).to eq(169778030)
+      expect(json['chat_id']).to eq(chat_id)
       expect(json['parse_mode']).to eq('Markdown')
       expect(json['method']).to eq('sendMessage')
     end
@@ -76,12 +81,12 @@ describe Hooks::TelegramController, :type => :request do
           'message' => {
               'message_id' => 117,
               'from' => {
-                  'id' => 169778030,
+                  'id' => chat_id,
                   'first_name' => 'Leo',
                   'username' => 'Amig0'
               },
               'chat' => {
-                  'id' => 169778030,
+                  'id' => chat_id,
                   'first_name' => 'Leo',
                   'username' => 'Amig0',
                   'type' => 'private'
@@ -97,12 +102,12 @@ describe Hooks::TelegramController, :type => :request do
               'message' => {
                   'message_id' => 117,
                   'from' => {
-                      'id' => 169778030,
+                      'id' => chat_id,
                       'first_name' => 'Leo',
                       'username' => 'Amig0'
                   },
                   'chat' => {
-                      'id' => 169778030,
+                      'id' => chat_id,
                       'first_name' => 'Leo',
                       'username' => 'Amig0',
                       'type' => 'private'
@@ -123,15 +128,19 @@ describe Hooks::TelegramController, :type => :request do
 
       expect(json).to be
       expect(json['text']).to match /Here is the list of available commands/
-      expect(json['chat_id']).to eq(169778030)
+      expect(json['chat_id']).to eq(chat_id)
       expect(json['parse_mode']).to eq('Markdown')
       expect(json['method']).to eq('sendMessage')
     end
   end
 
   context 'given dictionary with word levels' do
-    before(:each) do
+    let!(:ask_level) { Telegram::CommandQueue::Exec.new('TelegramMessenger.ask_level', chat_id, Telegram::Action::Level.self?) }
+
+    before do
       allow(TelegramMessenger).to receive(:answerCallbackQuery)
+
+      queue.push(ask_level)
     end
 
     let!(:dictionary) { create :dictionary, :english, lang: 'RU'}
@@ -143,7 +152,7 @@ describe Hooks::TelegramController, :type => :request do
             'callback_query' => {
                 'id' => '729191086489033331',
                 'from' => {
-                    'id' => 169778030,
+                    'id' => chat_id,
                     'first_name' => 'Leo',
                     'username' => 'Amig0'
                 },
@@ -155,7 +164,7 @@ describe Hooks::TelegramController, :type => :request do
                         'username' => 'bullsandcowswordsbot'
                     },
                     'chat' => {
-                        'id' => 169778030,
+                        'id' => chat_id,
                         'first_name' => 'Leo',
                         'username' => 'Amig0',
                         'type' => 'private'
@@ -173,7 +182,7 @@ describe Hooks::TelegramController, :type => :request do
                 'callback_query' => {
                     'id' => '729191086489033331',
                     'from' => {
-                        'id' => 169778030,
+                        'id' => chat_id,
                         'first_name' => 'Leo',
                         'username' => 'Amig0'
                     },
@@ -185,7 +194,7 @@ describe Hooks::TelegramController, :type => :request do
                             'username' => 'bullsandcowswordsbot'
                         },
                         'chat' => {
-                            'id' => 169778030,
+                            'id' => chat_id,
                             'first_name' => 'Leo',
                             'username' => 'Amig0',
                             'type' => 'private'
@@ -201,14 +210,16 @@ describe Hooks::TelegramController, :type => :request do
       }
 
       it 'creates a game with selected level' do
-        post "/hooks/telegram/#{ENV['TELEGRAM_WEBHOOK']}", command
+        expect {
+          post "/hooks/telegram/#{ENV['TELEGRAM_WEBHOOK']}", command
+        }.to change(queue, :size).by(-1)
 
         expect(response).to be_success
         expect(response).to have_http_status(200)
 
         expect(json).to be
         expect(json['text']).to eq('Game level was set to easy.')
-        expect(json['chat_id']).to eq(169778030)
+        expect(json['chat_id']).to eq(chat_id)
         expect(json['parse_mode']).to eq('Markdown')
         expect(json['method']).to eq('sendMessage')
       end

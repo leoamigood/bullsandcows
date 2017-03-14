@@ -13,7 +13,7 @@ default: &default
 development:
   <<: *default
   database: bulls_cows_development
-  username: sa
+  username: <%= ENV['POSTGRES_USER'] %>
   password: <%= ENV['POSTGRES_PASSWORD'] %>
   pool: 5
   host: <%= ENV['DB_HOST'] %>

@@ -18,7 +18,7 @@ class TelegramDispatcher
     def handle(message)
       begin
         command = message.text.mb_chars.downcase.to_s
-        execute(command, message.chat.id, message)
+        execute(command, channel = message.chat.id, message)
       rescue => ex
         ex.message
       end
@@ -26,12 +26,14 @@ class TelegramDispatcher
 
     def handle_callback_query(callback_query)
       begin
+        channel = callback_query.message.chat.id
         command = callback_query.data.downcase.to_s
-        response = execute(command, callback_query.message.chat.id, callback_query)
+        response = execute(command, channel, callback_query)
 
-        if Telegram::CommandQueue.present?
+        queue = Telegram::CommandQueue::Queue.new(channel)
+        if queue.present?
           TelegramMessenger.answerCallbackQuery(callback_query.id, response)
-          Telegram::CommandQueue.execute
+          queue.execute if response.present?
         else
           response
         end
@@ -43,56 +45,56 @@ class TelegramDispatcher
     def execute(command, channel, message)
       case command
         when Telegram::CommandRoute::START
-          Telegram::Command::Start.execute(channel)
-          Telegram::CommandQueue.execute
+          Telegram::Action::Start.execute(channel)
+          Telegram::CommandQueue::Queue.new(channel).execute
 
         when Telegram::CommandRoute::LANG
-          Telegram::Command::Language.ask(channel)
+          Telegram::Action::Language.ask(channel)
 
         when Telegram::CommandRoute::LANG_ALPHA
-          Telegram::Command::Language.execute(channel, $~['language'])
+          Telegram::Action::Language.execute(channel, $~['language'])
 
         when Telegram::CommandRoute::CREATE
-          Telegram::Command::Create.ask(channel)
+          Telegram::Action::Create.ask(channel)
 
         when Telegram::CommandRoute::CREATE_ALPHA
-          Telegram::Command::Create.execute(channel, message, word: $~['secret'], strategy: :by_word)
+          Telegram::Action::Create.execute(channel, message, word: $~['secret'], strategy: :by_word)
 
         when Telegram::CommandRoute::CREATE_DIGIT
-          Telegram::Command::Create.execute(channel, message, length: $~['number'], strategy: :by_number)
+          Telegram::Action::Create.execute(channel, message, length: $~['number'], strategy: :by_number)
 
         when Telegram::CommandRoute::GUESS
-          Telegram::Command::Guess.execute(channel, message, $~['guess'])
+          Telegram::Action::Guess.execute(channel, message, $~['guess'])
 
         when Telegram::CommandRoute::WORD
-          Telegram::Command::Guess.execute(channel, message, command) if GameService.in_progress?(channel)
+          Telegram::Action::Guess.execute(channel, message, command) if GameService.in_progress?(channel)
 
         when Telegram::CommandRoute::HINT_ALPHA
-          Telegram::Command::Hint.execute(channel, letter: $~['letter'], strategy: :by_letter)
+          Telegram::Action::Hint.execute(channel, letter: $~['letter'], strategy: :by_letter)
 
         when Telegram::CommandRoute::HINT_DIGIT
-          Telegram::Command::Hint.execute(channel, number: $~['number'], strategy: :by_number)
+          Telegram::Action::Hint.execute(channel, number: $~['number'], strategy: :by_number)
 
         when Telegram::CommandRoute::SUGGEST
-          Telegram::Command::Suggest.execute(channel, message, $~['letters'])
+          Telegram::Action::Suggest.execute(channel, message, $~['letters'])
 
         when Telegram::CommandRoute::TRIES
-          Telegram::Command::Tries.execute(channel)
+          Telegram::Action::Tries.execute(channel)
 
         when Telegram::CommandRoute::BEST
-          Telegram::Command::Best.execute(channel, $~['best'])
+          Telegram::Action::Best.execute(channel, $~['best'])
 
         when Telegram::CommandRoute::ZERO
-          Telegram::Command::Zero.execute(channel)
+          Telegram::Action::Zero.execute(channel)
 
         when Telegram::CommandRoute::LEVEL
-          Telegram::Command::Level.ask(channel)
+          Telegram::Action::Level.ask(channel)
 
         when Telegram::CommandRoute::LEVEL_ALPHA
-          Telegram::Command::Level.execute(channel, $~['level'])
+          Telegram::Action::Level.execute(channel, $~['level'])
 
         when Telegram::CommandRoute::STOP
-          Telegram::Command::Stop.execute(channel, message)
+          Telegram::Action::Stop.execute(channel, message)
 
         when Telegram::CommandRoute::HELP
           TelegramMessenger.help

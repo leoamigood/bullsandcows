@@ -1,5 +1,5 @@
 require 'rails_helper'
-include Telegram::Command::Action
+include Telegram::Action::Command
 
 describe Telegram::Validator, type: :service do
   let!(:channel) { Random.rand(@MAX_INT_VALUE) }
@@ -75,7 +75,7 @@ describe Telegram::Validator, type: :service do
 
         it 'allows player permission to stop the game' do
           expect{
-            Telegram::Validator.validate!(Telegram::Command::Stop, realm.channel, message)
+            Telegram::Validator.validate!(Telegram::Action::Stop, realm.channel, message)
           }.not_to raise_error
         end
       end
