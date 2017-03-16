@@ -54,6 +54,10 @@ Rails.application.routes.draw do
   #     resources :products
   #   end
 
+  resource :users, only: [] do
+    get :me, :on => :member
+  end
+
   resources :games, :only => [:create, :index, :show, :update] do
     resources :guesses, :only => [:create, :index] do
       get :action => 'best', :on => :collection, constraints: { query_string: /best=/ }

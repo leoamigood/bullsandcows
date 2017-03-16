@@ -35,10 +35,6 @@ class GamesController < BaseApiController
 
   private
 
-  def realm
-    Realm::Web.new(session[:id])
-  end
-
   def validate_create
     params.permit(:secret)
   end
@@ -51,7 +47,7 @@ class GamesController < BaseApiController
   end
 
   def validate_index
-    params.permit(:source, :channel, :status)
+    params.permit(:source, :channel, :status, :format)
   end
 
   def validate_show

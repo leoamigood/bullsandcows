@@ -1,6 +1,14 @@
 class BaseApiController < ApplicationController
   before_action :set_default_response_format
 
+  def realm
+    Realm::Web.new(session.id)
+  end
+
+  def set_session_realm
+    session[:realm] = realm
+  end
+
   rescue_from Errors::ValidationException do |ex|
     render json: { error: ex.message }, status: 500
   end

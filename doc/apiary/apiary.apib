@@ -3,7 +3,20 @@ HOST: http://bullsandcows.heroku.com/
 
 # Bulls & Cows API
 
-Polls is a simple API allowing consumers to view polls and vote in them.
+Bulls and Cows is a code-breaking mind game for one or more players. This is a words version.
+
+## Users [/users/me]
+
+### Get current user details [GET]
+
++ Response 200 (application/json)
+
+        {
+            user: {
+                "id": "24c9807a4cc7d771a24a69633ef6085a"
+                "link": "/users/24c9807a4cc7d771a24a69633ef6085a"
+            }
+        }
 
 ## Games [/games{?status}{?channel}{?source}]
 
@@ -19,7 +32,7 @@ Polls is a simple API allowing consumers to view polls and vote in them.
             + `finished`    
             + `aborted` 
             
-    + channel (string, optional) - Channel to filter by (ex. user-session-id)
+    + channel (string, optional) - Channel to filter by (game group id OR user id)
     + source (string, optional) - Source to filter by
         + Values
         
