@@ -25,15 +25,54 @@ describe GameEngineService, type: :service do
     end
 
     context 'with length, complexity and language' do
-      let!(:options) { { length: 5, complexity: 'medium', language: 'EN' } }
+      let!(:options) { { length: 6, complexity: 'medium', language: 'EN' } }
 
       it 'create a game with specified amount of letters, complexity and language' do
         game = GameEngineService.create_by_options(realm, options)
 
         expect(game).to be
-        expect(game.secret.length).to eq(5)
+        expect(game.secret.length).to eq(6)
         expect(game.level).to be_between(7, 9)
         expect(game.dictionary.EN?).to be(true)
+      end
+
+      context 'with recent games in the channel' do
+        let!(:recent_game) { create(:game, channel: channel, secret: 'garlic', status: :finished, created_at: Time.now - 5.minutes) }
+
+        it 'verify recent secrets are not reused' do
+          game = GameEngineService.create_by_options(realm, options)
+
+          expect(game).to be
+          expect(game.secret).not_to eq(recent_game.secret)
+        end
+      end
+
+      context 'with old and recent games in the channel' do
+        let!(:old_game) { create(:game, channel: channel, secret: 'garlic', status: :finished, created_at: Time.now - 8.days) }
+        let!(:recent_game) { create(:game, channel: channel, secret: 'parrot', status: :finished, created_at: Time.now - 2.days) }
+
+        it 'verify recent secrets are not reused' do
+          game = GameEngineService.create_by_options(realm, options)
+
+          expect(game).to be
+          expect(game.secret).not_to eq(recent_game.secret)
+        end
+      end
+
+      context 'with old and recent games in multiple channels' do
+        let!(:another) { Random.rand(@MAX_INT_VALUE) }
+
+        let!(:old) { create(:game, channel: channel, secret: 'garlic', status: :finished, created_at: Time.now - 8.days) }
+        let!(:another1) { create(:game, channel: another, secret: 'garlic', status: :finished, created_at: Time.now - 2.days) }
+        let!(:recent) { create(:game, channel: channel, secret: 'parrot', status: :finished, created_at: Time.now - 3.days) }
+        let!(:another2) { create(:game, channel: another, secret: 'parrot', status: :finished, created_at: Time.now - 5.days) }
+
+        it 'verify recent secrets are not reused in same channel' do
+          game = GameEngineService.create_by_options(realm, options)
+
+          expect(game).to be
+          expect(game.secret).not_to eq(recent.secret)
+        end
       end
     end
 

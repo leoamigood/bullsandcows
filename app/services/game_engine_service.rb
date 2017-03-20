@@ -1,17 +1,14 @@
 class GameEngineService
 
+  @@RECENT_GAMES_DAYS = 7.days
+
   class << self
     def create_by_word(realm, word)
       GameService.create(realm, Noun.new(noun: word))
     end
 
     def create_by_options(realm, options)
-      secret = Noun.active.
-          by_length(options[:length]).
-          in_language(options[:language]).
-          by_complexity(options[:language], options[:complexity]).
-          order('RANDOM()').first
-
+      secret = secret_by_options(realm, options)
       raise Errors::GameCreateException.new('Unable to create game. Please try different parameters') unless secret.present?
 
       GameService.create(realm, secret)
@@ -69,6 +66,22 @@ class GameEngineService
 
       setting
     end
+
+    private
+
+    def secret_by_options(realm, options)
+      nouns = Noun.active.
+          by_length(options[:length]).
+          in_language(options[:language]).
+          by_complexity(options[:language], options[:complexity]).
+          order('RANDOM()')
+
+      recent_secrets = Game.recent(realm.channel, Time.now - @@RECENT_GAMES_DAYS).pluck(:secret)
+      nouns.detect { |n|
+        recent_secrets.exclude?(n.noun)
+      } || nouns.first
+    end
+
   end
 
 end
