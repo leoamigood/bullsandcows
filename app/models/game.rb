@@ -16,6 +16,8 @@ class Game < ActiveRecord::Base
   enum status: { created: 'created', running: 'running', finished: 'finished', aborted: 'aborted' }
   enum source: { telegram: 'telegram', web: 'web' }
 
+  scope :recent, -> (channel, since) { where(channel: channel, :created_at => since..Time.now) }
+
   def best(limit = nil)
     guesses.sort.first(limit || 8)
   end
