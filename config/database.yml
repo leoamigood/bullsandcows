@@ -31,6 +31,8 @@ test:
   host: <%= ENV['DB_HOST'] %>
   port: <%= ENV['DB_PORT'] %>
 
+staging:
+  <<: *default
+
 production:
   <<: *default
-  database: db/production.sqlite3
