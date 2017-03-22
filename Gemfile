@@ -31,6 +31,7 @@ gem 'sdoc', '~> 0.4.0', group: :doc
 gem 'puma'
 gem 'puma-heroku'
 gem 'newrelic_rpm'
+gem 'airbrake', '~> 6.0'
 
 # Use Capistrano for deployment
 # gem 'capistrano-rails', group: :development
