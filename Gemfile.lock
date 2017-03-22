@@ -38,6 +38,9 @@ GEM
       minitest (~> 5.1)
       thread_safe (~> 0.3, >= 0.3.4)
       tzinfo (~> 1.1)
+    airbrake (6.0.0)
+      airbrake-ruby (~> 2.0)
+    airbrake-ruby (2.0.0)
     api-pagination (4.5.2)
     arel (6.0.4)
     aspector (0.14.0)
@@ -222,6 +225,7 @@ PLATFORMS
 
 DEPENDENCIES
   activerecord-import (~> 0.4.0)
+  airbrake (~> 6.0)
   api-pagination
   aspector
   attr_extras
