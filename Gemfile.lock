@@ -235,6 +235,7 @@ DEPENDENCIES
   jbuilder (~> 2.0)
   jquery-rails
   kaminari
+  msgpack
   newrelic_rpm
   pg
   puma

@@ -10,14 +10,15 @@ services:
       - postgres
     working_dir: /usr/src/app
     env_file:
-      - '.env.postgres.secret.digitalocean.staging'
       - '.env.backend'
-      - '.env.backend.secret.digitalocean.staging'
     environment: 
       RAILS_ENV: production
-    command: bash -c "rm -f /usr/src/app/tmp/pids/server.pid && bundle exec rails s --binding 0.0.0.0"
+    command: bash -c "rm -rf /usr/src/app/tmp/pids/server.pid && bundle exec puma -C config/puma.rb"
   nginx:
     image: nginx:1.11
+    volumes:
+      - ./nginx/server.conf:/etc/nginx/conf.d/default.conf
+      - ./shared:/usr/src/app/shared
     ports:
       - "80:80"
     environment:
@@ -26,5 +27,7 @@ services:
     image: postgres:9.5.3
     ports:
       - "5432:5432"
-    env_file:
-      - '.env.postgres.secret.digitalocean.staging'
+  redis:
+    image: redis:3.2
+    ports:
+      - "6379:6379"

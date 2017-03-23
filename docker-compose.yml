@@ -19,9 +19,12 @@ services:
       - '.env.backend'
       - '.env.backend.secret'
       - '.env.postgres.secret'
-    command: bundle exec rails s --binding 0.0.0.0
+    command: bash -c "rm -rf /usr/src/app/tmp/pids/server.pid && bundle exec puma -C config/puma.rb"
   nginx:
     image: nginx:1.11
+    volumes:
+      - ./nginx/server.conf:/etc/nginx/conf.d/default.conf
+      - ./shared:/usr/src/app/shared
     ports:
       - "80:80"
     environment:
