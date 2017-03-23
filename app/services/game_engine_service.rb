@@ -33,7 +33,7 @@ class GameEngineService
       nouns = nouns.where("noun LIKE '%#{letters}%'") if letters.present?
       suggestion = nouns.order('RANDOM()').first
 
-      GameService.guess(game, user, suggestion.noun.downcase, suggestion = true) if suggestion.present?
+      GameService.guess(game, user, suggestion.noun, suggestion = true) if suggestion.present?
     end
 
     def tries(channel)

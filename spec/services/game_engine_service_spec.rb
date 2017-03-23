@@ -129,4 +129,22 @@ describe GameEngineService, type: :service do
     end
   end
 
+  context 'given a game with a russian secret word with ambiguous spelling' do
+    let!(:game) { create(:game, :realm, secret: 'елка', realm: realm, status: :running) }
+
+    it 'matches word with alternative spelling' do
+      expect {
+        expect(GameEngineService.guess(game, user, 'ёлка')).to have_attributes(word: 'елка')
+      }.to change{ game.status }.to('finished')
+    end
+
+    it 'returns specified matching letter in a secret' do
+      expect {
+        expect(GameEngineService.hint(game, 'е')).to satisfy {
+            |letter| game.secret.include?(letter)
+        }
+      }.to change{ game.hints.count }.by(1)
+    end
+  end
+
 end
