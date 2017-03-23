@@ -184,4 +184,7 @@ describe GameService, type: :service do
     end
   end
 
+  it 'sanitize word with ambiguous spelling and case' do
+    expect(GameService.sanitize('Ёлка')).to eq('елка')
+  end
 end

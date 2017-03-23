@@ -4,7 +4,8 @@ class GameEngineService
 
   class << self
     def create_by_word(realm, word)
-      GameService.create(realm, Noun.new(noun: word))
+      sanitized = GameService.sanitize(word)
+      GameService.create(realm, Noun.new(noun: sanitized))
     end
 
     def create_by_options(realm, options)
@@ -17,7 +18,8 @@ class GameEngineService
     def guess(game, user, word)
       GameService.validate_guess!(game, word)
 
-      GameService.guess(game, user, word)
+      sanitized = GameService.sanitize(word)
+      GameService.guess(game, user, sanitized)
     end
 
     def hint(game, letter = nil)
@@ -33,7 +35,7 @@ class GameEngineService
       nouns = nouns.where("noun LIKE '%#{letters}%'") if letters.present?
       suggestion = nouns.order('RANDOM()').first
 
-      GameService.guess(game, user, suggestion.noun.downcase, suggestion = true) if suggestion.present?
+      GameService.guess(game, user, suggestion.noun, suggestion = true) if suggestion.present?
     end
 
     def tries(channel)

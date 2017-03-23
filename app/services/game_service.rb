@@ -43,13 +43,14 @@ class GameService
     end
 
     def guess(game, user, word, suggestion = false)
-      guess = Guess.find_or_create_by(game_id: game.id, word: word) do |guess|
+      sanitized = sanitize(word)
+      guess = Guess.find_or_create_by(game_id: game.id, word: sanitized) do |guess|
         guess.attempts = 0
         guess.user_id = user.id
         guess.username = user.name
         guess.suggestion = suggestion
 
-        guess.update(match(word, game.secret))
+        guess.update(match(sanitized, game.secret))
       end
 
       guess.attempts += 1
@@ -57,6 +58,11 @@ class GameService
 
       guess.exact? ? game.finished! : game.running!
       guess
+    end
+
+    def sanitize(word)
+      downcased = word.mb_chars.downcase
+      downcased.tr('ё'.force_encoding('utf-8'),'е'.force_encoding('utf-8')).to_s
     end
 
     def match(guess, secret)
@@ -113,6 +119,10 @@ class GameService
     end
 
     private
+
+    def sanitize(word)
+      word.downcase.gsub('ё','е')
+    end
 
     def detect_letter(secret, letter)
       secret.split('').detect { |l| l == letter }
