@@ -19,6 +19,8 @@ class TelegramDispatcher
 
     def handle(message)
       begin
+        return unless message.text.present?
+
         command = message.text.mb_chars.downcase.to_s
         execute(command, channel = message.chat.id, message)
       rescue => ex
