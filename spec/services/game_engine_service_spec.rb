@@ -14,6 +14,13 @@ describe GameEngineService, type: :service do
     expect(game.level).not_to be
   end
 
+  it 'sanitizes ambiguously spelled russian word' do
+    game = GameEngineService.create_by_word(realm, 'посёлок')
+
+    expect(game).to be
+    expect(game.secret).to eq('поселок')
+  end
+
   context 'given english dictionary with word levels and dictionary complexity levels breakdown' do
     let!(:medium) { create :dictionary_level, :medium_en }
     let!(:dictionary) { create :dictionary, :english, levels: [medium] }
@@ -126,6 +133,24 @@ describe GameEngineService, type: :service do
     it 'persist game complexity setting' do
       setting = GameEngineService.settings(realm.channel, {complexity: 'hard'})
       expect(setting.complexity).to eq('hard')
+    end
+  end
+
+  context 'given a game with a russian secret word with ambiguous spelling' do
+    let!(:game) { create(:game, :realm, secret: 'елка', realm: realm, status: :running) }
+
+    it 'matches word with alternative spelling' do
+      expect {
+        expect(GameEngineService.guess(game, user, 'ёлка')).to have_attributes(word: 'елка')
+      }.to change{ game.status }.to('finished')
+    end
+
+    it 'returns specified matching letter in a secret' do
+      expect {
+        expect(GameEngineService.hint(game, 'е')).to satisfy {
+            |letter| game.secret.include?(letter)
+        }
+      }.to change{ game.hints.count }.by(1)
     end
   end
 

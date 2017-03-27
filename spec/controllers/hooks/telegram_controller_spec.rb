@@ -134,6 +134,77 @@ describe Hooks::TelegramController, :type => :request do
     end
   end
 
+  context 'when receives telegram message with non text message' do
+    let!(:command) {
+      {
+          'update_id' => 215227398,
+          'message' => {
+              'message_id' => 117,
+              'from' => {
+                  'id' => chat_id,
+                  'first_name' => 'Leo',
+                  'username' => 'Amig0'
+              },
+              'chat' => {
+                  'id' => chat_id,
+                  'first_name' => 'Leo',
+                  'username' => 'Amig0',
+                  'type' => 'private'
+              },
+              'date' => 1475902767,
+              'sticker'=>{
+                  'width'=>512,
+                  'height'=>512,
+                  'emoji'=>'?',
+                  'thumb'=>{
+                      'file_id'=>'AAQCABPl_kcNAARhuKiTqw7TXDUWAAIC',
+                      'file_size'=>5698,
+                      'width'=>128,
+                      'height'=>128},
+                  'file_id'=>'CAADAgAD5AIAAnn_1AaG0dar1zK5xQI',
+                  'file_size'=>37706
+              },
+              'entities' => [{'type' => 'bot_command', 'offset' => 0, 'length' => 5}]
+          },
+          'controller' => 'hooks/telegram',
+          'action' => 'update',
+          'telegram' => {
+              'update_id' => 215227398,
+              'message' => {
+                  'message_id' => 117,
+                  'from' => {
+                      'id' => chat_id,
+                      'first_name' => 'Leo',
+                      'username' => 'Amig0'
+                  },
+                  'chat' => {
+                      'id' => chat_id,
+                      'first_name' => 'Leo',
+                      'username' => 'Amig0',
+                      'type' => 'private'
+                  },
+                  'date' => 1475902767,
+                  'text' => '/help',
+                  'entities' => [{'type' => 'bot_command', 'offset' => 0, 'length' => 5}]
+              }
+          }
+      }
+    }
+
+    it 'responds with help text' do
+      post "/hooks/telegram/#{ENV['TELEGRAM_WEBHOOK']}", command
+
+      expect(response).to be_success
+      expect(response).to have_http_status(200)
+
+      expect(json).to be
+      expect(json['text']).to be_empty
+      expect(json['chat_id']).to eq(chat_id)
+      expect(json['parse_mode']).to eq('Markdown')
+      expect(json['method']).to eq('sendMessage')
+    end
+  end
+
   context 'given dictionary with word levels' do
     let!(:ask_level) { Telegram::CommandQueue::Exec.new('TelegramMessenger.ask_level', chat_id, Telegram::Action::Level.self?) }
 

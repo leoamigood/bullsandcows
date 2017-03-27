@@ -59,6 +59,11 @@ class GameService
       guess
     end
 
+    def sanitize(word)
+      downcased = word.mb_chars.downcase
+      downcased.tr('ё'.force_encoding('utf-8'),'е'.force_encoding('utf-8')).to_s
+    end
+
     def match(guess, secret)
       bulls = bulls(guess.split(''), secret.split(''))
       cows = cows(guess.split(''), secret.split(''))

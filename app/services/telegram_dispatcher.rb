@@ -1,3 +1,5 @@
+require 'airbrake'
+
 class TelegramDispatcher
 
   class << self
@@ -17,9 +19,12 @@ class TelegramDispatcher
 
     def handle(message)
       begin
+        return unless message.text.present?
+
         command = message.text.mb_chars.downcase.to_s
         execute(command, channel = message.chat.id, message)
       rescue => ex
+        Airbrake.notify(ex)
         ex.message
       end
     end
@@ -38,6 +43,7 @@ class TelegramDispatcher
           response
         end
       rescue => ex
+        Airbrake.notify(ex)
         ex.message
       end
     end
