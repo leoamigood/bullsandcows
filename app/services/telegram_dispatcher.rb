@@ -23,9 +23,11 @@ class TelegramDispatcher
 
         command = message.text.mb_chars.downcase.to_s
         execute(command, channel = message.chat.id, message)
-      rescue => ex
-        Airbrake.notify(ex)
+      rescue Errors::GameException => ex
+        Airbrake.notify(ex, message.to_h)
         ex.message
+      rescue => ex
+        Airbrake.notify(ex, message.to_h)
       end
     end
 
@@ -42,10 +44,13 @@ class TelegramDispatcher
         else
           response
         end
-      rescue => ex
-        Airbrake.notify(ex)
+      rescue Errors::GameException => ex
+        Airbrake.notify(ex, message.to_h)
         ex.message
+      rescue => ex
+        Airbrake.notify(ex, message.to_h)
       end
+
     end
 
     def execute(command, channel, message)
