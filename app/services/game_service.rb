@@ -106,7 +106,12 @@ class GameService
     end
 
     def validate_guess!(game, guess)
-      raise "Your guess word _#{guess}_ has to be *#{game.secret.length}* letters long." if game.secret.length != guess.length
+      if game.secret.length != guess.length
+        raise Errors::GuessException.new(
+            "Your guess word _#{guess}_ has to be *#{game.secret.length}* letters long.",
+            game
+        )
+      end
     end
 
     def recent_game(channel)

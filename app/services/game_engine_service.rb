@@ -32,7 +32,7 @@ class GameEngineService
           where('char_length(noun) = ?', game.secret.length).
           where("noun <> '#{game.secret}'")
 
-      nouns = nouns.where("noun LIKE '%#{letters}%'") if letters.present?
+      nouns = nouns.where("noun ILIKE '%#{letters}%'") if letters.present?
       suggestion = nouns.order('RANDOM()').first
 
       GameService.guess(game, user, suggestion.noun, suggestion = true) if suggestion.present?

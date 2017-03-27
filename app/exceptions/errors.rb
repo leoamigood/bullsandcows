@@ -15,6 +15,9 @@ module Errors
     end
   end
 
+  class GuessException < GameException
+  end
+
   class GameNotFoundException < GameException
   end
 
