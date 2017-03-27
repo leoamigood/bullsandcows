@@ -386,7 +386,7 @@ describe TelegramDispatcher, type: :service do
 
       it 'replies with error message' do
         expect {
-          expect(TelegramDispatcher.handle(message)).to include('Your guess word _mistake_ has to be *6* letters long.')
+          expect(TelegramDispatcher.handle(message)).to include('Your guess word _mistake_ (*7*) has to be *6* letters long.')
         }.not_to change(Guess, :count)
       end
     end
