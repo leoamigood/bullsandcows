@@ -108,7 +108,7 @@ class GameService
     def validate_guess!(game, guess)
       if game.secret.length != guess.length
         raise Errors::GuessException.new(
-            "Your guess word _#{guess}_ has to be *#{game.secret.length}* letters long.",
+            "Your guess word _#{guess}_ (*#{guess.length}*) has to be *#{game.secret.length}* letters long.",
             game
         )
       end
