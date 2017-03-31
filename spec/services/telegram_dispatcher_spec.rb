@@ -289,6 +289,20 @@ describe TelegramDispatcher, type: :service do
   context 'when game has just started and had no guesses placed' do
     let!(:game) { create(:game, :realm, secret: 'secret', realm: realm, status: :created, dictionary: english) }
 
+    context 'when /best command received' do
+      let!(:message) { Telegram::Bot::Types::Message.new(text: '/best') }
+
+      before do
+        message.stub_chain(:chat, :id).and_return(channel)
+      end
+
+      it 'replies with no guesses message' do
+        expect {
+          expect(TelegramDispatcher.handle(message)).to include('There was no guesses so far')
+        }.not_to change(Guess, :count)
+      end
+    end
+
     context 'when /suggest command received' do
       let!(:message) { Telegram::Bot::Types::Message.new(text: '/suggest') }
 

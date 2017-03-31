@@ -184,8 +184,6 @@ class TelegramMessenger
       'Go ahead and _/create_ a new game. For help try _/help_.'
     end
 
-    private
-
     def no_guesses_submitted
       'There was no guesses so far. Go ahead and submit one with _/guess <word>_.'
     end
