@@ -583,6 +583,20 @@ describe TelegramDispatcher, type: :service do
           }.to raise_error
         end
       end
+
+      context 'given a game with a long secret word' do
+        let!(:game_long_secret) { create(:game, :realm, secret: 'одновалентность', realm: realm, status: :running) }
+
+        context 'with a number that is over 10 letters, but within word length' do
+          let!(:message) { Telegram::Bot::Types::Message.new(text: '/hint 14') }
+
+          it 'reveals specified number of letter in a secret' do
+            expect {
+              expect(TelegramDispatcher.handle(message)).to match(/Secret word has letter \*т\* in it/)
+            }.to change{ game_long_secret.hints.count }.by(1)
+          end
+        end
+      end
     end
 
     context 'when /suggest <letters> command received with letters matching available suggestion' do

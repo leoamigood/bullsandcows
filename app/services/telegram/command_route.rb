@@ -10,7 +10,7 @@ module Telegram
     WORD         = /\A(?<guess>[[:alpha:]]+)\z/im
     HELP         = /^#{Telegram::Action::Command::HELP}#{BOT_REGEXP}$/i
     HINT_ALPHA   = /^#{Telegram::Action::Command::HINT}#{BOT_REGEXP}\s*(?<letter>[[:alpha:]])?$/i
-    HINT_DIGIT   = /^#{Telegram::Action::Command::HINT}#{BOT_REGEXP}\s+(?<number>[[:digit:]])$/i
+    HINT_DIGIT   = /^#{Telegram::Action::Command::HINT}#{BOT_REGEXP}\s+(?<number>[[:digit:]]+)$/i
     LANG         = /^#{Telegram::Action::Command::LANG}#{BOT_REGEXP}$/i
     LANG_ALPHA   = /^#{Telegram::Action::Command::LANG}#{BOT_REGEXP}\s+(?<language>[[:alpha:]]+)$/i
     LEVEL        = /^#{Telegram::Action::Command::LEVEL}#{BOT_REGEXP}$/i
