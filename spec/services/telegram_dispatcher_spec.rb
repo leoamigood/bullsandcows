@@ -289,6 +289,20 @@ describe TelegramDispatcher, type: :service do
   context 'when game has just started and had no guesses placed' do
     let!(:game) { create(:game, :realm, secret: 'secret', realm: realm, status: :created, dictionary: english) }
 
+    context 'when /best command received' do
+      let!(:message) { Telegram::Bot::Types::Message.new(text: '/best') }
+
+      before do
+        message.stub_chain(:chat, :id).and_return(channel)
+      end
+
+      it 'replies with no guesses message' do
+        expect {
+          expect(TelegramDispatcher.handle(message)).to include('There was no guesses so far')
+        }.not_to change(Guess, :count)
+      end
+    end
+
     context 'when /suggest command received' do
       let!(:message) { Telegram::Bot::Types::Message.new(text: '/suggest') }
 
@@ -567,6 +581,20 @@ describe TelegramDispatcher, type: :service do
           expect {
             TelegramDispatcher.handle(message)
           }.to raise_error
+        end
+      end
+
+      context 'given a game with a long secret word' do
+        let!(:game_long_secret) { create(:game, :realm, secret: 'одновалентность', realm: realm, status: :running) }
+
+        context 'with a number that is over 10 letters, but within word length' do
+          let!(:message) { Telegram::Bot::Types::Message.new(text: '/hint 14') }
+
+          it 'reveals specified number of letter in a secret' do
+            expect {
+              expect(TelegramDispatcher.handle(message)).to match(/Secret word has letter \*т\* in it/)
+            }.to change{ game_long_secret.hints.count }.by(1)
+          end
         end
       end
     end
