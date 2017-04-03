@@ -154,20 +154,10 @@ describe GameService, type: :service do
   end
 
   context 'with a secret word given' do
-    it 'returns letters in places of bulls' do
-      expect(GameService.bulls('мораль'.split(''), 'корова'.split(''))).to eq([nil, 'о', 'р', nil, nil, nil])
-      expect(GameService.bulls('краска'.split(''), 'корова'.split(''))).to eq(['к', nil, nil, nil, nil, 'а'])
-    end
-
-    it 'returns letters in places of cows' do
-      expect(GameService.cows('мораль'.split(''), 'корова'.split(''))).to eq([nil, nil, nil, 'а', nil, nil])
-      expect(GameService.cows('краска'.split(''), 'корова'.split(''))).to eq([nil, 'р', nil, nil, nil, nil])
-    end
-
     it 'counts bulls and cows in input against the secret word' do
-      expect(GameService.match('корень', 'корова')).to eq({word: 'корень', bulls: 3, cows: 0, exact: false})
-      expect(GameService.match('восток', 'корова')).to eq({word: 'восток', bulls: 1, cows: 3, exact: false})
       expect(GameService.match('оборот', 'корова')).to eq({word: 'оборот', bulls: 0, cows: 3, exact: false})
+      expect(GameService.match('восток', 'корова')).to eq({word: 'восток', bulls: 1, cows: 3, exact: false})
+      expect(GameService.match('корень', 'корова')).to eq({word: 'корень', bulls: 3, cows: 0, exact: false})
       expect(GameService.match('краска', 'корова')).to eq({word: 'краска', bulls: 2, cows: 1, exact: false})
       expect(GameService.match('оборот', 'корова')).to eq({word: 'оборот', bulls: 0, cows: 3, exact: false})
       expect(GameService.match('корова', 'корова')).to eq({word: 'корова', bulls: 6, cows: 0, exact: true})

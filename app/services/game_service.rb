@@ -71,21 +71,6 @@ class GameService
       return { word: guess, bulls: bulls.compact.count, cows: cows.compact.count, exact: guess == secret }
     end
 
-    def bulls(guess, secret)
-      guess.zip(secret).map { |(g, s)| g == s ? g : nil}
-    end
-
-    def cows(guess, secret)
-      bulls = bulls(guess, secret)
-      guess, secret = guess.zip(secret, bulls).
-          map{|g, s, b| b.present? ? [nil, nil] : [g, s]}.transpose
-
-      guess.each_with_index.map { |g, index|
-        (i = secret.index(g)) && secret[i] = nil
-        i.present? ? g : nil
-      }
-    end
-
     def hint(game, letter = nil)
       hint = letter.present? ? detect_letter(game.secret, letter) : random_letter(game.secret)
       Hint.create!(game_id: game.id, letter: letter, hint: hint)
@@ -123,6 +108,19 @@ class GameService
     end
 
     private
+
+    def bulls(guess, secret)
+      guess.zip(secret).map { |(g, s)| g == s ? g : nil }
+    end
+
+    def cows(guess, secret)
+      g, s = not_bulls(guess, secret).transpose
+      (g & s).try(:flat_map) { |n| [n] * [g.count(n), s.count(n)].min } || []
+    end
+
+    def not_bulls(guess, secret)
+      guess.zip(secret).reject { |(g, s)| g == s }
+    end
 
     def detect_letter(secret, letter)
       secret.split('').detect { |l| l == letter }
