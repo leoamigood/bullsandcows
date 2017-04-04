@@ -3,9 +3,9 @@ class GameEngineService
   @@RECENT_GAMES_DAYS = 7.days
 
   class << self
-    def create_by_word(realm, word)
-      sanitized = GameService.sanitize(word)
-      GameService.create(realm, Noun.new(noun: sanitized))
+    def create_by_word(realm, input)
+      word = GameService.sanitize(input)
+      GameService.create(realm, Noun.new(noun: word))
     end
 
     def create_by_options(realm, options)
@@ -15,11 +15,11 @@ class GameEngineService
       GameService.create(realm, secret)
     end
 
-    def guess(game, user, word)
-      GameService.validate_guess!(game, word)
+    def guess(game, user, input)
+      GameService.validate_guess!(game, input)
 
-      sanitized = GameService.sanitize(word)
-      GameService.guess(game, user, sanitized)
+      word = GameService.sanitize(input)
+      GameService.guess(game, user, word)
     end
 
     def hint(game, letter = nil)

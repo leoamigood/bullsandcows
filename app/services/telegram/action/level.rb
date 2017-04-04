@@ -20,6 +20,8 @@ module Telegram
       end
     end
 
+    private
+
     aspector(Level, class_methods: true) do
       target do
         def assert(*args, &block)
