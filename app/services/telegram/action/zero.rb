@@ -12,6 +12,8 @@ module Telegram
       end
     end
 
+    private
+
     aspector(Zero, class_methods: true) do
       target do
         def permit(*args, &block)
