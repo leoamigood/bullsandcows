@@ -20,6 +20,10 @@ class BaseApiController < ApplicationController
     request.format = :json
   end
 
+  def set_response_html_format
+    request.format = :html
+  end
+
   def set_timezone
     Time.zone = 'UTC'
   end

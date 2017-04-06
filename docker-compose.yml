@@ -19,12 +19,15 @@ services:
       - '.env.backend'
       - '.env.backend.secret'
       - '.env.postgres.secret'
+    command: bash -c "rm -rf /usr/src/app/tmp/pids/server.pid && bundle exec puma -C config/puma.rb"
+
   postgres:
     image: postgres:9.5.3
     ports:
       - "5432:5432"
     env_file:
       - '.env.postgres.secret'
+
   redis:
     image: redis:3.2
     ports:

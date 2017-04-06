@@ -56,6 +56,7 @@ Rails.application.routes.draw do
 
   resource :users, only: [] do
     get :me, :on => :member
+    get :console, :on => :collection
   end
 
   resources :games, :only => [:create, :index, :show, :update] do
