@@ -140,16 +140,23 @@ describe GameService, type: :service do
       expect(game.status).to eq('aborted')
     end
 
-    it 'checks that game is not in progress' do
+    it 'verify that game is in progress' do
       expect(GameService.in_progress?(channel)).to eq(true)
     end
   end
 
   context 'with a game finished' do
-    let!(:game) { create(:game, :realm, status: :finished, realm: realm)}
+    let!(:score) { create(:score, worth: 179) }
+    let!(:game) { create(:game, :realm, :with_tries, secret: 'hostel', score: score, status: :finished, realm: realm)}
 
-    it 'checks that game is in progress' do
+    it 'verify that game is NOT in progress' do
       expect(GameService.in_progress?(channel)).to eq(false)
+    end
+
+    it 'verify that game score gets updated' do
+      expect{
+        GameService.score(game)
+      }.to change{ game.reload.score.points }
     end
   end
 

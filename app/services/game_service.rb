@@ -1,7 +1,7 @@
 class GameService
 
   class << self
-    def create(realm, secret)
+    def create(realm, secret, score = nil)
       if (in_progress?(realm.channel))
         raise Errors::GameCreateException.new(
             'Cannot start new game. Finish or stop current game using _/stop_ command.',
@@ -15,7 +15,8 @@ class GameService
           secret: secret.noun,
           level: secret.level,
           dictionary: secret.dictionary,
-          source: realm.source
+          source: realm.source,
+          score: score
       )
     end
 
@@ -55,7 +56,7 @@ class GameService
       guess.attempts += 1
       guess.save!
 
-      guess.exact? ? game.finished! : game.running!
+      guess.exact? ? game.finished! : game.running! # TODO: should this be moved to GameEngineService?
       guess
     end
 
@@ -88,6 +89,18 @@ class GameService
     def stop!(game)
       game.aborted!
       game
+    end
+
+    def score(game)
+      return unless game.score.present?
+
+      score = game.score
+      score.bonus = ScoreService.bonus(game)
+      score.penalty = ScoreService.penalty(game)
+      score.points = ScoreService.points(game)
+      score.save!
+
+      score
     end
 
     def validate_guess!(game, guess)

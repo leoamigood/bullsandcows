@@ -15,5 +15,4 @@ describe Game, type: :model do
       expect(Game.recent(channel1, Time.now - 7.days)).not_to include(game2, game4)
     end
   end
-
 end

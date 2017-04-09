@@ -81,6 +81,16 @@ ActiveRecord::Schema.define(version: 20170417153150) do
     t.integer "rank"
   end
 
+  create_table "scores", force: :cascade do |t|
+    t.integer  "game_id"
+    t.integer  "worth"
+    t.integer  "bonus"
+    t.integer  "penalty"
+    t.integer  "points"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
   create_table "settings", force: :cascade do |t|
     t.string   "channel"
     t.string   "language",      default: "RU"

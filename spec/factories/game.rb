@@ -29,6 +29,12 @@ FactoryGirl.define do
     status :aborted
   end
 
+  trait :with_exact_guess do
+    after :create do |game|
+      FactoryGirl.create(:guess, word: 'hostel', game: game, user_id: game.user_id, bulls: 6, cows: 0)
+    end
+  end
+
   trait :with_tries do
     before :create do |game|
       time = Time.now

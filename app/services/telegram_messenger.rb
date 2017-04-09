@@ -62,13 +62,21 @@ class TelegramMessenger
     def game_created(game)
       message = "Game created: *#{game.secret.length}* letters."
       message += " Language: *#{game.dictionary.lang}*." if game.dictionary.present?
+      message += " Points: *#{game.score.worth}*." if game.score.present?
 
       message + "\nGo ahead and submit your guess word."
     end
 
     def guess(guess)
       text = "Guess #{guess.game.guesses_count}: _#{guess.word}_, *Bulls: #{guess.bulls}*, *Cows: #{guess.cows}*.\n"
-      text += "Congratulations! You guessed it with *#{guess.game.guesses.length}* tries." if guess.exact?
+      text += TelegramMessenger.finish(guess.game) if guess.exact?
+
+      text
+    end
+
+    def finish(game)
+      text = "Congratulations! You guessed it with *#{game.guesses.length}* tries.\n"
+      text += "You earned *#{game.score.points}* points." if game.score.present?
 
       text
     end

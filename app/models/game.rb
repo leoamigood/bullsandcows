@@ -12,6 +12,7 @@ class Game < ActiveRecord::Base
   end
 
   has_many :hints
+  has_one  :score
 
   enum status: { created: 'created', running: 'running', finished: 'finished', aborted: 'aborted' }
   enum source: { telegram: 'telegram', web: 'web' }
@@ -29,4 +30,5 @@ class Game < ActiveRecord::Base
   def in_progress?
     self.created? || self.running?
   end
+
 end

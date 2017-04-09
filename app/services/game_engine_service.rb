@@ -4,22 +4,28 @@ class GameEngineService
 
   class << self
     def create_by_word(realm, input)
-      word = GameService.sanitize(input)
-      GameService.create(realm, Noun.new(noun: word))
+      secret = GameService.sanitize(input)
+
+      GameService.create(realm, Noun.new(noun: secret))
     end
 
     def create_by_options(realm, options)
       secret = secret_by_options(realm, options)
       raise Errors::GameCreateException.new('Unable to create game. Please try different parameters') unless secret.present?
 
-      GameService.create(realm, secret)
+      score = ScoreService.build(secret, options[:complexity])
+      GameService.create(realm, secret, score)
     end
 
     def guess(game, user, input)
       GameService.validate_guess!(game, input)
 
       word = GameService.sanitize(input)
-      GameService.guess(game, user, word)
+      guess = GameService.guess(game, user, word)
+
+      GameService.score(game) if game.finished?
+
+      guess
     end
 
     def hint(game, letter = nil)
