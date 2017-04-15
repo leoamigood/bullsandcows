@@ -40,7 +40,7 @@ class GameEngineService
 
     def tries(channel)
       game = GameService.find_by_channel!(channel)
-      game.guesses
+      game.guesses.sort_by{ |guess| guess.created_at }
     end
 
     def best(channel, limit)
