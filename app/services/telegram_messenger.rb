@@ -60,10 +60,10 @@ class TelegramMessenger
     end
 
     def game_created(game)
-      message = "Game created: #{game.secret.length} letters."
-      message += " Language: #{game.dictionary.lang}." if game.dictionary.present?
+      message = "Game created: *#{game.secret.length}* letters."
+      message += " Language: *#{game.dictionary.lang}*." if game.dictionary.present?
 
-      message
+      message + "\nGo ahead and submit your guess word."
     end
 
     def guess(guess)
@@ -149,7 +149,7 @@ class TelegramMessenger
       # level   - Use /level to set game complexity level
       # lang    - Use /lang to set secret word language
       # create  - Use /create [word]|[number] to create a game
-      # guess   - Use /guess <word> to place a guess for the secret
+      # guess   - Use [/guess] <word> to place a guess for the secret
       # tries   - Use /tries to show previous guess attempts
       # best    - Use /best [number] to see top guesses
       # zero    - Use /zero to see guesses with zero matches
@@ -164,7 +164,7 @@ class TelegramMessenger
           'Use _/level_ to set game complexity level',
           'Use _/lang_ to set secret word language',
           'Use _/create [word]|[number]_ to create a game',
-          'Use _/guess <word>_ to place a guess for the secret',
+          'Use _[/guess] <word>_ to place a guess for the secret',
           'Use _/tries_ to show previous guess attempts',
           'Use _/best [number]_ to see top guesses',
           'Use _/zero_ to see guesses with zero matches',
