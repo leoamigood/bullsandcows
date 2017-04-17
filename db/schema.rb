@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20170220145159) do
+ActiveRecord::Schema.define(version: 20170417153150) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -44,6 +44,7 @@ ActiveRecord::Schema.define(version: 20170220145159) do
     t.integer  "level"
     t.integer  "guesses_count",            default: 0
     t.integer  "user_id"
+    t.integer  "winner_id"
   end
 
   create_table "guesses", force: :cascade do |t|
