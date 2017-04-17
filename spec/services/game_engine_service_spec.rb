@@ -2,7 +2,7 @@ require 'rails_helper'
 
 describe GameEngineService, type: :service do
   let!(:channel) { Random.rand(@MAX_INT_VALUE) }
-  let!(:user) { User.new(id = Random.rand(@MAX_INT_VALUE), username = '@Amig0') }
+  let!(:user) { build :user, id: Random.rand(@MAX_INT_VALUE), name: '@Amig0' }
 
   let!(:realm) { build :realm, :telegram, channel: channel, user_id: user.id }
 

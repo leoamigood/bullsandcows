@@ -8,6 +8,9 @@ module Telegram
         def execute(channel, message, word)
           game = GameService.find_by_channel!(channel)
           guess = GameEngineService.guess(game, User.new(message.from.id, message.from.username), word)
+
+          EventBus.announce(Events::GAME_FINISHED, game: game) if game.finished?
+
           TelegramMessenger.guess(guess)
         end
       end

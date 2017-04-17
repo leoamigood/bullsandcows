@@ -1,5 +1,11 @@
 FactoryGirl.define do
-  factory :game
+  factory :game do
+    factory :finished_game, :traits => [:with_tries, :winning_guess] do
+      transient do
+        winner nil
+      end
+    end
+  end
 
   trait :realm do
     initialize_with do
@@ -24,7 +30,7 @@ FactoryGirl.define do
   end
 
   trait :with_tries do
-    after :create do |game|
+    before :create do |game|
       time = Time.now
       FactoryGirl.create(:guess, word: 'tomato', game: game, bulls: 0, cows: 1, created_at: time - 9.seconds)
       FactoryGirl.create(:guess, word: 'mortal', game: game, bulls: 0, cows: 2, created_at: time - 8.seconds)
@@ -39,8 +45,15 @@ FactoryGirl.define do
     end
   end
 
+  trait :winning_guess do
+    status :finished
+    before :create do |game, evaluator|
+      game.guesses << FactoryGirl.create(:guess, word: 'hostel', game: game, bulls: 6, cows: 0, user_id: evaluator.winner)
+    end
+  end
+
   trait :with_hints do
-    after :create do |game|
+    before :create do |game|
       FactoryGirl.create(:hint, game: game, letter: 'o', hint: 'o')
       FactoryGirl.create(:hint, game: game, letter: 'a', hint: nil)
       FactoryGirl.create(:hint, game: game, letter: nil, hint: 's')

@@ -2,7 +2,7 @@ require 'rails_helper'
 
 describe Telegram::Action::Hint, type: :service do
   let!(:channel) { Random.rand(@MAX_INT_VALUE) }
-  let!(:user) { User.new(Random.rand(@MAX_INT_VALUE), '@Amig0') }
+  let!(:user) { build :user, id: Random.rand(@MAX_INT_VALUE), name: '@Amig0' }
 
   let!(:realm) { build :realm, :telegram, channel: channel, user_id: user.id }
 
