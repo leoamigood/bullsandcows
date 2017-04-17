@@ -70,6 +70,7 @@ GEM
     docile (1.1.5)
     equalizer (0.0.11)
     erubis (2.7.0)
+    event_bus (1.1.1)
     execjs (2.7.0)
     factory_girl (4.8.0)
       activesupport (>= 3.0.0)
@@ -231,6 +232,7 @@ DEPENDENCIES
   attr_extras
   byebug
   coffee-rails (~> 4.1.0)
+  event_bus
   factory_girl_rails (~> 4.0)
   jbuilder (~> 2.0)
   jquery-rails

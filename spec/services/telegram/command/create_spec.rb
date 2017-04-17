@@ -2,7 +2,7 @@ require 'rails_helper'
 
 describe Telegram::Action::Create, type: :service do
   let!(:channel) { Random.rand(@MAX_INT_VALUE) }
-  let!(:user) { User.new(id = Random.rand(@MAX_INT_VALUE), name = '@Amig0') }
+  let!(:user) { build :user, id: Random.rand(@MAX_INT_VALUE), name: '@Amig0' }
 
   let!(:message) { Telegram::Bot::Types::Message.new(text: '/create') }
 

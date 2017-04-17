@@ -2,7 +2,7 @@ require 'rails_helper'
 
 describe TelegramDispatcher, type: :service do
   let!(:channel) { Random.rand(@MAX_INT_VALUE) }
-  let!(:user) { User.new(id = Random.rand(@MAX_INT_VALUE), name = '@Amig0') }
+  let!(:user) { build :user, id: Random.rand(@MAX_INT_VALUE), name: '@Amig0' }
 
   let!(:realm) { build :realm, :telegram, channel: channel, user_id: user.id }
 
@@ -57,7 +57,7 @@ describe TelegramDispatcher, type: :service do
       end
 
       it 'replies with a game created text' do
-        expect(TelegramDispatcher.handle(message)).to include('Game created: 6 letters.')
+        expect(TelegramDispatcher.handle(message)).to include('Game created: *6* letters.')
       end
     end
 
@@ -70,7 +70,7 @@ describe TelegramDispatcher, type: :service do
       end
 
       it 'replies with a game created text' do
-        expect(TelegramDispatcher.handle(message)).to include('Game created: 6 letters.')
+        expect(TelegramDispatcher.handle(message)).to include('Game created: *6* letters.')
       end
     end
 
@@ -86,7 +86,7 @@ describe TelegramDispatcher, type: :service do
       end
 
       it 'replies with a game created text' do
-        expect(TelegramDispatcher.handle(message)).to include('Game created: 6 letters. Language: EN.')
+        expect(TelegramDispatcher.handle(message)).to include('Game created: *6* letters. Language: *EN*.')
       end
     end
 
