@@ -787,7 +787,7 @@ describe TelegramDispatcher, type: :service do
   end
 
   context 'when game has finished' do
-    let!(:game) { create(:game, :realm, :with_tries, status: :finished, secret: 'secret',  status: :finished, realm: realm) }
+    let!(:game) { create(:finished_game, :realm, :with_tries, secret: 'secret', realm: realm, winner_id: user.id) }
 
     context 'when /guess command received' do
       let!(:message) { Telegram::Bot::Types::Message.new(text: '/guess secret') }
@@ -959,6 +959,21 @@ describe TelegramDispatcher, type: :service do
         expect {
           expect(TelegramDispatcher.handle(message)).to match('Zero letters in:')
         }.not_to change(Guess, :count)
+      end
+    end
+
+    context 'when /score command received' do
+      let!(:message) { Telegram::Bot::Types::Message.new(text: '/score') }
+      let!(:score) { create(:score, game: game, worth: 179, bonus: 25, penalty: 0, points: 204) }
+
+      before do
+        message.stub_chain(:chat, :id).and_return(channel)
+      end
+
+      it 'replies with top scores' do
+        expect {
+          expect(TelegramDispatcher.handle(message)).to match("1: User ID: #{user.id}, Score: #{score.points}")
+        }.not_to change{ game.reload.score }
       end
     end
 

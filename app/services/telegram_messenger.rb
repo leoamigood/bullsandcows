@@ -76,7 +76,12 @@ class TelegramMessenger
 
     def finish(game)
       text = "Congratulations! You guessed it with *#{game.guesses.length}* tries.\n"
-      text += "You earned *#{game.score.points}* points." if game.score.present?
+
+      if game.score.present?
+        text += "You earned *#{game.score.points}* points."
+        text += " Bonus: *#{game.score.bonus}* points." if game.score.bonus > 0
+        text += " Penalty: *#{game.score.penalty}* points." if game.score.penalty > 0
+      end
 
       text
     end
@@ -151,8 +156,14 @@ class TelegramMessenger
       'Game has already finished. Please start a new game using _/create_ command.'
     end
 
-    def help
+    def top_scores(scores)
+      scores.each.with_index.reduce("Top scores: \n") { |text, indexed_score|
+        score, i = indexed_score.first, indexed_score.last
+        text + "#{i + 1}: User ID: #{score.first}, Score: #{score.last}\n"
+      }
+    end
 
+    def help
       # start   - Use /start to start game bot
       # level   - Use /level to set game complexity level
       # lang    - Use /lang to set secret word language

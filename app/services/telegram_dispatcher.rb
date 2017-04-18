@@ -104,6 +104,9 @@ class TelegramDispatcher
         when Telegram::CommandRoute::LEVEL_ALPHA
           Telegram::Action::Level.execute(channel, $~['level'])
 
+        when Telegram::CommandRoute::SCORE
+          Telegram::Action::Score.execute(channel, message)
+
         when Telegram::CommandRoute::STOP
           Telegram::Action::Stop.execute(channel, message)
 

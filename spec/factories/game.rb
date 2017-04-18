@@ -2,7 +2,7 @@ FactoryGirl.define do
   factory :game do
     factory :finished_game, :traits => [:with_tries, :winning_guess] do
       transient do
-        winner nil
+        exact_guess nil
       end
     end
   end
@@ -54,7 +54,7 @@ FactoryGirl.define do
   trait :winning_guess do
     status :finished
     before :create do |game, evaluator|
-      game.guesses << FactoryGirl.create(:guess, word: 'hostel', game: game, bulls: 6, cows: 0, user_id: evaluator.winner)
+      game.guesses << evaluator.exact_guess if evaluator.exact_guess.present?
     end
   end
 

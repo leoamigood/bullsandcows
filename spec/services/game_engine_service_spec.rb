@@ -154,4 +154,42 @@ describe GameEngineService, type: :service do
     end
   end
 
+  context 'given scores for multiple games' do
+    let!(:winner1) { 873784623 }
+    let!(:winner2) { 223937424 }
+    let!(:winner3) { 527567212 }
+
+    let!(:game1) { create(:game, :realm, realm: realm, winner_id: winner1, created_at: 5.hours.ago) }
+    let!(:score1) { create(:score, points: 179, game: game1) }
+
+    let!(:game2) { create(:game, :realm, realm: realm, winner_id: winner2, created_at: 1.day.ago) }
+    let!(:score2) { create(:score, points: 138, game: game2) }
+
+    let!(:game3) { create(:game, :realm, realm: realm, winner_id: winner1, created_at: 2.days.ago) }
+    let!(:score3) { create(:score, points: 205, game: game3) }
+
+    let!(:game4) { create(:game, :realm, realm: realm, winner_id: winner3, created_at: 20.hours.ago) }
+    let!(:score4) { create(:score, points: 152, game: game4) }
+
+    let!(:game5) { create(:game, :realm, realm: realm, winner_id: winner2, created_at: 4.days.ago) }
+    let!(:score5) { create(:score, points: 108, game: game5) }
+
+    it 'calculate top scores for last week' do
+      expect(GameEngineService.scores(channel).count).to eq(3)
+      expect(GameEngineService.scores(channel)).to include([winner1, 179 + 205], [winner2, 138 + 108], [winner3, 152])
+    end
+
+    let(:last_3_days) { 3.days.ago..Time.now }
+    it 'calculate top scores for last 3 days' do
+      expect(GameEngineService.scores(channel, last_3_days).count).to eq(3)
+      expect(GameEngineService.scores(channel, last_3_days)).to include([winner1, 179 + 205], [winner3, 152], [winner2, 138])
+    end
+
+    it 'calculate 2 top scores for last 3 days' do
+      expect(GameEngineService.scores(channel, last_3_days, 2).count).to eq(2)
+      expect(GameEngineService.scores(channel, last_3_days, 2)).to include([winner1, 179 + 205], [winner3, 152])
+      expect(GameEngineService.scores(channel, last_3_days, 2)).not_to include(winner2)
+    end
+  end
+
 end

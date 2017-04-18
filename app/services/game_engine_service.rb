@@ -66,6 +66,15 @@ class GameEngineService
       lang
     end
 
+    def scores(channel, period = 1.week.ago..Time.now, limit = 8)
+      Game.joins(:score).
+          where(channel: channel, :created_at => period).
+          group(:winner_id).
+          order('score DESC').
+          pluck(:winner_id, 'SUM(points) as score').
+          first(limit)
+    end
+
     def settings(channel, attributes)
       setting = Setting.find_or_create_by!(channel: channel)
 
