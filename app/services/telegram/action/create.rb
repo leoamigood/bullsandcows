@@ -37,12 +37,12 @@ module Telegram
         end
 
         def permit(*args, &block)
-          channel, message = *args
-          Telegram::Validator.validate!(Command::CREATE, channel, message)
+          channel = *args
+          Telegram::Validator.validate!(Command::CREATE, channel)
         end
 
         def pop(*args, &block)
-          msg, channel, message = *args
+          msg, channel = *args
           Telegram::CommandQueue::Queue.new(channel).pop
 
           msg

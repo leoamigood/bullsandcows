@@ -145,8 +145,17 @@ describe GamesController, :type => :request do
   end
 
   context 'with game in progress with few guesses placed' do
+    let!(:channel) { 'session-id' }
+    let!(:user) { create :user, username: '@Amig0' }
+
+    let!(:realm) { build :realm, :web, channel: channel, user_id: user.ext_id }
+
     let!(:dictionary) { create :dictionary, lang: 'EN'}
-    let!(:game) { create :game, :running, :with_tries, :with_hints, secret: 'hostel', source: 'web', dictionary: dictionary }
+    let!(:game) { create :game, :running, :with_tries, :with_hints, secret: 'hostel', channel: channel, source: 'web', dictionary: dictionary }
+
+    before do
+      allow_any_instance_of(BaseApiController).to receive(:realm).and_return(realm)
+    end
 
     it 'gets game details' do
       expect {
