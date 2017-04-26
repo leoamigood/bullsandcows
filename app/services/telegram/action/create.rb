@@ -9,16 +9,16 @@ module Telegram
           TelegramMessenger.ask_length(channel)
         end
 
-        def execute(channel, message, options)
+        def execute(channel, user, options)
           case options[:strategy]
             when :by_word
-              game = GameEngineService.create_by_word(Realm::Telegram.new(channel, message.from.id), options[:word])
+              game = GameEngineService.create_by_word(Realm::Telegram.new(channel, user.ext_id), options[:word])
 
             when :by_number
               settings = Setting.find_by_channel(channel)
               options = settings.options.merge(options) if settings.present?
 
-              game = GameEngineService.create_by_options(Realm::Telegram.new(channel, message.from.id), options)
+              game = GameEngineService.create_by_options(Realm::Telegram.new(channel, user.ext_id), options)
           end
           TelegramMessenger.game_created(game)
         end
@@ -32,7 +32,7 @@ module Telegram
     aspector(Create, class_methods: true) do
       target do
         def assert(*args, &block)
-          channel, message = *args
+          channel = *args
           Telegram::CommandQueue::Queue.new(channel).assert(self)
         end
 

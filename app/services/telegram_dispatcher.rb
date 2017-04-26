@@ -21,8 +21,17 @@ class TelegramDispatcher
       begin
         return unless message.text.present?
 
+        user = User.find_or_create_by(ext_id: message.from.id) do |user|
+          user.ext_id = message.from.id
+          user.username = message.from.username
+          user.first_name = message.from.first_name
+          user.last_name = message.from.last_name
+          user.username = message.from.username
+          user.source = :telegram
+        end
+
         command = message.text.mb_chars.downcase.to_s
-        execute(command, channel = message.chat.id, message)
+        execute(command, channel = message.chat.id, message, user)
       rescue Errors::GameException => ex
         Airbrake.notify(ex, message.to_h)
         ex.message
@@ -53,7 +62,7 @@ class TelegramDispatcher
 
     end
 
-    def execute(command, channel, message)
+    def execute(command, channel, message, user = nil)
       case command
         when Telegram::CommandRoute::START
           Telegram::Action::Start.execute(channel)
@@ -69,16 +78,16 @@ class TelegramDispatcher
           Telegram::Action::Create.ask(channel)
 
         when Telegram::CommandRoute::CREATE_ALPHA
-          Telegram::Action::Create.execute(channel, message, word: $~['secret'], strategy: :by_word)
+          Telegram::Action::Create.execute(channel, user, word: $~['secret'], strategy: :by_word)
 
         when Telegram::CommandRoute::CREATE_DIGIT
-          Telegram::Action::Create.execute(channel, message, length: $~['number'], strategy: :by_number)
+          Telegram::Action::Create.execute(channel, user, length: $~['number'], strategy: :by_number)
 
         when Telegram::CommandRoute::GUESS
-          Telegram::Action::Guess.execute(channel, message, $~['guess'])
+          Telegram::Action::Guess.execute(channel, user, $~['guess'])
 
         when Telegram::CommandRoute::WORD
-          Telegram::Action::Guess.execute(channel, message, command) if GameService.in_progress?(channel)
+          Telegram::Action::Guess.execute(channel, user, command) if GameService.in_progress?(channel)
 
         when Telegram::CommandRoute::HINT_ALPHA
           Telegram::Action::Hint.execute(channel, letter: $~['letter'], strategy: :by_letter)
@@ -87,7 +96,7 @@ class TelegramDispatcher
           Telegram::Action::Hint.execute(channel, number: $~['number'], strategy: :by_number)
 
         when Telegram::CommandRoute::SUGGEST
-          Telegram::Action::Suggest.execute(channel, message, $~['letters'])
+          Telegram::Action::Suggest.execute(channel, user, $~['letters'])
 
         when Telegram::CommandRoute::TRIES
           Telegram::Action::Tries.execute(channel)

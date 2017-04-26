@@ -4,7 +4,7 @@ module Telegram
     class << self
       include Telegram::Action::Command
 
-      def validate!(action, channel, message)
+      def validate!(action, channel, message = nil)
         game = GameService.recent_game(channel)
 
         case action

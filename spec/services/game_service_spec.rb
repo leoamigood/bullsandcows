@@ -2,9 +2,9 @@ require 'rails_helper'
 
 describe GameService, type: :service do
   let!(:channel) { Random.rand(@MAX_INT_VALUE) }
-  let!(:user) { build :user, id: Random.rand(@MAX_INT_VALUE), name: '@Amig0' }
+  let!(:user) { create :user, username: '@Amig0' }
 
-  let!(:realm) { build :realm, :web, channel: channel, user_id: user.id }
+  let!(:realm) { build :realm, :web, channel: channel, user_id: user.ext_id }
 
   context 'with game not started' do
     context 'with a secret word' do

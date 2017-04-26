@@ -2,9 +2,9 @@ require 'rails_helper'
 
 describe GameEngineService, type: :service do
   let!(:channel) { Random.rand(@MAX_INT_VALUE) }
-  let!(:user) { build :user, id: Random.rand(@MAX_INT_VALUE), name: '@Amig0' }
+  let!(:user) { create :user, username: '@Amig0' }
 
-  let!(:realm) { build :realm, :telegram, channel: channel, user_id: user.id }
+  let!(:realm) { build :realm, :telegram, channel: channel, user_id: user.ext_id }
 
   it 'create a game with specified secret word' do
     game = GameEngineService.create_by_word(realm, 'magic')

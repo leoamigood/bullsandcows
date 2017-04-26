@@ -5,9 +5,9 @@ module Telegram
 
     class Suggest
       class << self
-        def execute(channel, message, letters)
+        def execute(channel, user, letters)
           game = GameService.find_by_channel!(channel)
-          guess = GameEngineService.suggest(game, User.new(message.from.id, message.from.username), letters)
+          guess = GameEngineService.suggest(game, user, letters)
 
           guess.present? ? TelegramMessenger.suggestion(guess) : TelegramMessenger.no_suggestions(letters)
         end
@@ -17,8 +17,8 @@ module Telegram
     aspector(Suggest, class_methods: true) do
       target do
         def permit(*args, &block)
-          channel, message = *args
-          Telegram::Validator.validate!(Command::SUGGEST, channel, message)
+          channel = *args
+          Telegram::Validator.validate!(Command::SUGGEST, channel)
         end
       end
 

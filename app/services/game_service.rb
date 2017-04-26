@@ -45,8 +45,8 @@ class GameService
     def guess(game, user, word, suggestion = false)
       guess = Guess.find_or_create_by(game_id: game.id, word: word) do |guess|
         guess.attempts = 0
-        guess.user_id = user.id
-        guess.username = user.name
+        guess.user_id = user.ext_id
+        guess.username = user.username
         guess.suggestion = suggestion
 
         guess.update(match(word, game.secret))
