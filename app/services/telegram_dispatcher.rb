@@ -21,17 +21,8 @@ class TelegramDispatcher
       begin
         return unless message.text.present?
 
-        user = User.find_or_create_by(ext_id: message.from.id) do |user|
-          user.ext_id = message.from.id
-          user.username = message.from.username
-          user.first_name = message.from.first_name
-          user.last_name = message.from.last_name
-          user.username = message.from.username
-          user.source = :telegram
-        end
-
         command = message.text.mb_chars.downcase.to_s
-        execute(command, channel = message.chat.id, message, user)
+        execute(command, channel = message.chat.id, message)
       rescue Errors::GameException => ex
         Airbrake.notify(ex, message.to_h)
         ex.message
@@ -44,7 +35,7 @@ class TelegramDispatcher
       begin
         channel = callback_query.message.chat.id
         command = callback_query.data.downcase.to_s
-        response = execute(command, channel, callback_query)
+        response = execute(command, channel, callback_query.message)
 
         queue = Telegram::CommandQueue::Queue.new(channel)
         if queue.present?
@@ -62,7 +53,16 @@ class TelegramDispatcher
 
     end
 
-    def execute(command, channel, message, user = nil)
+    def execute(command, channel, message)
+      user = User.find_or_create_by(ext_id: message.from.id) do |user|
+        user.ext_id = message.from.id
+        user.username = message.from.username
+        user.first_name = message.from.first_name
+        user.last_name = message.from.last_name
+        user.username = message.from.username
+        user.source = :telegram
+      end
+
       case command
         when Telegram::CommandRoute::START
           Telegram::Action::Start.execute(channel)
