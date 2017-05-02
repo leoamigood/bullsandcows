@@ -20,7 +20,8 @@ FactoryGirl.define do
   trait :with_realm do
     after :build do |message, evaluator|
       message.stub_chain(:chat, :id).and_return(evaluator.realm.channel)
-      message.stub_chain(:from, :id).and_return(evaluator.realm.user_id)
+      message.stub_chain(:from).and_return(evaluator.realm.user)
+      message.stub_chain(:from, :id).and_return(evaluator.realm.user.ext_id)
     end
   end
 end

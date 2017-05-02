@@ -1,14 +1,12 @@
 require 'rails_helper'
 
 describe Telegram::Action::Guess, type: :service do
-  let!(:user) { create :user, username: '@Amig0' }
-  let!(:channel) { 'telegram-game-channel' }
-
-  let!(:realm) { build :realm, :telegram, channel: channel, user_id: user.ext_id }
+  let!(:user) { create :user, :telegram, :john_smith }
+  let!(:realm) { build :telegram_realm, user: user }
 
   let!(:message) { build :message, :with_realm, text: 'hostel', realm: realm }
 
-  let!(:game) { create(:game, source: :telegram, secret: 'secret', channel: channel) }
+  let!(:game) { create(:game, :telegram, secret: 'secret', channel: realm.channel) }
 
   context 'given created game' do
     before do
@@ -19,11 +17,11 @@ describe Telegram::Action::Guess, type: :service do
 
     it 'verifies non exact guess execution chain' do
       expect {
-        Telegram::Action::Guess.execute(channel, user, message.text)
+        Telegram::Action::Guess.execute(realm.channel, user, message.text)
       }.not_to change{ game.reload.winner_id }
 
       expect(TelegramMessenger).to have_received(:guess).with(
-          have_attributes(game_id: game.id, word: 'hostel', username: '@Amig0')
+          have_attributes(game_id: game.id, word: 'hostel', username: 'john_smith')
       )
     end
 
@@ -34,8 +32,8 @@ describe Telegram::Action::Guess, type: :service do
 
       it 'verifies winning guess execution chain' do
         expect {
-          Telegram::Action::Guess.execute(channel, user, message.text)
-        }.to change{ game.reload.winner_id }.from(nil).to(user.ext_id)
+          Telegram::Action::Guess.execute(realm.channel, user, message.text)
+        }.to change{ game.reload.winner_id.to_s }.from('').to(user.ext_id)
       end
     end
   end

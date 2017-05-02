@@ -9,7 +9,7 @@ FactoryGirl.define do
 
   trait :realm do
     initialize_with do
-      new(channel: realm.channel, user_id: realm.user_id, source: realm.source)
+      new(channel: realm.channel, user_id: realm.user.ext_id, source: realm.source)
     end
   end
 

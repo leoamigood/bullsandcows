@@ -4,11 +4,11 @@ include Telegram::Action::Command
 describe Telegram::Validator, type: :service do
   let!(:channel) { Random.rand(@MAX_INT_VALUE) }
 
-  let!(:creator) { create :user, username: '@Creator' }
-  let!(:player) { create :user, username: '@Player' }
+  let!(:creator) { create :user, :telegram, :john_smith }
+  let!(:player) { create :user, :telegram, :player_leo }
 
-  let!(:creator_realm) { build :realm, :telegram, channel: channel, user_id: creator.id }
-  let!(:player_realm) { build :realm, :telegram, channel: channel, user_id: player.id }
+  let!(:creator_realm) { build :telegram_realm, channel: channel, user: creator }
+  let!(:player_realm) { build :telegram_realm, channel: channel, user: player }
 
   context 'given a running game for the channel' do
     let!(:game) { create(:game, :realm, :running, realm: creator_realm) }

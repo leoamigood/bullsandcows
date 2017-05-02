@@ -54,14 +54,7 @@ class TelegramDispatcher
     end
 
     def execute(command, channel, message)
-      user = User.find_or_create_by(ext_id: message.from.id) do |user|
-        user.ext_id = message.from.id
-        user.username = message.from.username
-        user.first_name = message.from.first_name
-        user.last_name = message.from.last_name
-        user.username = message.from.username
-        user.source = :telegram
-      end
+      user = UserService.create_from_telegram(message)
 
       case command
         when Telegram::CommandRoute::START

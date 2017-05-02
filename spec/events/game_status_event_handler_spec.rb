@@ -1,7 +1,7 @@
 require 'rails_helper'
 
 describe GameStatusEventHandler, type: :event do
-  let!(:user) { create :user, username: '@Amig0' }
+  let!(:user) { create :user, :telegram, :john_smith }
 
   context 'when game has finished' do
     let!(:game) { create :finished_game, winner: user.ext_id }
@@ -10,7 +10,7 @@ describe GameStatusEventHandler, type: :event do
     it 'game winner id is updated' do
       expect{
         GameStatusEventHandler.game_finished(payload)
-      }.to change{ game.reload.winner_id }.to(user.ext_id)
+      }.to change{ game.reload.winner_id.to_s }.to(user.ext_id)
     end
   end
 

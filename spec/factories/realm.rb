@@ -1,15 +1,20 @@
 FactoryGirl.define do
-  factory :realm, :class => Realm::Base
-
-  trait :telegram do
-    initialize_with do
-      new(channel, user_id, :telegram)
+  factory :realm do
+    transient do
+      sequence(:channel) { generate_random_int }
     end
-  end
 
-  trait :web do
-    initialize_with do
-      new(channel, user_id, :web)
+    factory :telegram_realm, :class => Realm::Telegram do
+      initialize_with do
+        new(channel, user)
+      end
+    end
+
+    factory :web_realm, :class => Realm::Web do
+      initialize_with do
+        new(OpenStruct.new(id: channel))
+      end
     end
   end
 end
+

@@ -10,15 +10,16 @@ module Telegram
         end
 
         def execute(channel, user, options)
+          realm = Realm::Telegram.new(channel, user)
           case options[:strategy]
             when :by_word
-              game = GameEngineService.create_by_word(Realm::Telegram.new(channel, user.ext_id), options[:word])
+              game = GameEngineService.create_by_word(realm, options[:word])
 
             when :by_number
               settings = Setting.find_by_channel(channel)
               options = settings.options.merge(options) if settings.present?
 
-              game = GameEngineService.create_by_options(Realm::Telegram.new(channel, user.ext_id), options)
+              game = GameEngineService.create_by_options(realm, options)
           end
           TelegramMessenger.game_created(game)
         end
@@ -32,12 +33,12 @@ module Telegram
     aspector(Create, class_methods: true) do
       target do
         def assert(*args, &block)
-          channel = *args
+          channel = args.first
           Telegram::CommandQueue::Queue.new(channel).assert(self)
         end
 
         def permit(*args, &block)
-          channel = *args
+          channel = args.first
           Telegram::Validator.validate!(Command::CREATE, channel)
         end
 

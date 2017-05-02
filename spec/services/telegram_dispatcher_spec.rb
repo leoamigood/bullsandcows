@@ -1,10 +1,8 @@
 require 'rails_helper'
 
 describe TelegramDispatcher, type: :service do
-  let!(:channel) { Random.rand(@MAX_INT_VALUE) }
-  let!(:user) { create :user, username: '@Amig0' }
-
-  let!(:realm) { build :realm, :telegram, channel: channel, user_id: user.ext_id }
+  let!(:user) { create :user, :telegram, :john_smith }
+  let!(:realm) { build :telegram_realm, user: user }
 
   let!(:english) { create :dictionary, :english}
   let!(:russian) { create :dictionary, :russian}
@@ -21,9 +19,9 @@ describe TelegramDispatcher, type: :service do
       it 'replies with a welcome text' do
         expect {
           expect(TelegramDispatcher.handle(message)).to be
-          expect(TelegramMessenger).to have_received(:send_message).with(channel, /Welcome to Bulls and Cows!/).once
-          expect(TelegramMessenger).to have_received(:send_message).with(channel, 'Select game language:', markup).once
-        }.to change(Telegram::CommandQueue::Queue.new(channel), :size).by(3)
+          expect(TelegramMessenger).to have_received(:send_message).with(realm.channel, /Welcome to Bulls and Cows!/).once
+          expect(TelegramMessenger).to have_received(:send_message).with(realm.channel, 'Select game language:', markup).once
+        }.to change(Telegram::CommandQueue::Queue.new(realm.channel), :size).by(3)
       end
     end
 
@@ -33,7 +31,7 @@ describe TelegramDispatcher, type: :service do
 
       it 'replies with a prompt to specify word length' do
         expect(TelegramDispatcher.handle(message)).to be
-        expect(TelegramMessenger).to have_received(:send_message).with(channel, 'How many letters will it be?', markup)
+        expect(TelegramMessenger).to have_received(:send_message).with(realm.channel, 'How many letters will it be?', markup)
       end
     end
 
@@ -55,7 +53,7 @@ describe TelegramDispatcher, type: :service do
 
     context 'when /create <number> command received' do
       let!(:medium) { create :dictionary_level, :medium_en }
-      let!(:settings) { create :setting, channel: channel, language: 'EN', dictionary: english, complexity: 'medium'}
+      let!(:settings) { create :setting, channel: realm.channel, language: 'EN', dictionary: english, complexity: 'medium'}
 
       let!(:message) { build :message, :with_realm, text: '/create 6', realm: realm }
 
@@ -85,7 +83,7 @@ describe TelegramDispatcher, type: :service do
       it 'replies with prompt to submit game level' do
         expect {
           TelegramDispatcher.handle(message)
-          expect(TelegramMessenger).to have_received(:send_message).with(channel, 'Select game level:', markup)
+          expect(TelegramMessenger).to have_received(:send_message).with(realm.channel, 'Select game level:', markup)
         }.not_to change(Game, :count)
       end
     end
@@ -133,7 +131,7 @@ describe TelegramDispatcher, type: :service do
       it 'replies with prompt to submit game language' do
         expect {
           TelegramDispatcher.handle(message)
-          expect(TelegramMessenger).to have_received(:send_message).with(channel, 'Select game language:', markup)
+          expect(TelegramMessenger).to have_received(:send_message).with(realm.channel, 'Select game language:', markup)
         }.not_to change(Game, :count)
       end
     end
@@ -652,7 +650,7 @@ describe TelegramDispatcher, type: :service do
       it 'replies with prompt to submit game level' do
         expect {
           TelegramDispatcher.handle(message)
-          expect(TelegramMessenger).to have_received(:send_message).with(channel, 'Select game level:', markup)
+          expect(TelegramMessenger).to have_received(:send_message).with(realm.channel, 'Select game level:', markup)
         }.not_to change(Game, :count)
       end
     end
@@ -686,7 +684,7 @@ describe TelegramDispatcher, type: :service do
       it 'replies with prompt to submit game language' do
         expect {
           TelegramDispatcher.handle(message)
-          expect(TelegramMessenger).to have_received(:send_message).with(channel, 'Select game language:', markup)
+          expect(TelegramMessenger).to have_received(:send_message).with(realm.channel, 'Select game language:', markup)
         }.not_to change(Game, :count)
       end
     end

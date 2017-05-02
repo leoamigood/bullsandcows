@@ -1,14 +1,14 @@
 module Responses
   class User < Response
 
-    def initialize(realm)
-      @id = realm.user_id
-      @link = User.link(realm)
+    def initialize(user)
+      @id = user.id
+      @link = User.link(user)
     end
 
     class << self
-      def link(realm)
-        "/users/#{realm.user_id}"
+      def link(user)
+        "/users/#{user.id}"
       end
     end
   end

@@ -1,10 +1,8 @@
 require 'rails_helper'
 
 describe GameEngineService, type: :service do
-  let!(:channel) { Random.rand(@MAX_INT_VALUE) }
-  let!(:user) { create :user, username: '@Amig0' }
-
-  let!(:realm) { build :realm, :telegram, channel: channel, user_id: user.ext_id }
+  let!(:user) { create :user, :telegram, :john_smith }
+  let!(:realm) { build :telegram_realm, user: user }
 
   it 'create a game with specified secret word' do
     game = GameEngineService.create_by_word(realm, 'magic')
@@ -44,7 +42,7 @@ describe GameEngineService, type: :service do
       end
 
       context 'with recent games in the channel' do
-        let!(:recent_game) { create(:game, channel: channel, secret: 'garlic', status: :finished, created_at: Time.now - 5.minutes) }
+        let!(:recent_game) { create(:game, channel: realm.channel, secret: 'garlic', status: :finished, created_at: Time.now - 5.minutes) }
 
         it 'verify recent secrets are not reused' do
           game = GameEngineService.create_by_options(realm, options)
@@ -55,8 +53,8 @@ describe GameEngineService, type: :service do
       end
 
       context 'with old and recent games in the channel' do
-        let!(:old_game) { create(:game, channel: channel, secret: 'garlic', status: :finished, created_at: Time.now - 8.days) }
-        let!(:recent_game) { create(:game, channel: channel, secret: 'parrot', status: :finished, created_at: Time.now - 2.days) }
+        let!(:old_game) { create(:game, channel: realm.channel, secret: 'garlic', status: :finished, created_at: Time.now - 8.days) }
+        let!(:recent_game) { create(:game, channel: realm.channel, secret: 'parrot', status: :finished, created_at: Time.now - 2.days) }
 
         it 'verify recent secrets are not reused' do
           game = GameEngineService.create_by_options(realm, options)
@@ -67,12 +65,12 @@ describe GameEngineService, type: :service do
       end
 
       context 'with old and recent games in multiple channels' do
-        let!(:another) { Random.rand(@MAX_INT_VALUE) }
+        let!(:another) { build :telegram_realm, user: user }
 
-        let!(:old) { create(:game, channel: channel, secret: 'garlic', status: :finished, created_at: Time.now - 8.days) }
-        let!(:another1) { create(:game, channel: another, secret: 'garlic', status: :finished, created_at: Time.now - 2.days) }
-        let!(:recent) { create(:game, channel: channel, secret: 'parrot', status: :finished, created_at: Time.now - 3.days) }
-        let!(:another2) { create(:game, channel: another, secret: 'parrot', status: :finished, created_at: Time.now - 5.days) }
+        let!(:old) { create(:game, channel: realm.channel, secret: 'garlic', status: :finished, created_at: Time.now - 8.days) }
+        let!(:another1) { create(:game, channel: another.channel, secret: 'garlic', status: :finished, created_at: Time.now - 2.days) }
+        let!(:recent) { create(:game, channel: realm.channel, secret: 'parrot', status: :finished, created_at: Time.now - 3.days) }
+        let!(:another2) { create(:game, channel: another.channel, secret: 'parrot', status: :finished, created_at: Time.now - 5.days) }
 
         it 'verify recent secrets are not reused in same channel' do
           game = GameEngineService.create_by_options(realm, options)

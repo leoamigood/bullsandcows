@@ -2,7 +2,7 @@ class BaseApiController < ApplicationController
   before_action :set_default_response_format
 
   def realm
-    Realm::Web.new(session.id)
+    Realm::Web.new(session)
   end
 
   def set_session_realm

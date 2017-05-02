@@ -11,7 +11,7 @@ class GameService
 
       Game.create(
           channel: realm.channel,
-          user_id: realm.user_id,
+          user_id: realm.user.ext_id,
           secret: secret.noun,
           level: secret.level,
           dictionary: secret.dictionary,
