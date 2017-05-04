@@ -1,6 +1,8 @@
 class GamesController < BaseApiController
   include Rails::Pagination
 
+  before_action :set_session_realm
+
   def create
     if params[:secret].present?
       game = GameEngineService.create_by_word(realm, validate_create[:secret])

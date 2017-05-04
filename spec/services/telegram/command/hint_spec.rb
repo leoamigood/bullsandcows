@@ -1,10 +1,8 @@
 require 'rails_helper'
 
 describe Telegram::Action::Hint, type: :service do
-  let!(:channel) { Random.rand(@MAX_INT_VALUE) }
-  let!(:user) { build :user, id: Random.rand(@MAX_INT_VALUE), name: '@Amig0' }
-
-  let!(:realm) { build :realm, :telegram, channel: channel, user_id: user.id }
+  let!(:user) { create :user, :telegram, :john_smith }
+  let!(:realm) { build :telegram_realm, user: user }
 
   context 'given created game' do
     let!(:game) { create(:game, :realm, secret: 'secret', realm: realm) }
@@ -16,17 +14,17 @@ describe Telegram::Action::Hint, type: :service do
 
     let!(:letter) { 'r' }
     it 'verifies hint by letter execution chain' do
-      Telegram::Action::Hint.execute(channel, letter: 'r', strategy: :by_letter)
+      Telegram::Action::Hint.execute(realm.channel, letter: 'r', strategy: :by_letter)
 
-      expect(GameService).to have_received(:find_by_channel!).with(channel)
+      expect(GameService).to have_received(:find_by_channel!).with(realm.channel)
       expect(TelegramMessenger).to have_received(:hint).with(letter)
     end
 
     let!(:number) { 4 }
     it 'verifies hint by number execution chain' do
-      Telegram::Action::Hint.execute(channel, number: number, strategy: :by_number)
+      Telegram::Action::Hint.execute(realm.channel, number: number, strategy: :by_number)
 
-      expect(GameService).to have_received(:find_by_channel!).with(channel)
+      expect(GameService).to have_received(:find_by_channel!).with(realm.channel)
       expect(TelegramMessenger).to have_received(:hint).with(letter)
     end
   end

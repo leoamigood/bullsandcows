@@ -11,7 +11,7 @@ class GameService
 
       Game.create(
           channel: realm.channel,
-          user_id: realm.user_id,
+          user_id: realm.user.ext_id,
           secret: secret.noun,
           level: secret.level,
           dictionary: secret.dictionary,
@@ -46,8 +46,8 @@ class GameService
     def guess(game, user, word, suggestion = false)
       guess = Guess.find_or_create_by(game_id: game.id, word: word) do |guess|
         guess.attempts = 0
-        guess.user_id = user.id
-        guess.username = user.name
+        guess.user_id = user.ext_id
+        guess.username = user.username
         guess.suggestion = suggestion
 
         guess.update(match(word, game.secret))
@@ -98,9 +98,15 @@ class GameService
       score.bonus = ScoreService.bonus(game)
       score.penalty = ScoreService.penalty(game)
       score.points = ScoreService.points(game)
+      score.total = score.points + ScoreService.total(game)
       score.save!
 
       score
+    end
+
+    def update_winner(game)
+      game.winner_id = game.guesses.last.user_id
+      game.save!
     end
 
     def validate_guess!(game, guess)

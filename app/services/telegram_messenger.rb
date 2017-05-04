@@ -3,7 +3,7 @@ class TelegramMessenger
   class << self
     def send_message(channel, text, markup = nil)
       Telegram::Bot::Client.run(TELEGRAM_TOKEN) do |bot|
-        bot.api.send_message(chat_id: channel, text: text, parse_mode: 'Markdown', reply_markup: markup)
+        bot.api.send_message(chat_id: channel, text: text, reply_markup: markup)
       end
     end
 
@@ -78,9 +78,10 @@ class TelegramMessenger
       text = "Congratulations! You guessed it with *#{game.guesses.length}* tries.\n"
 
       if game.score.present?
-        text += "You earned *#{game.score.points}* points."
+        text += "You earned *#{game.score.worth}* points."
         text += " Bonus: *#{game.score.bonus}* points." if game.score.bonus > 0
-        text += " Penalty: *#{game.score.penalty}* points." if game.score.penalty > 0
+        text += " Penalty: *-#{game.score.penalty}* points." if game.score.penalty > 0
+        text += "\nTotal score: *#{game.score.total}* points."
       end
 
       text
@@ -152,14 +153,10 @@ class TelegramMessenger
       "You give up? Here is the secret word *#{game.secret}*."
     end
 
-    def game_was_finished(game)
-      'Game has already finished. Please start a new game using _/create_ command.'
-    end
-
     def top_scores(scores)
       scores.each.with_index.reduce("Top scores: \n") { |text, indexed_score|
         score, i = indexed_score.first, indexed_score.last
-        text + "#{i + 1}: User ID: #{score.first}, Score: #{score.last}\n"
+        text + "#{i + 1}: <b>#{score.slice(0..1).join(' ')}</b>, User: <i>#{score.slice(2)}</i>, Score: <b>#{score.slice(4)}</b>\n"
       }
     end
 

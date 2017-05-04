@@ -1,6 +1,11 @@
 require 'rails_helper'
 
 describe GamesController, :type => :request do
+  let(:session) { OpenStruct.new(id: Random.rand(@MAX_INT_VALUE)) }
+
+  before do
+    allow_any_instance_of(BaseApiController).to receive(:realm).and_return(Realm::Web.new(session))
+  end
 
   it 'creates game with the secret word' do
     expect {
@@ -145,8 +150,15 @@ describe GamesController, :type => :request do
   end
 
   context 'with game in progress with few guesses placed' do
+    let!(:user) { create :user, :web, :john_smith }
+    let!(:realm) { build :web_realm, channel: 'session-id' }
+
     let!(:dictionary) { create :dictionary, lang: 'EN'}
-    let!(:game) { create :game, :running, :with_tries, :with_hints, secret: 'hostel', source: 'web', dictionary: dictionary }
+    let!(:game) { create :game, :running, :with_tries, :with_hints, secret: 'hostel', channel: realm.channel, source: 'web', dictionary: dictionary }
+
+    before do
+      allow_any_instance_of(BaseApiController).to receive(:realm).and_return(realm)
+    end
 
     it 'gets game details' do
       expect {

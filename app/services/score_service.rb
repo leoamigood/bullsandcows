@@ -5,12 +5,16 @@ class ScoreService
       Score.new(worth: worth(secret, complexity))
     end
 
+    def total(game)
+      Game.joins(:score).where(channel: game.channel, winner_id: game.winner_id).sum(:points)
+    end
+
     def points(game)
       [game.score.worth + bonus(game) - penalty(game), 0].max
     end
 
     def bonus(game)
-      user_guesses, others = game.guesses.partition { |g| g.user_id == game.user_id }
+      user_guesses, others = game.guesses.partition { |g| g.user_id == game.winner_id }
       return 0 if others.empty?
 
       ratio = (others.count.to_f / others.group_by(&:user_id).count - user_guesses.count) / game.guesses.count

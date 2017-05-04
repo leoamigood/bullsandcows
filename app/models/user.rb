@@ -1,9 +1,6 @@
-class User
-
-  rattr_initialize :id, :name
+class User < ActiveRecord::Base
 
   def ==(other)
-    @id == other.id
+    id == other.id || ext_id = other.ext_id && source == other.source
   end
-
 end

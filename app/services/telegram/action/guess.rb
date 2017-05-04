@@ -5,9 +5,9 @@ module Telegram
 
     class Guess
       class << self
-        def execute(channel, message, word)
+        def execute(channel, user, word)
           game = GameService.find_by_channel!(channel)
-          guess = GameEngineService.guess(game, User.new(message.from.id, message.from.username), word)
+          guess = GameEngineService.guess(game, user, word)
 
           EventBus.announce(Events::GAME_FINISHED, game: game) if game.finished?
 
@@ -21,8 +21,8 @@ module Telegram
     aspector(Guess, class_methods: true) do
       target do
         def permit(*args, &block)
-          channel, message = *args
-          Telegram::Validator.validate!(Command::GUESS, channel, message)
+          channel = *args
+          Telegram::Validator.validate!(Command::GUESS, channel)
         end
       end
 

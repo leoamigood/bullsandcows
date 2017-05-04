@@ -1,18 +1,17 @@
 module Realm
-
   class Base
-    vattr_initialize :channel, :user_id, :source
+    vattr_initialize :channel, :user, :source
   end
 
   class Web < Base
-    def initialize(session_id)
-      super(session_id, session_id, :web)
+    def initialize(session)
+      super(session.id, UserService.create_from_web(session), :web)
     end
   end
 
   class Telegram < Base
-    def initialize(channel, user_id)
-      super(channel, user_id, :telegram)
+    def initialize(channel, user)
+      super(channel, user, :telegram)
     end
   end
 

@@ -1,10 +1,8 @@
 require 'rails_helper'
 
 describe GameService, type: :service do
-  let!(:channel) { Random.rand(@MAX_INT_VALUE) }
-  let!(:user) { build :user, id: Random.rand(@MAX_INT_VALUE), name: '@Amig0' }
-
-  let!(:realm) { build :realm, :web, channel: channel, user_id: user.id }
+  let!(:user) { create :user, :telegram, :john_smith }
+  let!(:realm) { build :web_realm }
 
   context 'with game not started' do
     context 'with a secret word' do
@@ -21,7 +19,7 @@ describe GameService, type: :service do
     end
 
     it 'checks that game is not in progress' do
-      expect(GameService.in_progress?(channel)).to eq(false)
+      expect(GameService.in_progress?(realm.channel)).to eq(false)
     end
   end
 
@@ -34,8 +32,9 @@ describe GameService, type: :service do
       }.to raise_error(Errors::GameCreateException)
     end
 
+    let!(:another) { build :web_realm }
     it 'creates new game in different channel' do
-      recreated = GameService.create(Realm::Web.new('another-channel'), Noun.new(noun: 'canal'))
+      recreated = GameService.create(another, Noun.new(noun: 'canal'))
 
       expect(recreated).not_to be(nil)
       expect(recreated.secret).to eq('canal')
@@ -45,7 +44,7 @@ describe GameService, type: :service do
 
     it 'finds game by channel' do
       expect {
-        found = GameService.find_by_channel!(channel)
+        found = GameService.find_by_channel!(realm.channel)
 
         expect(found).to be
         expect(found).to eq(game)
@@ -141,7 +140,7 @@ describe GameService, type: :service do
     end
 
     it 'verify that game is in progress' do
-      expect(GameService.in_progress?(channel)).to eq(true)
+      expect(GameService.in_progress?(realm.channel)).to eq(true)
     end
   end
 
@@ -149,8 +148,8 @@ describe GameService, type: :service do
     let!(:score) { create(:score, worth: 179) }
     let!(:game) { create(:game, :realm, :with_tries, secret: 'hostel', score: score, status: :finished, realm: realm)}
 
-    it 'verify that game is NOT in progress' do
-      expect(GameService.in_progress?(channel)).to eq(false)
+    it 'checks that game is in progress' do
+      expect(GameService.in_progress?(realm.channel)).to eq(false)
     end
 
     it 'verify that game score gets updated' do
@@ -158,6 +157,13 @@ describe GameService, type: :service do
         GameService.score(game)
       }.to change{ game.reload.score.points }
     end
+
+    it 'verify that total score gets updated' do
+      expect{
+        GameService.score(game)
+      }.to change{ game.reload.score.total }
+    end
+
   end
 
   context 'with a secret word given' do

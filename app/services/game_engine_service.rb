@@ -21,11 +21,7 @@ class GameEngineService
       GameService.validate_guess!(game, input)
 
       word = GameService.sanitize(input)
-      guess = GameService.guess(game, user, word)
-
-      GameService.score(game) if game.finished?
-
-      guess
+      GameService.guess(game, user, word)
     end
 
     def hint(game, letter = nil)
@@ -67,12 +63,13 @@ class GameEngineService
     end
 
     def scores(channel, period = 1.week.ago..Time.now, limit = 8)
-      Game.joins(:score).
-          where(channel: channel, :created_at => period).
-          group(:winner_id).
-          order('score DESC').
-          pluck(:winner_id, 'SUM(points) as score').
-          first(limit)
+      Game.joins(:score).joins(:winner)
+          .where(channel: channel, status: :finished, :created_at => period)
+          .where.not(winner_id: nil)
+          .group(:first_name, :last_name, :username, :winner_id)
+          .order('score DESC')
+          .pluck(:first_name, :last_name, :username, :winner_id, 'SUM(points) as score')
+          .first(limit)
     end
 
     def settings(channel, attributes)

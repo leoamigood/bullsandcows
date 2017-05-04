@@ -8,7 +8,7 @@ describe Noun, type: :model do
     let!(:disabled) { create :dictionary, :english, enabled: false }
 
     it 'get nouns in active dictionary' do
-      expect(Noun.active).to eq(english.nouns + russian.nouns)
+      expect(Noun.active).to match_array(russian.nouns + english.nouns)
     end
 
     it 'get nouns in preferred language' do
