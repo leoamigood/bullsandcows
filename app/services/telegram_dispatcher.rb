@@ -42,13 +42,9 @@ class TelegramDispatcher
       command = callback_query.data.downcase.to_s
       response = execute(command, channel, callback_query)
 
+      TelegramMessenger.answerCallbackQuery(callback_query.id, response)
       queue = Telegram::CommandQueue::Queue.new(channel)
-      if queue.present?
-        TelegramMessenger.answerCallbackQuery(callback_query.id, response)
-        queue.execute if response.present?
-      else
-        response
-      end
+      queue.present? ? queue.execute : response
     end
 
     def execute(command, channel, message)

@@ -103,7 +103,7 @@ describe TelegramDispatcher, type: :service do
         it 'creates setting with selected game level and response with inline message' do
           expect {
             expect(TelegramDispatcher.handle_callback_query(callback)).to eq('Game level was set to easy.')
-            expect(TelegramMessenger).not_to have_received(:answerCallbackQuery)
+            expect(TelegramMessenger).to have_received(:answerCallbackQuery)
           }.to change(Setting, :count).by(1)
         end
       end
@@ -150,7 +150,7 @@ describe TelegramDispatcher, type: :service do
         it 'creates setting with selected game language and response with inline message' do
           expect {
             expect(TelegramDispatcher.handle_callback_query(callback)).to eq('Language was set to Русский.')
-            expect(TelegramMessenger).not_to have_received(:answerCallbackQuery)
+            expect(TelegramMessenger).to have_received(:answerCallbackQuery)
           }.to change(Setting, :count).by(1)
         end
       end
@@ -748,7 +748,7 @@ describe TelegramDispatcher, type: :service do
         it 'creates setting with selected game level and response with inline message' do
           expect {
             expect(TelegramDispatcher.handle_callback_query(callback)).to eq('Game level was set to easy.')
-            expect(TelegramMessenger).not_to have_received(:answerCallbackQuery)
+            expect(TelegramMessenger).to have_received(:answerCallbackQuery)
           }.to change(Setting, :count).by(1)
         end
       end
@@ -781,7 +781,7 @@ describe TelegramDispatcher, type: :service do
         it 'creates setting with selected game language and response with inline message' do
           expect {
             expect(TelegramDispatcher.handle_callback_query(callback)).to eq('Language was set to Русский.')
-            expect(TelegramMessenger).not_to have_received(:answerCallbackQuery)
+            expect(TelegramMessenger).to have_received(:answerCallbackQuery)
           }.to change(Setting, :count).by(1)
         end
       end
