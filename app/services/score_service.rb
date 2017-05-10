@@ -1,12 +1,15 @@
 class ScoreService
 
   class << self
-    def build(secret, complexity = 'easy')
-      Score.new(worth: worth(secret, complexity))
+    def create(game)
+      Score.create(game_id: game.id, channel: game.channel, worth: worth(game.secret, game.complexity))
     end
 
     def total(game)
-      Game.joins(:score).where(channel: game.channel, winner_id: game.winner_id).sum(:points)
+      Score
+          .where('created_at < ?', game.score.created_at)
+          .where(channel: game.channel, winner_id: game.winner_id)
+          .sum(:points) + game.score.points
     end
 
     def points(game)
@@ -21,13 +24,13 @@ class ScoreService
       ([ratio, 0].max * game.score.worth).round
     end
 
-    def penalty(game)
-      ratio = game.hints.count.to_f / game.secret.length
-      (ratio * game.score.worth).round
+    def penalty(game, severity = 2.0)
+      ratio = game.hints.count.to_f / game.secret.length * severity
+      [ratio * game.score.worth, game.score.worth + bonus(game)].min.round
     end
 
-    def worth(secret, complexity)
-      points = Math.log(secret.noun.length * Score.scales[complexity.to_sym]) * 100
+    def worth(secret, complexity, scale = 100.0)
+      (Math.log(secret.length * Score.complexity_ratios[complexity.to_sym]) * scale).to_i
     end
   end
 

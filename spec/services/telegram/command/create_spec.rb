@@ -28,7 +28,7 @@ describe Telegram::Action::Create, type: :service do
 
     context 'with a dictionary' do
       let!(:dictionary) { create :dictionary, :russian }
-      let!(:hard) { create :dictionary_level, :hard_ru }
+      let!(:hard) { create :dictionary_level, :hard_ru, dictionary_id: dictionary.id }
 
       it 'creates game with specifies word length' do
         expect_any_instance_of(Telegram::CommandQueue::Queue).to receive(:pop).with(no_args)

@@ -7,70 +7,118 @@ describe ScoreService, type: :service do
 
   let!(:realm) { build :telegram_realm, user: user }
 
-  it 'verify score for the secret word' do
-    expect{
-      expect(ScoreService.build(Noun.new(noun: 'hostel'))).to have_attributes(worth: 179)
-    }.not_to change(Score, :count)
+  it 'verify score worth for words with different lengths' do
+    expect(ScoreService.worth('map', 'easy')).to eq(109)
+    expect(ScoreService.worth('cart', 'easy')).to eq(138)
+    expect(ScoreService.worth('magic', 'easy')).to eq(160)
+    expect(ScoreService.worth('hostel', 'easy')).to eq(179)
+    expect(ScoreService.worth('teacher', 'easy')).to eq(194)
+    expect(ScoreService.worth('marathon', 'easy')).to eq(207)
+    expect(ScoreService.worth('invention', 'easy')).to eq(219)
+    expect(ScoreService.worth('cappuccino', 'easy')).to eq(230)
   end
 
-  it 'verify score for the secret word with different lengths' do
-    expect(ScoreService.build(Noun.new(noun: 'map'))).to have_attributes(worth: 109)
-    expect(ScoreService.build(Noun.new(noun: 'cart'))).to have_attributes(worth: 138)
-    expect(ScoreService.build(Noun.new(noun: 'magic'))).to have_attributes(worth: 160)
-    expect(ScoreService.build(Noun.new(noun: 'hostel'))).to have_attributes(worth: 179)
-    expect(ScoreService.build(Noun.new(noun: 'teacher'))).to have_attributes(worth: 194)
-    expect(ScoreService.build(Noun.new(noun: 'marathon'))).to have_attributes(worth: 207)
-    expect(ScoreService.build(Noun.new(noun: 'invention'))).to have_attributes(worth: 219)
-    expect(ScoreService.build(Noun.new(noun: 'cappuccino'))).to have_attributes(worth: 230)
-  end
-
-  it 'verify score for the secret word with different complexities' do
-    expect(ScoreService.build(Noun.new(noun: 'hostel'), 'easy')).to have_attributes(worth: 179)
-    expect(ScoreService.build(Noun.new(noun: 'hostel'), 'medium')).to have_attributes(worth: 193)
-    expect(ScoreService.build(Noun.new(noun: 'hostel'), 'hard')).to have_attributes(worth: 205)
+  it 'verify score worth for words with different complexities' do
+    expect(ScoreService.worth('hostel', 'easy')).to eq(179)
+    expect(ScoreService.worth('hostel', 'medium')).to eq(193)
+    expect(ScoreService.worth('hostel', 'hard')).to eq(205)
   end
 
   context 'when game with multiple guesses by one user only with one hint' do
-    let!(:score) { create(:score, worth: 179) }
-    let!(:game) { create(:game, secret: 'hostel', score: score, winner_id: realm.user.ext_id, status: :finished) }
+    let!(:score) { create :score, worth: 179 }
+    let!(:game) { create :game, secret: 'hostel', score: score, winner_id: realm.user.ext_id, status: :finished }
 
-    let!(:hint) { create(:hint, hint: 'h', game: game) }
+    let!(:hint) { create :hint, hint: 'h', game: game }
 
-    let!(:guess1) { create(:guess, word: 'castle', game: game, user_id: user.ext_id) }
-    let!(:guess2) { create(:guess, word: 'poster', game: game, user_id: user.ext_id) }
-    let!(:guess3) { create(:guess, word: 'master', game: game, user_id: user.ext_id) }
-    let!(:guess4) { create(:guess, word: 'harbor', game: game, user_id: user.ext_id) }
-    let!(:guess5) { create(:guess, word: 'hostel', game: game, user_id: user.ext_id) }
+    let!(:guess1) { create :guess, word: 'castle', game: game, user_id: user.ext_id }
+    let!(:guess2) { create :guess, word: 'poster', game: game, user_id: user.ext_id }
+    let!(:guess3) { create :guess, word: 'master', game: game, user_id: user.ext_id }
+    let!(:guess4) { create :guess, word: 'harbor', game: game, user_id: user.ext_id }
+    let!(:guess5) { create :guess, word: 'hostel', game: game, user_id: user.ext_id }
 
     it 'calculate bonus points' do
       expect(ScoreService.bonus(game)).to eq(0)
     end
 
     it 'calculate cheat charge' do
-      expect(ScoreService.penalty(game)).to eq(30)
+      expect(ScoreService.penalty(game)).to eq(60)
     end
   end
 
-  context 'when game with multiple users guesses and one hint' do
+  context 'when game with multiple users guesses' do
     let!(:score) { create(:score, worth: 179) }
     let!(:game) { create(:game, secret: 'hostel', score: score, winner_id: realm.user.ext_id, status: :finished) }
 
-    let!(:hint) { create(:hint, hint: 'h', game: game) }
-
-    let!(:guess1) { create(:guess, word: 'castle', game: game, user_id: user.ext_id) }
-    let!(:guess2) { create(:guess, word: 'poster', game: game, user_id: other.ext_id) }
-    let!(:guess3) { create(:guess, word: 'master', game: game, user_id: other.ext_id) }
-    let!(:guess4) { create(:guess, word: 'harbor', game: game, user_id: other.ext_id) }
-    let!(:guess5) { create(:guess, word: 'huddle', game: game, user_id: third.ext_id) }
-    let!(:guess6) { create(:guess, word: 'portal', game: game, user_id: other.ext_id) }
-    let!(:guess7) { create(:guess, word: 'hostel', game: game, user_id: user.ext_id) }
+    let!(:guess1) { create :guess, word: 'castle', game: game, user_id: user.ext_id }
+    let!(:guess2) { create :guess, word: 'poster', game: game, user_id: other.ext_id }
+    let!(:guess3) { create :guess, word: 'master', game: game, user_id: other.ext_id }
+    let!(:guess4) { create :guess, word: 'harbor', game: game, user_id: other.ext_id }
+    let!(:guess5) { create :guess, word: 'huddle', game: game, user_id: third.ext_id }
+    let!(:guess6) { create :guess, word: 'portal', game: game, user_id: other.ext_id }
+    let!(:guess7) { create :guess, word: 'hostel', game: game, user_id: user.ext_id }
 
     it 'calculate bonus points' do
       expect(ScoreService.bonus(game)).to eq(13)
     end
 
-    it 'calculate cheat charge' do
-      expect(ScoreService.penalty(game)).to eq(30)
+    it 'calculate penalty points' do
+      expect(ScoreService.penalty(game)).to eq(0)
+    end
+
+    it 'calculate score points' do
+      expect(ScoreService.points(game)).to eq(179 + 13)
+    end
+
+    context 'with one hint' do
+      let!(:hint) { create(:hint, hint: 'h', game: game) }
+
+      it 'calculate bonus points' do
+        expect(ScoreService.bonus(game)).to eq(13)
+      end
+
+      it 'calculate penalty points' do
+        expect(ScoreService.penalty(game)).to eq(60)
+      end
+
+      it 'calculate score points' do
+        expect(ScoreService.points(game)).to eq(179 + 13 - 60)
+      end
+    end
+
+    context 'with hints more than a half of the word letters' do
+      let!(:hint1) { create(:hint, hint: 'h', game: game) }
+      let!(:hint2) { create(:hint, hint: 'o', game: game) }
+      let!(:hint3) { create(:hint, hint: 's', game: game) }
+      let!(:hint4) { create(:hint, hint: 't', game: game) }
+
+      it 'calculate bonus points' do
+        expect(ScoreService.bonus(game)).to eq(13)
+      end
+
+      it 'calculate penalty points' do
+        expect(ScoreService.penalty(game)).to eq(179 + 13)
+      end
+
+      it 'calculate score points' do
+        expect(ScoreService.points(game)).to eq(179 + 13 - 179 - 13)
+      end
+    end
+  end
+
+  context 'when multiple scores in same channel by the user' do
+    let!(:game1) { create :game, :realm, realm: realm, winner_id: user.ext_id, created_at: 5.days.ago }
+    let!(:score1) { create :score, :winner_by_realm, realm: realm, game: game1, worth: 179, points: 162, created_at: 5.days.ago }
+
+    let!(:game2) { create :game, :realm, realm: realm, winner_id: user.ext_id, created_at: 3.days.ago }
+    let!(:score2) { create :score, :winner_by_realm, realm: realm, game: game2, worth: 229, points: 249, created_at: 3.days.ago }
+
+    let!(:game3) { create :game, :realm, realm: realm, winner_id: user.ext_id, created_at: 1.hour.ago }
+    let!(:score3) { create :score, :winner_by_realm, realm: realm, game: game3, worth: 340, points: 381, created_at: 1.hour.ago }
+
+    it 'calculates total points for a latest game' do
+      expect(ScoreService.total(game1)).to eq(162)
+      expect(ScoreService.total(game2)).to eq(162 + 249)
+      expect(ScoreService.total(game3)).to eq(162 + 249 + 381)
     end
   end
 

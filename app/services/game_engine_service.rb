@@ -13,8 +13,7 @@ class GameEngineService
       secret = secret_by_options(realm, options)
       raise Errors::GameCreateException.new('Unable to create game. Please try different parameters') unless secret.present?
 
-      score = ScoreService.build(secret, options[:complexity])
-      GameService.create(realm, secret, score)
+      GameService.create(realm, secret)
     end
 
     def guess(game, user, input)
@@ -63,13 +62,24 @@ class GameEngineService
     end
 
     def scores(channel, period = 1.week.ago..Time.now, limit = 8)
-      Game.joins(:score).joins(:winner)
-          .where(channel: channel, status: :finished, :created_at => period)
+      scores = Score
+          .where(channel: channel, :created_at => period)
           .where.not(winner_id: nil)
-          .group(:first_name, :last_name, :username, :winner_id)
-          .order('score DESC')
-          .pluck(:first_name, :last_name, :username, :winner_id, 'SUM(points) as score')
-          .first(limit)
+          .group(:winner_id)
+          .maximum(:total)
+
+      scores.map { |winner_id, total|
+        user = User.find_by_ext_id(winner_id)
+        {
+            first_name: user.first_name,
+            last_name: user.last_name,
+            username: user.username,
+            total_score: total
+        } if user.present?
+      }.compact.max_by(limit) { |value|
+        value[:total_score]
+      }
+
     end
 
     def settings(channel, attributes)

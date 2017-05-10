@@ -7,7 +7,6 @@ describe GameService, type: :service do
   context 'with game not started' do
     context 'with a secret word' do
       let!(:secret) { create(:noun, noun: 'secret')}
-
       it 'creates a game' do
         game = GameService.create(realm, secret)
 
@@ -32,9 +31,10 @@ describe GameService, type: :service do
       }.to raise_error(Errors::GameCreateException)
     end
 
-    let!(:another) { build :web_realm }
+    let!(:other_user) { build :web_realm }
+    let!(:other_secret) { create :noun, noun: 'canal' }
     it 'creates new game in different channel' do
-      recreated = GameService.create(another, Noun.new(noun: 'canal'))
+      recreated = GameService.create(other_user, other_secret)
 
       expect(recreated).not_to be(nil)
       expect(recreated.secret).to eq('canal')

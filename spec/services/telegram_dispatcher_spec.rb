@@ -52,7 +52,7 @@ describe TelegramDispatcher, type: :service do
     end
 
     context 'when /create <number> command received' do
-      let!(:medium) { create :dictionary_level, :medium_en }
+      let!(:medium) { create :dictionary_level, :medium_en, dictionary_id: english.id }
       let!(:settings) { create :setting, channel: realm.channel, language: 'EN', dictionary: english, complexity: 'medium'}
 
       let!(:message) { build :message, :with_realm, text: '/create 6', realm: realm }
@@ -819,12 +819,12 @@ describe TelegramDispatcher, type: :service do
 
     context 'when /score command received' do
       let!(:message) { build :message, :with_realm, text: '/score', realm: realm }
-      let!(:score) { create(:score, game: game, worth: 179, bonus: 25, penalty: 0, points: 204) }
+      let!(:score) { create(:score, worth: 179, bonus: 25, penalty: 0, points: 204, total: 807, winner_id: user.ext_id, channel: realm.channel) }
 
       it 'replies with top scores' do
         expect {
           expect(TelegramDispatcher.handle(message)).to satisfy { |response|
-            response.first.include?('1: <b>John Smith</b>, User: <i>john_smith</i>, Score: <b>204</b>') &&
+            response.first.include?('1: <b>John Smith</b>, User: <i>john_smith</i>, Score: <b>807</b>') &&
                 response.last == 'HTML'
           }
         }.not_to change{ game.reload.score }

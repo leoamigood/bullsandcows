@@ -83,6 +83,8 @@ ActiveRecord::Schema.define(version: 20170419133254) do
 
   create_table "scores", force: :cascade do |t|
     t.integer  "game_id"
+    t.integer  "channel"
+    t.integer  "winner_id"
     t.integer  "worth"
     t.integer  "bonus",      default: 0
     t.integer  "penalty",    default: 0

@@ -155,31 +155,23 @@ describe GameEngineService, type: :service do
 
   context 'given scores for multiple games' do
     let!(:winner1) { create :user, :telegram, :john_smith, ext_id: 873784623 }
-    let!(:winner2) { create :user, :telegram, :chris_pooh, ext_id: 223937424 }
-    let!(:winner3) { create :user, :telegram, :josef_gold, ext_id: 527567212 }
+    let!(:winner2) { create :user, :telegram, :chris_pooh, ext_id: 223937422 }
+    let!(:winner3) { create :user, :telegram, :josef_gold, ext_id: 527567221 }
 
-    let!(:game1) { create(:game, :realm, realm: realm, winner_id: winner1.ext_id, status: :finished, created_at: 5.hours.ago) }
-    let!(:score1) { create(:score, points: 179, game: game1) }
-
-    let!(:game2) { create(:game, :realm, realm: realm, winner_id: winner2.ext_id, status: :finished, created_at: 1.day.ago) }
-    let!(:score2) { create(:score, points: 138, game: game2) }
-
-    let!(:game3) { create(:game, :realm, realm: realm, winner_id: winner1.ext_id, status: :finished, created_at: 2.days.ago) }
-    let!(:score3) { create(:score, points: 205, game: game3) }
-
-    let!(:game4) { create(:game, :realm, realm: realm, winner_id: winner3.ext_id, status: :finished, created_at: 20.hours.ago) }
-    let!(:score4) { create(:score, points: 152, game: game4) }
-
-    let!(:game5) { create(:game, :realm, realm: realm, winner_id: winner2.ext_id, status: :finished, created_at: 4.days.ago) }
-    let!(:score5) { create(:score, points: 108, game: game5) }
+    let!(:score1) { create(:score, channel: realm.channel, winner: winner3, points: 179, total: 179, created_at: 5.hours.ago) }
+    let!(:score2) { create(:score, channel: realm.channel, winner: winner2, points: 138, total: 138, created_at: 1.day.ago) }
+    let!(:score3) { create(:score, channel: realm.channel, winner: winner3, points: 205, total: 179 + 205, created_at: 2.days.ago) }
+    let!(:score4) { create(:score, channel: realm.channel, winner: winner1, points: 152, total: 152, created_at: 20.hours.ago) }
+    let!(:score5) { create(:score, channel: realm.channel, winner: winner2, points: 108, total: 138 + 108, created_at: 4.days.ago) }
+    let!(:unknown) { create(:score, channel: realm.channel, winner_id: 0, points: 999, total: 999, created_at: 1.hour.ago) }
 
     it 'calculate top scores for last week' do
       expect(GameEngineService.scores(realm.channel).count).to eq(3)
       expect(GameEngineService.scores(realm.channel))
           .to include(
-                  [winner1.first_name, winner1.last_name, winner1.username, winner1.ext_id, 179 + 205],
-                  [winner2.first_name, winner2.last_name, winner2.username, winner2.ext_id, 138 + 108],
-                  [winner3.first_name, winner3.last_name, winner3.username, winner3.ext_id, 152]
+                  { first_name: winner3.first_name, last_name: winner3.last_name, username: winner3.username, total_score: 179 + 205 },
+                  { first_name: winner2.first_name, last_name: winner2.last_name, username: winner2.username, total_score: 138 + 108 },
+                  { first_name: winner1.first_name, last_name: winner1.last_name, username: winner1.username, total_score: 152 }
               )
     end
 
@@ -188,9 +180,9 @@ describe GameEngineService, type: :service do
       expect(GameEngineService.scores(realm.channel, last_3_days).count).to eq(3)
       expect(GameEngineService.scores(realm.channel, last_3_days)).
           to include(
-                 [winner1.first_name, winner1.last_name, winner1.username, winner1.ext_id, 179 + 205],
-                 [winner3.first_name, winner3.last_name, winner3.username, winner3.ext_id, 152],
-                 [winner2.first_name, winner2.last_name, winner2.username, winner2.ext_id, 138]
+                 { first_name: winner3.first_name, last_name: winner3.last_name, username: winner3.username, total_score: 179 + 205 },
+                 { first_name: winner1.first_name, last_name: winner1.last_name, username: winner1.username, total_score: 152 },
+                 { first_name: winner2.first_name, last_name: winner2.last_name, username: winner2.username, total_score: 138 }
              )
     end
 
@@ -198,8 +190,8 @@ describe GameEngineService, type: :service do
       expect(GameEngineService.scores(realm.channel, last_3_days, 2).count).to eq(2)
       expect(GameEngineService.scores(realm.channel, last_3_days, 2)).
           to include(
-                 [winner1.first_name, winner1.last_name, winner1.username, winner1.ext_id, 179 + 205],
-                 [winner3.first_name, winner3.last_name, winner3.username, winner3.ext_id, 152]
+                 { first_name: winner3.first_name, last_name: winner3.last_name, username: winner3.username, total_score: 179 + 205 },
+                 { first_name: winner1.first_name, last_name: winner1.last_name, username: winner1.username, total_score: 152 }
              )
       expect(GameEngineService.scores(realm.channel, last_3_days, 2)).
           not_to include([winner2.first_name, winner2.last_name, winner2.username, winner2.ext_id, 138])

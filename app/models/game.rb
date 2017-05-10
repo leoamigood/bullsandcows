@@ -33,4 +33,13 @@ class Game < ActiveRecord::Base
     self.created? || self.running?
   end
 
+  def complexity
+    return :easy unless level.present?
+
+    DictionaryLevel
+        .where(dictionary_id: dictionary_id)
+        .where("#{level} >= min_level AND #{level} <= max_level")
+        .take.try(:complexity)
+  end
+
 end

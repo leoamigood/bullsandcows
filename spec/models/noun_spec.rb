@@ -36,7 +36,7 @@ describe Noun, type: :model do
     end
 
     context 'with russian and english dictionaries complexity levels' do
-      let!(:hard_ru) { create :dictionary_level, :hard_ru, dictionary_id: russian.id }
+      let!(:medium_ru) { create :dictionary_level, :medium_ru, dictionary_id: russian.id }
       let!(:hard_en) { create :dictionary_level, :hard_en, dictionary_id: english.id }
 
       it 'get nouns with levels according specified language and complexity' do

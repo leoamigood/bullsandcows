@@ -1,7 +1,7 @@
 class GameService
 
   class << self
-    def create(realm, secret, score = nil)
+    def create(realm, secret)
       if (in_progress?(realm.channel))
         raise Errors::GameCreateException.new(
             'Cannot start new game. Finish or stop current game using _/stop_ command.',
@@ -9,15 +9,18 @@ class GameService
         )
       end
 
-      Game.create(
+      game = Game.create(
           channel: realm.channel,
           user_id: realm.user.ext_id,
           secret: secret.noun,
           level: secret.level,
           dictionary: secret.dictionary,
-          source: realm.source,
-          score: score
+          source: realm.source
       )
+
+      ScoreService.create(game)
+
+      game
     end
 
     def find_by_id!(game_id)
@@ -95,10 +98,11 @@ class GameService
       return unless game.score.present?
 
       score = game.score
+      score.winner_id = game.winner_id
       score.bonus = ScoreService.bonus(game)
       score.penalty = ScoreService.penalty(game)
       score.points = ScoreService.points(game)
-      score.total = score.points + ScoreService.total(game)
+      score.total = ScoreService.total(game)
       score.save!
 
       score

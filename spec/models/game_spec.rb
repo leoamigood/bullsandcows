@@ -15,4 +15,21 @@ describe Game, type: :model do
       expect(Game.recent(channel1, Time.now - 7.days)).not_to include(game2, game4)
     end
   end
+
+  context 'given games with the secret in dictionary with levels' do
+    let!(:english) { create :dictionary, :english, enabled: true }
+    let!(:russian) { create :dictionary, :russian, enabled: true }
+
+    let!(:medium_ru) { create :dictionary_level, :medium_ru, dictionary_id: russian.id }
+    let!(:hard_en) { create :dictionary_level, :hard_en, dictionary_id: english.id }
+
+    let!(:game_medium) { create :game, dictionary: russian, level: medium_ru.max_level }
+    let!(:game_hard) { create :game, dictionary: english, level: hard_en.min_level }
+
+    it 'gets correct game complexity' do
+      expect(game_hard.complexity).to eq('hard')
+      expect(game_medium.complexity).to eq('medium')
+    end
+  end
+
 end
