@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20170419133254) do
+ActiveRecord::Schema.define(version: 20170513212844) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -59,6 +59,7 @@ ActiveRecord::Schema.define(version: 20170419133254) do
     t.string   "username"
     t.boolean  "suggestion", default: false
     t.integer  "user_id"
+    t.boolean  "common"
   end
 
   create_table "hints", force: :cascade do |t|
@@ -80,6 +81,8 @@ ActiveRecord::Schema.define(version: 20170419133254) do
     t.integer "doc"
     t.integer "rank"
   end
+
+  add_index "nouns", ["noun", "dictionary_id"], name: "index_nouns_on_noun_and_dictionary_id", unique: true, using: :btree
 
   create_table "scores", force: :cascade do |t|
     t.integer  "game_id"
