@@ -61,7 +61,7 @@ class GameEngineService
       lang
     end
 
-    def scores(channel, period = 1.week.ago..Time.now, limit = 8)
+    def scores(channel, period = 1.month.ago..Time.now, limit = 8)
       scores = Score
           .where(channel: channel, :created_at => period)
           .where.not(winner_id: nil)

@@ -6,6 +6,7 @@ namespace :game do
       next unless game.level.present?
 
       ScoreService.create(game) unless game.score.present?
+      game.reload # need to link created score to the game
       GameService.score(game) if game.finished? && game.winner_id.present?
 
       print "Updating score for game #{i} of #{games.count}\r"

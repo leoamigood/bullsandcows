@@ -2,7 +2,7 @@ class ScoreService
 
   class << self
     def create(game)
-      Score.create(game_id: game.id, channel: game.channel, worth: worth(game.secret, game.complexity))
+      Score.create!(game_id: game.id, channel: game.channel, worth: worth(game.secret, game.complexity))
     end
 
     def total(game)
@@ -20,8 +20,10 @@ class ScoreService
       user_guesses, others = game.guesses.partition { |g| g.user_id == game.winner_id }
       return 0 if others.empty?
 
-      ratio = (others.count.to_f / others.group_by(&:user_id).count - user_guesses.count) / game.guesses.count
-      ([ratio, 0].max * game.score.worth).round
+      common_ratio = user_guesses.select(&:common).count.to_f / user_guesses.count > 0.85 ? 0.15 : 0
+      hit_ratio = (others.count.to_f / others.group_by(&:user_id).count - user_guesses.count) / game.guesses.count
+
+      ([hit_ratio, 0].max * game.score.worth + common_ratio * game.score.worth).round
     end
 
     def penalty(game, severity = 2.0)

@@ -5,7 +5,7 @@ class Guess < ActiveRecord::Base
   after_validation :confirm_noun_existence
 
   def confirm_noun_existence
-    self.common = Noun.exists?(noun: word)
+    self.common = self.common || Noun.exists?(noun: word)
   end
 
   def <=>(other)

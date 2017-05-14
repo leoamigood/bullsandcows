@@ -2,7 +2,7 @@ class CreateScore < ActiveRecord::Migration
   def change
     create_table :scores do |t|
       t.integer :game_id
-      t.integer :channel
+      t.string  :channel
       t.integer :winner_id
       t.integer :worth
       t.integer :bonus, default: 0

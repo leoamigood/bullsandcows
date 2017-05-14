@@ -2,6 +2,7 @@ class Game < ActiveRecord::Base
   belongs_to :creator, class_name: 'User', primary_key: 'ext_id', foreign_key: 'winner_id'
   belongs_to :winner, class_name: 'User', primary_key: 'ext_id', foreign_key: 'winner_id'
   belongs_to :dictionary
+  has_one  :score
 
   has_many :guesses do
     def since(time)
@@ -41,5 +42,4 @@ class Game < ActiveRecord::Base
         .where("#{level} >= min_level AND #{level} <= max_level")
         .take.try(:complexity)
   end
-
 end

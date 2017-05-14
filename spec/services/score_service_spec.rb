@@ -45,6 +45,25 @@ describe ScoreService, type: :service do
     end
   end
 
+  context 'when game with multiple users guesses and majority words are common' do
+    let!(:score) { create(:score, worth: 179) }
+    let!(:game) { create(:game, secret: 'hostel', score: score, winner_id: realm.user.ext_id, status: :finished) }
+
+    let!(:guess_u1) { create :guess, word: 'castle', common: true, game: game, user_id: user.ext_id }
+    let!(:guess_o1) { create :guess, word: 'poster', common: true, game: game, user_id: other.ext_id }
+    let!(:guess_o2) { create :guess, word: 'master', common: true, game: game, user_id: other.ext_id }
+    let!(:guess_o3) { create :guess, word: 'harbor', common: true, game: game, user_id: other.ext_id }
+    let!(:guess_o4) { create :guess, word: 'portal', common: true, game: game, user_id: other.ext_id }
+    let!(:guess_u2) { create :guess, word: 'zamper', common: false, game: game, user_id: user.ext_id }
+    let!(:guess_u3) { create :guess, word: 'camper', common: true, game: game, user_id: user.ext_id }
+    let!(:guess_o5) { create :guess, word: 'garage', common: true, game: game, user_id: other.ext_id }
+    let!(:guess_u4) { create :guess, word: 'hostel', common: true, game: game, user_id: user.ext_id }
+
+    it 'calculate bonus points' do
+      expect(ScoreService.bonus(game)).to eq(20)
+    end
+  end
+
   context 'when game with multiple users guesses' do
     let!(:score) { create(:score, worth: 179) }
     let!(:game) { create(:game, secret: 'hostel', score: score, winner_id: realm.user.ext_id, status: :finished) }
