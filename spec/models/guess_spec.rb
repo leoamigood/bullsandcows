@@ -2,6 +2,21 @@ require 'rails_helper'
 
 describe Guess, type: :model do
 
+  context 'given a dictionary noun and multiple guesses' do
+    let!(:noun) { create :noun, noun: 'existence' }
+
+    let!(:known) { build :guess, word: 'existence' }
+    let!(:unknown) { build :guess, word: 'absencentence' }
+
+    it 'sets common attribute to true upon persistence of existent word' do
+      expect{ known.save }.to change(known, :common).to(true)
+    end
+
+    it 'sets common attribute to false persistence of non existent word' do
+      expect{ unknown.save }.to change(unknown, :common).to(false)
+    end
+  end
+
   context 'with multiple guesses' do
     let!(:guess1) { create :guess, word: 'sector', bulls: 3, cows: 2 }
     let!(:guess2) { create :guess, word: 'master', bulls: 1, cows: 3 }
