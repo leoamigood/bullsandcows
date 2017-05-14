@@ -1,15 +1,12 @@
 require 'rails_helper'
 
 describe GameService, type: :service do
-  let!(:channel) { Random.rand(@MAX_INT_VALUE) }
-  let!(:user) { build :user, id: Random.rand(@MAX_INT_VALUE), name: '@Amig0' }
-
-  let!(:realm) { build :realm, :web, channel: channel, user_id: user.id }
+  let!(:user) { create :user, :telegram, :john_smith }
+  let!(:realm) { build :web_realm }
 
   context 'with game not started' do
     context 'with a secret word' do
       let!(:secret) { create(:noun, noun: 'secret')}
-
       it 'creates a game' do
         game = GameService.create(realm, secret)
 
@@ -21,7 +18,7 @@ describe GameService, type: :service do
     end
 
     it 'checks that game is not in progress' do
-      expect(GameService.in_progress?(channel)).to eq(false)
+      expect(GameService.in_progress?(realm.channel)).to eq(false)
     end
   end
 
@@ -34,8 +31,10 @@ describe GameService, type: :service do
       }.to raise_error(Errors::GameCreateException)
     end
 
+    let!(:other_user) { build :web_realm }
+    let!(:other_secret) { create :noun, noun: 'canal' }
     it 'creates new game in different channel' do
-      recreated = GameService.create(Realm::Web.new('another-channel'), Noun.new(noun: 'canal'))
+      recreated = GameService.create(other_user, other_secret)
 
       expect(recreated).not_to be(nil)
       expect(recreated.secret).to eq('canal')
@@ -45,7 +44,7 @@ describe GameService, type: :service do
 
     it 'finds game by channel' do
       expect {
-        found = GameService.find_by_channel!(channel)
+        found = GameService.find_by_channel!(realm.channel)
 
         expect(found).to be
         expect(found).to eq(game)
@@ -140,34 +139,38 @@ describe GameService, type: :service do
       expect(game.status).to eq('aborted')
     end
 
-    it 'checks that game is not in progress' do
-      expect(GameService.in_progress?(channel)).to eq(true)
+    it 'verify that game is in progress' do
+      expect(GameService.in_progress?(realm.channel)).to eq(true)
     end
   end
 
   context 'with a game finished' do
-    let!(:game) { create(:game, :realm, status: :finished, realm: realm)}
+    let!(:score) { create(:score, worth: 179) }
+    let!(:game) { create(:game, :realm, :with_tries, secret: 'hostel', score: score, status: :finished, realm: realm)}
 
     it 'checks that game is in progress' do
-      expect(GameService.in_progress?(channel)).to eq(false)
+      expect(GameService.in_progress?(realm.channel)).to eq(false)
     end
+
+    it 'verify that game score gets updated' do
+      expect{
+        GameService.score(game)
+      }.to change{ game.reload.score.points }
+    end
+
+    it 'verify that total score gets updated' do
+      expect{
+        GameService.score(game)
+      }.to change{ game.reload.score.total }
+    end
+
   end
 
   context 'with a secret word given' do
-    it 'returns letters in places of bulls' do
-      expect(GameService.bulls('мораль'.split(''), 'корова'.split(''))).to eq([nil, 'о', 'р', nil, nil, nil])
-      expect(GameService.bulls('краска'.split(''), 'корова'.split(''))).to eq(['к', nil, nil, nil, nil, 'а'])
-    end
-
-    it 'returns letters in places of cows' do
-      expect(GameService.cows('мораль'.split(''), 'корова'.split(''))).to eq([nil, nil, nil, 'а', nil, nil])
-      expect(GameService.cows('краска'.split(''), 'корова'.split(''))).to eq([nil, 'р', nil, nil, nil, nil])
-    end
-
     it 'counts bulls and cows in input against the secret word' do
-      expect(GameService.match('корень', 'корова')).to eq({word: 'корень', bulls: 3, cows: 0, exact: false})
-      expect(GameService.match('восток', 'корова')).to eq({word: 'восток', bulls: 1, cows: 3, exact: false})
       expect(GameService.match('оборот', 'корова')).to eq({word: 'оборот', bulls: 0, cows: 3, exact: false})
+      expect(GameService.match('восток', 'корова')).to eq({word: 'восток', bulls: 1, cows: 3, exact: false})
+      expect(GameService.match('корень', 'корова')).to eq({word: 'корень', bulls: 3, cows: 0, exact: false})
       expect(GameService.match('краска', 'корова')).to eq({word: 'краска', bulls: 2, cows: 1, exact: false})
       expect(GameService.match('оборот', 'корова')).to eq({word: 'оборот', bulls: 0, cows: 3, exact: false})
       expect(GameService.match('корова', 'корова')).to eq({word: 'корова', bulls: 6, cows: 0, exact: true})

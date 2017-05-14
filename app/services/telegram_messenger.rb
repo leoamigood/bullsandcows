@@ -3,7 +3,7 @@ class TelegramMessenger
   class << self
     def send_message(channel, text, markup = nil)
       Telegram::Bot::Client.run(TELEGRAM_TOKEN) do |bot|
-        bot.api.send_message(chat_id: channel, text: text, parse_mode: 'Markdown', reply_markup: markup)
+        bot.api.send_message(chat_id: channel, text: text, reply_markup: markup)
       end
     end
 
@@ -62,13 +62,27 @@ class TelegramMessenger
     def game_created(game)
       message = "Game created: *#{game.secret.length}* letters."
       message += " Language: *#{game.dictionary.lang}*." if game.dictionary.present?
+      message += " Points: *#{game.score.worth}*." if game.score.present?
 
       message + "\nGo ahead and submit your guess word."
     end
 
     def guess(guess)
       text = "Guess #{guess.game.guesses_count}: _#{guess.word}_, *Bulls: #{guess.bulls}*, *Cows: #{guess.cows}*.\n"
-      text += "Congratulations! You guessed it with *#{guess.game.guesses.length}* tries." if guess.exact?
+      text += TelegramMessenger.finish(guess.game) if guess.exact?
+
+      text
+    end
+
+    def finish(game)
+      text = "Congratulations! You guessed it with *#{game.guesses.length}* tries.\n"
+
+      if game.score.present?
+        text += "You earned *#{game.score.worth}* points."
+        text += " Bonus: *#{game.score.bonus}* points." if game.score.bonus > 0
+        text += " Penalty: *-#{game.score.penalty}* points." if game.score.penalty > 0
+        text += "\nTotal score: *#{game.score.total}* points."
+      end
 
       text
     end
@@ -139,39 +153,43 @@ class TelegramMessenger
       "You give up? Here is the secret word *#{game.secret}*."
     end
 
-    def game_was_finished(game)
-      'Game has already finished. Please start a new game using _/create_ command.'
+    def top_scores(scores)
+      scores.each.with_index.reduce("Top scores: \n") { |text, indexed_score|
+        score, i = indexed_score.first, indexed_score.last
+        text + "#{i + 1}: <b>#{score[:first_name]} #{score[:last_name]}</b>, User: <i>#{score[:username]}</i>, Score: <b>#{score[:total_score]}</b>\n"
+      }
     end
 
     def help
-
-      # start   - Use /start to start game bot
+      # start   - Use /start to start the game bot
       # level   - Use /level to set game complexity level
       # lang    - Use /lang to set secret word language
       # create  - Use /create [word]|[number] to create a game
       # guess   - Use [/guess] <word> to place a guess for the secret
       # tries   - Use /tries to show previous guess attempts
-      # best    - Use /best [number] to see top guesses
-      # zero    - Use /zero to see guesses with zero matches
+      # best    - Use /best [number] to show best guesses
+      # zero    - Use /zero to show guesses with zero matches
       # hint    - Use /hint to reveal a random letter in a secret
       # suggest - Use /suggest [letters] for bot to suggest a word
       # stop    - Use /stop to abort the game and show secret
-      # help    - Usr /help to see this help
+      # score   - Use /score to show top scores
+      # help    - Usr /help to show this help
 
       lines = [
           'Here is the list of available commands:',
-          'Use _/start_ to start the game bot',
-          'Use _/level_ to set game complexity level',
-          'Use _/lang_ to set secret word language',
-          'Use _/create [word]|[number]_ to create a game',
-          'Use _[/guess] <word>_ to place a guess for the secret',
-          'Use _/tries_ to show previous guess attempts',
-          'Use _/best [number]_ to see top guesses',
-          'Use _/zero_ to see guesses with zero matches',
-          'Use _/hint_ [letter]|[number] to reveal a letter in a secret',
-          'Use _/suggest_ [letters] for bot to suggest a word',
-          'Use _/stop_ to abort the game and show secret',
-          'Use _/help_ to see this help'
+          '_/start_ to start the game bot',
+          '_/level_ to set game complexity level',
+          '_/lang_ to set secret word language',
+          '_/create [word]|[number]_ to create a game',
+          '_[/guess] <word>_ to place a guess for the secret',
+          '_/tries_ to show previous guess attempts',
+          '_/best [number]_ to show best guesses',
+          '_/zero_ to show guesses with zero matches',
+          '_/hint_ [letter]|[number] to reveal a letter in a secret',
+          '_/suggest_ [letters] for bot to suggest a word',
+          '_/stop_ to abort the game and show secret',
+          '_/score_ to show top scores for a period',
+          '_/help_ to show this help'
       ]
       lines.join("\n")
     end

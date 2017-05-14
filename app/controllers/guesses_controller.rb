@@ -3,7 +3,7 @@ class GuessesController < BaseApiController
 
   def create
     game = GameService.find_by_id!(validate[:game_id])
-    guess = GameEngineService.guess(game, User.new(id = Random.rand, name = validate[:username]), validate[:guess])
+    guess = GameEngineService.guess(game, User.new(ext_id: Random.rand, username: validate[:username]), validate[:guess])
 
     render json: {
         guess: Responses::Guess.new(guess),

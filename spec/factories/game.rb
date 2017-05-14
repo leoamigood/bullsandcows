@@ -2,14 +2,14 @@ FactoryGirl.define do
   factory :game do
     factory :finished_game, :traits => [:with_tries, :winning_guess] do
       transient do
-        winner nil
+        exact_guess nil
       end
     end
   end
 
   trait :realm do
     initialize_with do
-      new(channel: realm.channel, user_id: realm.user_id, source: realm.source)
+      new(channel: realm.channel, user_id: realm.user.ext_id, source: realm.source)
     end
   end
 
@@ -27,6 +27,12 @@ FactoryGirl.define do
 
   trait :aborted do
     status :aborted
+  end
+
+  trait :with_exact_guess do
+    after :create do |game|
+      FactoryGirl.create(:guess, word: 'hostel', game: game, user_id: game.user_id, bulls: 6, cows: 0)
+    end
   end
 
   trait :with_tries do
@@ -48,7 +54,7 @@ FactoryGirl.define do
   trait :winning_guess do
     status :finished
     before :create do |game, evaluator|
-      game.guesses << FactoryGirl.create(:guess, word: 'hostel', game: game, bulls: 6, cows: 0, user_id: evaluator.winner)
+      game.guesses << evaluator.exact_guess if evaluator.exact_guess.present?
     end
   end
 

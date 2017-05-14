@@ -1,10 +1,8 @@
 require 'rails_helper'
 
 describe GameEngineService, type: :service do
-  let!(:channel) { Random.rand(@MAX_INT_VALUE) }
-  let!(:user) { build :user, id: Random.rand(@MAX_INT_VALUE), name: '@Amig0' }
-
-  let!(:realm) { build :realm, :telegram, channel: channel, user_id: user.id }
+  let!(:user) { create :user, :telegram, :john_smith }
+  let!(:realm) { build :telegram_realm, user: user }
 
   it 'create a game with specified secret word' do
     game = GameEngineService.create_by_word(realm, 'magic')
@@ -41,10 +39,11 @@ describe GameEngineService, type: :service do
         expect(game.secret.length).to eq(6)
         expect(game.level).to be_between(7, 9)
         expect(game.dictionary.EN?).to be(true)
+        expect(game.user_id).to eq(realm.user.ext_id)
       end
 
       context 'with recent games in the channel' do
-        let!(:recent_game) { create(:game, channel: channel, secret: 'garlic', status: :finished, created_at: Time.now - 5.minutes) }
+        let!(:recent_game) { create(:game, channel: realm.channel, secret: 'garlic', status: :finished, created_at: Time.now - 5.minutes) }
 
         it 'verify recent secrets are not reused' do
           game = GameEngineService.create_by_options(realm, options)
@@ -55,8 +54,8 @@ describe GameEngineService, type: :service do
       end
 
       context 'with old and recent games in the channel' do
-        let!(:old_game) { create(:game, channel: channel, secret: 'garlic', status: :finished, created_at: Time.now - 8.days) }
-        let!(:recent_game) { create(:game, channel: channel, secret: 'parrot', status: :finished, created_at: Time.now - 2.days) }
+        let!(:old_game) { create(:game, channel: realm.channel, secret: 'garlic', status: :finished, created_at: Time.now - 8.days) }
+        let!(:recent_game) { create(:game, channel: realm.channel, secret: 'parrot', status: :finished, created_at: Time.now - 2.days) }
 
         it 'verify recent secrets are not reused' do
           game = GameEngineService.create_by_options(realm, options)
@@ -67,12 +66,12 @@ describe GameEngineService, type: :service do
       end
 
       context 'with old and recent games in multiple channels' do
-        let!(:another) { Random.rand(@MAX_INT_VALUE) }
+        let!(:another) { build :telegram_realm, user: user }
 
-        let!(:old) { create(:game, channel: channel, secret: 'garlic', status: :finished, created_at: Time.now - 8.days) }
-        let!(:another1) { create(:game, channel: another, secret: 'garlic', status: :finished, created_at: Time.now - 2.days) }
-        let!(:recent) { create(:game, channel: channel, secret: 'parrot', status: :finished, created_at: Time.now - 3.days) }
-        let!(:another2) { create(:game, channel: another, secret: 'parrot', status: :finished, created_at: Time.now - 5.days) }
+        let!(:old) { create(:game, channel: realm.channel, secret: 'garlic', status: :finished, created_at: Time.now - 8.days) }
+        let!(:another1) { create(:game, channel: another.channel, secret: 'garlic', status: :finished, created_at: Time.now - 2.days) }
+        let!(:recent) { create(:game, channel: realm.channel, secret: 'parrot', status: :finished, created_at: Time.now - 3.days) }
+        let!(:another2) { create(:game, channel: another.channel, secret: 'parrot', status: :finished, created_at: Time.now - 5.days) }
 
         it 'verify recent secrets are not reused in same channel' do
           game = GameEngineService.create_by_options(realm, options)
@@ -151,6 +150,51 @@ describe GameEngineService, type: :service do
             |letter| game.secret.include?(letter)
         }
       }.to change{ game.hints.count }.by(1)
+    end
+  end
+
+  context 'given scores for multiple games' do
+    let!(:winner1) { create :user, :telegram, :john_smith, ext_id: 873784623 }
+    let!(:winner2) { create :user, :telegram, :chris_pooh, ext_id: 223937422 }
+    let!(:winner3) { create :user, :telegram, :josef_gold, ext_id: 527567221 }
+
+    let!(:score1) { create(:score, channel: realm.channel, winner: winner3, points: 179, total: 179, created_at: 5.hours.ago) }
+    let!(:score2) { create(:score, channel: realm.channel, winner: winner2, points: 138, total: 138, created_at: 1.day.ago) }
+    let!(:score3) { create(:score, channel: realm.channel, winner: winner3, points: 205, total: 179 + 205, created_at: 2.days.ago) }
+    let!(:score4) { create(:score, channel: realm.channel, winner: winner1, points: 152, total: 152, created_at: 20.hours.ago) }
+    let!(:score5) { create(:score, channel: realm.channel, winner: winner2, points: 108, total: 138 + 108, created_at: 4.days.ago) }
+    let!(:unknown) { create(:score, channel: realm.channel, winner_id: 0, points: 999, total: 999, created_at: 1.hour.ago) }
+
+    it 'calculate top scores for last week' do
+      expect(GameEngineService.scores(realm.channel).count).to eq(3)
+      expect(GameEngineService.scores(realm.channel))
+          .to include(
+                  { first_name: winner3.first_name, last_name: winner3.last_name, username: winner3.username, total_score: 179 + 205 },
+                  { first_name: winner2.first_name, last_name: winner2.last_name, username: winner2.username, total_score: 138 + 108 },
+                  { first_name: winner1.first_name, last_name: winner1.last_name, username: winner1.username, total_score: 152 }
+              )
+    end
+
+    let(:last_3_days) { 3.days.ago..Time.now }
+    it 'calculate top scores for last 3 days' do
+      expect(GameEngineService.scores(realm.channel, last_3_days).count).to eq(3)
+      expect(GameEngineService.scores(realm.channel, last_3_days)).
+          to include(
+                 { first_name: winner3.first_name, last_name: winner3.last_name, username: winner3.username, total_score: 179 + 205 },
+                 { first_name: winner1.first_name, last_name: winner1.last_name, username: winner1.username, total_score: 152 },
+                 { first_name: winner2.first_name, last_name: winner2.last_name, username: winner2.username, total_score: 138 }
+             )
+    end
+
+    it 'calculate 2 top scores for last 3 days' do
+      expect(GameEngineService.scores(realm.channel, last_3_days, 2).count).to eq(2)
+      expect(GameEngineService.scores(realm.channel, last_3_days, 2)).
+          to include(
+                 { first_name: winner3.first_name, last_name: winner3.last_name, username: winner3.username, total_score: 179 + 205 },
+                 { first_name: winner1.first_name, last_name: winner1.last_name, username: winner1.username, total_score: 152 }
+             )
+      expect(GameEngineService.scores(realm.channel, last_3_days, 2)).
+          not_to include([winner2.first_name, winner2.last_name, winner2.username, winner2.ext_id, 138])
     end
   end
 

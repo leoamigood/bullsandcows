@@ -3,9 +3,10 @@ class GameEngineService
   @@RECENT_GAMES_DAYS = 7.days
 
   class << self
-    def create_by_word(realm, word)
-      sanitized = GameService.sanitize(word)
-      GameService.create(realm, Noun.new(noun: sanitized))
+    def create_by_word(realm, input)
+      secret = GameService.sanitize(input)
+
+      GameService.create(realm, Noun.new(noun: secret))
     end
 
     def create_by_options(realm, options)
@@ -15,11 +16,11 @@ class GameEngineService
       GameService.create(realm, secret)
     end
 
-    def guess(game, user, word)
-      GameService.validate_guess!(game, word)
+    def guess(game, user, input)
+      GameService.validate_guess!(game, input)
 
-      sanitized = GameService.sanitize(word)
-      GameService.guess(game, user, sanitized)
+      word = GameService.sanitize(input)
+      GameService.guess(game, user, word)
     end
 
     def hint(game, letter = nil)
@@ -58,6 +59,27 @@ class GameEngineService
       raise "Language: #{language} is not available!" unless lang.present?
 
       lang
+    end
+
+    def scores(channel, period = 1.month.ago..Time.now, limit = 8)
+      scores = Score
+          .where(channel: channel, :created_at => period)
+          .where.not(winner_id: nil)
+          .group(:winner_id)
+          .maximum(:total)
+
+      scores.map { |winner_id, total|
+        user = User.find_by_ext_id(winner_id)
+        {
+            first_name: user.first_name,
+            last_name: user.last_name,
+            username: user.username,
+            total_score: total
+        } if user.present?
+      }.compact.max_by(limit) { |value|
+        value[:total_score]
+      }
+
     end
 
     def settings(channel, attributes)

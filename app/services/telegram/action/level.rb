@@ -20,10 +20,12 @@ module Telegram
       end
     end
 
+    private
+
     aspector(Level, class_methods: true) do
       target do
         def assert(*args, &block)
-          channel, message = *args
+          channel = args.first
           Telegram::CommandQueue::Queue.new(channel).assert(self)
         end
 
@@ -33,7 +35,7 @@ module Telegram
         end
 
         def pop(*args, &block)
-          msg, channel, message = *args
+          msg, channel = *args
           Telegram::CommandQueue::Queue.new(channel).pop
 
           msg

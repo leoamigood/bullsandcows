@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20170417153150) do
+ActiveRecord::Schema.define(version: 20170513213540) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -59,6 +59,7 @@ ActiveRecord::Schema.define(version: 20170417153150) do
     t.string   "username"
     t.boolean  "suggestion", default: false
     t.integer  "user_id"
+    t.boolean  "common"
   end
 
   create_table "hints", force: :cascade do |t|
@@ -81,6 +82,21 @@ ActiveRecord::Schema.define(version: 20170417153150) do
     t.integer "rank"
   end
 
+  add_index "nouns", ["noun", "dictionary_id"], name: "index_nouns_on_noun_and_dictionary_id", unique: true, using: :btree
+
+  create_table "scores", force: :cascade do |t|
+    t.integer  "game_id"
+    t.string   "channel"
+    t.integer  "winner_id"
+    t.integer  "worth"
+    t.integer  "bonus",      default: 0
+    t.integer  "penalty",    default: 0
+    t.integer  "points",     default: 0
+    t.integer  "total",      default: 0
+    t.datetime "created_at",             null: false
+    t.datetime "updated_at",             null: false
+  end
+
   create_table "settings", force: :cascade do |t|
     t.string   "channel"
     t.string   "language",      default: "RU"
@@ -88,6 +104,16 @@ ActiveRecord::Schema.define(version: 20170417153150) do
     t.integer  "dictionary_id"
     t.datetime "created_at",                     null: false
     t.datetime "updated_at",                     null: false
+  end
+
+  create_table "users", force: :cascade do |t|
+    t.integer  "ext_id",     null: false
+    t.string   "source",     null: false
+    t.string   "first_name"
+    t.string   "last_name"
+    t.string   "username"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
   end
 
 end

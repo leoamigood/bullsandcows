@@ -5,12 +5,12 @@ class Guess < ActiveRecord::Base
   after_validation :confirm_noun_existence
 
   def confirm_noun_existence
-    self.common = Noun.exists?(noun: word)
+    self.common = self.common || Noun.exists?(noun: word)
   end
 
   def <=>(other)
-    score = other.bulls * 3 + other.cows <=> bulls * 3 + cows
-    score == 0 ? (self.created_at <=> other.created_at) : score
+    points = other.value <=> value
+    points == 0 ? (self.created_at <=> other.created_at) : points
   end
 
   def self.since(time)
@@ -19,6 +19,10 @@ class Guess < ActiveRecord::Base
     } if time.present?
 
     return guesses || @relation
+  end
+
+  def value
+    bulls * 3 + cows
   end
 
   def ==(other)

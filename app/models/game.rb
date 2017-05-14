@@ -1,5 +1,8 @@
 class Game < ActiveRecord::Base
+  belongs_to :creator, class_name: 'User', primary_key: 'ext_id', foreign_key: 'winner_id'
+  belongs_to :winner, class_name: 'User', primary_key: 'ext_id', foreign_key: 'winner_id'
   belongs_to :dictionary
+  has_one  :score
 
   has_many :guesses do
     def since(time)
@@ -12,6 +15,7 @@ class Game < ActiveRecord::Base
   end
 
   has_many :hints
+  has_one  :score
 
   enum status: { created: 'created', running: 'running', finished: 'finished', aborted: 'aborted' }
   enum source: { telegram: 'telegram', web: 'web' }
@@ -28,5 +32,14 @@ class Game < ActiveRecord::Base
 
   def in_progress?
     self.created? || self.running?
+  end
+
+  def complexity
+    return :easy unless level.present?
+
+    DictionaryLevel
+        .where(dictionary_id: dictionary_id)
+        .where("#{level} >= min_level AND #{level} <= max_level")
+        .take.try(:complexity)
   end
 end

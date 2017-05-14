@@ -4,7 +4,7 @@ module Telegram
     class << self
       include Telegram::Action::Command
 
-      def validate!(action, channel, message)
+      def validate!(action, channel, message = nil)
         game = GameService.recent_game(channel)
 
         case action
@@ -49,10 +49,17 @@ module Telegram
       private
 
       def permitted?(game, message)
-        member = TelegramMessenger.getChatMember(message.chat.id, message.from.id)
+        is_admin?(message) || is_game_creator?(game, message)
+      end
 
+      def is_admin?(message)
+        member = TelegramMessenger.getChatMember(message.chat.id, message.from.id)
         status = member['result']['status']
-        status == 'creator' || status == 'administrator' || game.try(:user_id) == message.from.id
+        status == 'creator' || status == 'administrator'
+      end
+
+      def is_game_creator?(game, message)
+        game.user_id == message.from.id
       end
     end
   end

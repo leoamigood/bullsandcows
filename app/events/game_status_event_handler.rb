@@ -2,8 +2,8 @@ class GameStatusEventHandler
   class << self
     def game_finished(payload)
       game = payload[:game]
-      game.winner_id = game.guesses.last.user_id
-      game.save!
+      GameService.update_winner(game)
+      GameService.score(game)
     end
   end
 end

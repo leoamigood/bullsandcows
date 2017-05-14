@@ -9,14 +9,18 @@ class GameService
         )
       end
 
-      Game.create(
+      game = Game.create(
           channel: realm.channel,
-          user_id: realm.user_id,
+          user_id: realm.user.ext_id,
           secret: secret.noun,
           level: secret.level,
           dictionary: secret.dictionary,
           source: realm.source
       )
+
+      ScoreService.create(game)
+
+      game
     end
 
     def find_by_id!(game_id)
@@ -45,8 +49,8 @@ class GameService
     def guess(game, user, word, suggestion = false)
       guess = Guess.find_or_create_by(game_id: game.id, word: word) do |guess|
         guess.attempts = 0
-        guess.user_id = user.id
-        guess.username = user.name
+        guess.user_id = user.ext_id
+        guess.username = user.username
         guess.suggestion = suggestion
 
         guess.update(match(word, game.secret))
@@ -55,7 +59,7 @@ class GameService
       guess.attempts += 1
       guess.save!
 
-      guess.exact? ? game.finished! : game.running!
+      guess.exact? ? game.finished! : game.running! # TODO: should this be moved to GameEngineService?
       guess
     end
 
@@ -69,21 +73,6 @@ class GameService
       cows = cows(guess.split(''), secret.split(''))
 
       return { word: guess, bulls: bulls.compact.count, cows: cows.compact.count, exact: guess == secret }
-    end
-
-    def bulls(guess, secret)
-      guess.zip(secret).map { |(g, s)| g == s ? g : nil}
-    end
-
-    def cows(guess, secret)
-      bulls = bulls(guess, secret)
-      guess, secret = guess.zip(secret, bulls).
-          map{|g, s, b| b.present? ? [nil, nil] : [g, s]}.transpose
-
-      guess.each_with_index.map { |g, index|
-        (i = secret.index(g)) && secret[i] = nil
-        i.present? ? g : nil
-      }
     end
 
     def hint(game, letter = nil)
@@ -105,6 +94,25 @@ class GameService
       game
     end
 
+    def score(game)
+      return unless game.score.present?
+
+      score = game.score
+      score.winner_id = game.winner_id
+      score.bonus = ScoreService.bonus(game)
+      score.penalty = ScoreService.penalty(game)
+      score.points = ScoreService.points(game)
+      score.total = ScoreService.total(game)
+      score.save!
+
+      score
+    end
+
+    def update_winner(game)
+      game.winner_id = game.guesses.last.user_id
+      game.save!
+    end
+
     def validate_guess!(game, guess)
       if game.secret.length != guess.length
         raise Errors::GuessException.new(
@@ -123,6 +131,19 @@ class GameService
     end
 
     private
+
+    def bulls(guess, secret)
+      guess.zip(secret).map { |(g, s)| g == s ? g : nil }
+    end
+
+    def cows(guess, secret)
+      g, s = not_bulls(guess, secret).transpose
+      (g & s).try(:flat_map) { |n| [n] * [g.count(n), s.count(n)].min } || []
+    end
+
+    def not_bulls(guess, secret)
+      guess.zip(secret).reject { |(g, s)| g == s }
+    end
 
     def detect_letter(secret, letter)
       secret.split('').detect { |l| l == letter }

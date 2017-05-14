@@ -8,7 +8,7 @@ describe Noun, type: :model do
     let!(:disabled) { create :dictionary, :english, enabled: false }
 
     it 'get nouns in active dictionary' do
-      expect(Noun.active).to eq(english.nouns + russian.nouns)
+      expect(Noun.active).to match_array(russian.nouns + english.nouns)
     end
 
     it 'get nouns in preferred language' do
@@ -36,7 +36,7 @@ describe Noun, type: :model do
     end
 
     context 'with russian and english dictionaries complexity levels' do
-      let!(:hard_ru) { create :dictionary_level, :hard_ru, dictionary_id: russian.id }
+      let!(:medium_ru) { create :dictionary_level, :medium_ru, dictionary_id: russian.id }
       let!(:hard_en) { create :dictionary_level, :hard_en, dictionary_id: english.id }
 
       it 'get nouns with levels according specified language and complexity' do

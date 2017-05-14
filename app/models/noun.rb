@@ -9,5 +9,4 @@ class Noun < ActiveRecord::Base
   scope :by_complexity, -> (language, complexity) {
     where(:level => DictionaryLevel.where(lang: language, complexity: complexity).take.try(:levels))
   }
-
 end
