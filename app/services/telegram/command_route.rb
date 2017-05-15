@@ -15,6 +15,7 @@ module Telegram
     LANG_ALPHA   = /^#{Telegram::Action::Command::LANG}#{BOT_REGEXP}\s+(?<language>[[:alpha:]]+)$/i
     LEVEL        = /^#{Telegram::Action::Command::LEVEL}#{BOT_REGEXP}$/i
     LEVEL_ALPHA  = /^#{Telegram::Action::Command::LEVEL}#{BOT_REGEXP}\s+(?<level>[[:alpha:]]+)$/i
+    RULES        = /^#{Telegram::Action::Command::RULES}#{BOT_REGEXP}/i
     SCORE        = /^#{Telegram::Action::Command::SCORE}#{BOT_REGEXP}\s*(?<period>[[:digit:]]+)?$/i
     START        = /^#{Telegram::Action::Command::START}#{BOT_REGEXP}$/i
     STOP         = /^#{Telegram::Action::Command::STOP}#{BOT_REGEXP}$/i

@@ -8,6 +8,7 @@ module Telegram
       HINT     = '/hint'
       LANG     = '/lang'
       LEVEL    = '/level'
+      RULES    = '/rules'
       SCORE    = '/score'
       START    = '/start'
       STOP     = '/stop'

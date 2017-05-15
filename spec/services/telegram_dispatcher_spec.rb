@@ -872,5 +872,18 @@ describe TelegramDispatcher, type: :service do
     end
   end
 
+  context 'when /rules command received' do
+    let!(:message) { build :message, :with_realm, text: '/rules', realm: realm }
+
+    before do
+      allow(TelegramMessenger).to receive(:rules)
+    end
+
+    it 'handles bot name as optional part in command' do
+      expect(TelegramDispatcher.handle(message))
+      expect(TelegramMessenger).to have_received(:rules)
+    end
+  end
+
 end
 
