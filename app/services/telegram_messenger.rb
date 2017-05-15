@@ -154,42 +154,48 @@ class TelegramMessenger
     end
 
     def top_scores(scores)
-      scores.each.with_index.reduce("Top scores: \n") { |text, indexed_score|
+      scores.each.with_index.reduce("Top #{scores.count} scores: \n") { |text, indexed_score|
         score, i = indexed_score.first, indexed_score.last
         text + "#{i + 1}: <b>#{score[:first_name]} #{score[:last_name]}</b>, User: <i>#{score[:username]}</i>, Score: <b>#{score[:total_score]}</b>\n"
       }
     end
 
+    def rules
+      '[Game rules](https://en.wikipedia.org/wiki/Bulls_and_Cows)'
+    end
+
     def help
       # start   - Use /start to start the game bot
+      # best    - Use /best [number] to show best guesses
       # level   - Use /level to set game complexity level
       # lang    - Use /lang to set secret word language
       # create  - Use /create [word]|[number] to create a game
       # guess   - Use [/guess] <word> to place a guess for the secret
       # tries   - Use /tries to show previous guess attempts
-      # best    - Use /best [number] to show best guesses
       # zero    - Use /zero to show guesses with zero matches
       # hint    - Use /hint to reveal a random letter in a secret
       # suggest - Use /suggest [letters] for bot to suggest a word
       # stop    - Use /stop to abort the game and show secret
       # score   - Use /score to show top scores
+      # rules   - Use /rules to see the game rules
       # help    - Usr /help to show this help
 
       lines = [
           'Here is the list of available commands:',
-          '_/start_ to start the game bot',
-          '_/level_ to set game complexity level',
-          '_/lang_ to set secret word language',
-          '_/create [word]|[number]_ to create a game',
-          '_[/guess] <word>_ to place a guess for the secret',
-          '_/tries_ to show previous guess attempts',
-          '_/best [number]_ to show best guesses',
-          '_/zero_ to show guesses with zero matches',
-          '_/hint_ [letter]|[number] to reveal a letter in a secret',
-          '_/suggest_ [letters] for bot to suggest a word',
-          '_/stop_ to abort the game and show secret',
-          '_/score_ to show top scores for a period',
-          '_/help_ to show this help'
+          '/start to start the game bot',
+          '/best _[number]_ to show best guesses',
+          '/level to set game complexity level',
+          '/lang to set secret word language',
+          '/create _[word]|[number]_ to create a game',
+          '/guess _<word>_ to place a guess for the secret',
+          '/tries to show previous guess attempts',
+          '/zero to show guesses with zero matches',
+          '/hint _[letter]|[number]_ to reveal a letter in a secret',
+          '/suggest _[letters]_ for bot to suggest a word',
+          '/stop to abort the game and show secret',
+          '/score to show top scores for a period',
+          '/rules to see the game rules',
+          '/help to show this help'
       ]
       lines.join("\n")
     end

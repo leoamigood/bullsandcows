@@ -100,6 +100,9 @@ class TelegramDispatcher
         when Telegram::CommandRoute::LEVEL_ALPHA
           Telegram::Action::Level.execute(channel, $~['level'])
 
+        when Telegram::CommandRoute::RULES
+          return TelegramMessenger.rules
+
         when Telegram::CommandRoute::SCORE
           return Telegram::Action::Score.execute(channel, message), 'HTML'
 
