@@ -1,4 +1,4 @@
-class Score < ActiveRecord::Base
+class Score < ApplicationRecord
   belongs_to :game
   belongs_to :winner, class_name: 'User', primary_key: 'ext_id', foreign_key: 'winner_id'
 

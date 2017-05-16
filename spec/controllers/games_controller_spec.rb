@@ -9,7 +9,7 @@ describe GamesController, :type => :request do
 
   it 'creates game with the secret word' do
     expect {
-      post '/games', secret: 'hostel'
+      post '/games', params: { secret: 'hostel' }
     }.to change(Game, :count).by(1) and expect_ok
 
     expect(json).to be
@@ -36,7 +36,7 @@ describe GamesController, :type => :request do
       }
 
       expect {
-        post '/games', data
+        post '/games', params: data
       }.to change(Game, :count).by(1) and expect_ok
 
       expect(json).to be
@@ -48,14 +48,14 @@ describe GamesController, :type => :request do
 
     it 'fails to create game with with only language specified' do
       expect {
-        post '/games', language: 'RU'
+        post '/games', params: { language: 'RU' }
       }.not_to change(Game, :count) and expect_error
     end
   end
 
   context 'with multiple games' do
-    let!(:en) { create :dictionary, lang: 'EN'}
-    let!(:ru) { create :dictionary, lang: 'RU'}
+    let!(:en) { create :dictionary, lang: 'EN' }
+    let!(:ru) { create :dictionary, lang: 'RU' }
     let!(:created_web_en)  { create :game, :created, :with_tries, secret: 'hostel', channel: 'user1-session-id', source: 'web', dictionary: en }
     let!(:running_web_ru)  { create :game, :running, :with_tries, secret: 'почта', channel: 'user2-session-id', source: 'web', dictionary: ru }
     let!(:finished_tel_en) { create :game, :finished, :with_tries, secret: 'magic', channel: 'user2-session-id', source: :telegram, dictionary: en }
@@ -78,15 +78,16 @@ describe GamesController, :type => :request do
 
       expect(json).to be
       expect(json['games'].count).to eq(2)
-      expect(json['games']).to include(
-                                   include('link' => "/games/#{created_web_en.id}"),
-                                   include('link' => "/games/#{aborted_tel_ru.id}")
-                               )
+      expect(json['games']).
+          to include(
+                 include('link' => "/games/#{created_web_en.id}"),
+                 include('link' => "/games/#{aborted_tel_ru.id}")
+             )
     end
 
     it 'gets only finished games' do
       expect {
-        get '/games?status=finished'
+        get '/games', params: { status: 'finished' }
       }.not_to change(Game, :count) and expect_ok
 
       expect(json).to be
@@ -96,7 +97,7 @@ describe GamesController, :type => :request do
 
     it 'gets only telegram games' do
       expect {
-        get '/games?source=telegram'
+        get '/games', params: { source: 'telegram' }
       }.not_to change(Game, :count) and expect_ok
 
       expect(json).to be
@@ -106,7 +107,7 @@ describe GamesController, :type => :request do
 
     it 'gets no games with non existing status' do
       expect {
-        get '/games?status=missing&source=web'
+        get '/games', params: { status: 'missing', source: 'web' }
       }.not_to change(Game, :count) and expect_ok
 
       expect(json).to be
@@ -118,7 +119,7 @@ describe GamesController, :type => :request do
 
     it 'gets no games with non existing source' do
       expect {
-        get '/games?status=created&source=mail'
+        get '/games', params: { status: 'created', source: 'mail' }
       }.not_to change(Game, :count) and expect_ok
 
       expect(json).to be
@@ -130,7 +131,7 @@ describe GamesController, :type => :request do
 
     it 'gets paginated games collection' do
       expect {
-        get '/games?per_page=2'
+        get '/games', params: { per_page: 2 }
       }.not_to change(Game, :count) and expect_ok
 
       expect(json).to be
@@ -140,7 +141,7 @@ describe GamesController, :type => :request do
 
     it 'gets games and ignores unknown filter parameters' do
       expect {
-        get '/games?unknown=value'
+        get '/games', params: { unknown: 'value' }
       }.not_to change(Game, :count) and expect_ok
 
       expect(json).to be
@@ -192,7 +193,7 @@ describe GamesController, :type => :request do
 
     it 'stops the game' do
       expect {
-        put "/games/#{game.id}", status: 'aborted'
+        put "/games/#{game.id}", params: { status: 'aborted' }
       }.not_to change(Game, :count) and expect_ok
 
       expect(json).to be
@@ -204,7 +205,7 @@ describe GamesController, :type => :request do
 
     it 'fails to create new game and gets 500 error' do
       expect {
-        post '/games', secret: 'magic'
+        post '/games', params: { secret: 'magic' }
       }.not_to change(Game, :count) and expect_error
 
       expect(json).to be

@@ -25,8 +25,8 @@ class TelegramDispatcher
 
     def log_error(ex, update)
       unless Rails.env == 'test'
-        Airbrake.notify(ex, update.to_h)
-        Rails.logger.warn("Error: #{ex.message}, context: #{update}")
+        Airbrake.notify_sync(ex, update.to_h)
+        Rails.logger.warn("Error: #{ex.message}, Update: #{update.to_json}")
       end
     end
 

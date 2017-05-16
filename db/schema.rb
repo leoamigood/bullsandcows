@@ -1,4 +1,3 @@
-# encoding: UTF-8
 # This file is auto-generated from the current state of the database. Instead
 # of editing this file, please use the migrations feature of Active Record to
 # incrementally modify your database, and then regenerate this schema definition.
@@ -80,9 +79,8 @@ ActiveRecord::Schema.define(version: 20170513213540) do
     t.integer "d"
     t.integer "doc"
     t.integer "rank"
+    t.index ["noun", "dictionary_id"], name: "index_nouns_on_noun_and_dictionary_id", unique: true, using: :btree
   end
-
-  add_index "nouns", ["noun", "dictionary_id"], name: "index_nouns_on_noun_and_dictionary_id", unique: true, using: :btree
 
   create_table "scores", force: :cascade do |t|
     t.integer  "game_id"

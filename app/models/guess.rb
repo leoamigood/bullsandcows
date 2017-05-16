@@ -1,4 +1,4 @@
-class Guess < ActiveRecord::Base
+class Guess < ApplicationRecord
   include Comparable
   belongs_to :game, counter_cache: true
 
@@ -14,11 +14,11 @@ class Guess < ActiveRecord::Base
   end
 
   def self.since(time)
-    guesses = @relation.select { |guess|
-      guess.created_at >= time.to_datetime
+    guesses = self.select { |guess|
+      guess.created_at > time.to_datetime
     } if time.present?
 
-    return guesses || @relation
+    guesses || self.all
   end
 
   def value

@@ -42,10 +42,10 @@ describe Guess, type: :model do
     let!(:game1) { create :game, secret: 'cinema' }
     let!(:game2) { create :game, secret: 'portal' }
 
-    let!(:guess1) { create :guess, id: 1, game: game1, word: 'staple', bulls: 1, cows: 1 }
-    let!(:guess2) { create :guess, id: 2, game: game2, word: 'engine', bulls: 1, cows: 2 }
-    let!(:guess3) { create :guess, id: 3, game: game2, word: 'eggnog', bulls: 1, cows: 2 }
-    let!(:guess4) { create :guess, id: 4, game: game1, word: 'entire', bulls: 1, cows: 1 }
+    let!(:guess1) { create :guess, id: 1, game: game1, word: 'staple', bulls: 1, cows: 1, created_at: 4.seconds.ago }
+    let!(:guess2) { create :guess, id: 2, game: game2, word: 'engine', bulls: 1, cows: 2, created_at: 3.seconds.ago }
+    let!(:guess3) { create :guess, id: 3, game: game2, word: 'eggnog', bulls: 1, cows: 2, created_at: 2.seconds.ago }
+    let!(:guess4) { create :guess, id: 4, game: game1, word: 'entire', bulls: 1, cows: 1, created_at: 1.seconds.ago }
 
     it 'finds guesses for given games' do
       expect(game1.guesses).to match_array([guess1, guess4])

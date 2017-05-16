@@ -1,4 +1,4 @@
-class Noun < ActiveRecord::Base
+class Noun < ApplicationRecord
   belongs_to :dictionary
 
   scope :active, -> { joins(:dictionary).where(excluded: false, dictionaries: {enabled: true}) }

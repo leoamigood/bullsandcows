@@ -154,9 +154,14 @@ class TelegramMessenger
     end
 
     def top_scores(scores)
-      scores.each.with_index.reduce("Top #{scores.count} scores: \n") { |text, indexed_score|
+      scores.each.with_index(1).reduce("Top #{scores.count} scores: \n") { |text, indexed_score|
         score, i = indexed_score.first, indexed_score.last
-        text + "#{i + 1}: <b>#{score[:first_name]} #{score[:last_name]}</b>, User: <i>#{score[:username]}</i>, Score: <b>#{score[:total_score]}</b>\n"
+
+        name = "<b>#{[score[:first_name], score[:last_name]].compact.join(' ')}</b>, "
+        user = "User: <i>#{score[:username]}</i>, " if score[:username].present?
+        total = "Score: <b>#{ActiveSupport::NumberHelper.number_to_human(score[:total_score])}</b>"
+
+        text + "#{i}: #{name}#{user}#{total}\n"
       }
     end
 
@@ -193,7 +198,7 @@ class TelegramMessenger
           '/hint _[letter]|[number]_ to reveal a letter in a secret',
           '/suggest _[letters]_ for bot to suggest a word',
           '/stop to abort the game and show secret',
-          '/score to show top scores for a period',
+          '/score to show top scores',
           '/rules to see the game rules',
           '/help to show this help'
       ]
