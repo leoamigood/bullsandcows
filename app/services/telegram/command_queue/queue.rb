@@ -26,7 +26,7 @@ module Telegram
         return if empty?
 
         if peek.callback.present?
-          peek.call
+          peek.try(:call)
         else
           pop.call
         end

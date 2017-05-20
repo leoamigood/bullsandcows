@@ -104,7 +104,10 @@ class TelegramDispatcher
           return TelegramMessenger.rules
 
         when Telegram::CommandRoute::SCORE
-          return Telegram::Action::Score.execute(channel, message), 'HTML'
+          return Telegram::Action::Score.execute(channel), 'HTML'
+
+        when Telegram::CommandRoute::TREND
+          return Telegram::Action::Trend.execute(channel, $~['since'] || 'week'), 'HTML'
 
         when Telegram::CommandRoute::STOP
           Telegram::Action::Stop.execute(channel, message)

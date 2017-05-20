@@ -2,7 +2,7 @@ class ScoreService
 
   class << self
     def create(game)
-      Score.create!(game_id: game.id, channel: game.channel, worth: worth(game.secret, game.complexity))
+      Score.create!(game_id: game.id, channel: game.channel, worth: worth(game.secret, game.complexity), created_at: game.created_at)
     end
 
     def total(game)

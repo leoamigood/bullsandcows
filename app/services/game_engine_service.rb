@@ -63,10 +63,10 @@ class GameEngineService
 
     def scores(channel, period = 1.month.ago..Time.now, limit = 8)
       scores = Score
-          .where(channel: channel, :created_at => period)
-          .where.not(winner_id: nil)
-          .group(:winner_id)
-          .maximum(:total)
+                   .where(channel: channel, :created_at => period)
+                   .where.not(winner_id: nil)
+                   .group(:winner_id)
+                   .pluck(:winner_id, 'max(total)')
 
       scores.map { |winner_id, total|
         user = User.find_by_ext_id(winner_id)
@@ -75,11 +75,30 @@ class GameEngineService
             last_name: user.last_name,
             username: user.username,
             total_score: total
-        } if user.present?
+        } if user.present? && total > 0
       }.compact.max_by(limit) { |value|
         value[:total_score]
       }
+    end
 
+    def trends(channel, period = 1.week.ago..Time.now, limit = 8)
+      scores = Score
+                   .where(channel: channel, :created_at => period)
+                   .where.not(winner_id: nil)
+                   .group(:winner_id)
+                   .pluck(:winner_id, 'max(total) - min(total)')
+
+      scores.map { |winner_id, total|
+        user = User.find_by_ext_id(winner_id)
+        {
+            first_name: user.first_name,
+            last_name: user.last_name,
+            username: user.username,
+            total_score: total
+        } if user.present? && total > 0
+      }.compact.max_by(limit) { |value|
+        value[:total_score]
+      }
     end
 
     def settings(channel, attributes)

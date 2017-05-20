@@ -831,6 +831,21 @@ describe TelegramDispatcher, type: :service do
       end
     end
 
+    context 'when /trend command received' do
+      let!(:message) { build :message, :with_realm, text: '/trend', realm: realm }
+      let!(:score1) { create(:score, worth: 179, bonus: 25, penalty: 0, points: 204, total: 807, winner_id: user.ext_id, channel: realm.channel, created_at: 15.minutes.ago) }
+      let!(:score2) { create(:score, worth: 138, bonus: 15, penalty: 0, points: 153, total: 960, winner_id: user.ext_id, channel: realm.channel, created_at: 5.minutes.ago) }
+
+      it 'replies with top players' do
+        expect {
+          expect(TelegramDispatcher.handle(message)).to satisfy { |response|
+            response.first.include?('1: <b>John Smith</b>, User: <i>john_smith</i>, Score: <b>153</b>') &&
+                response.last == 'HTML'
+          }
+        }.not_to change{ game.reload.score }
+      end
+    end
+
     context 'when non command guess word received' do
       let!(:message) { build :message, :with_realm, text: 'secret', realm: realm }
 

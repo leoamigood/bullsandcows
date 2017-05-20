@@ -165,13 +165,22 @@ describe GameEngineService, type: :service do
     let!(:score5) { create(:score, channel: realm.channel, winner: winner2, points: 108, total: 138 + 108, created_at: 4.days.ago) }
     let!(:unknown) { create(:score, channel: realm.channel, winner_id: 0, points: 999, total: 999, created_at: 1.hour.ago) }
 
-    it 'calculate top scores for last week' do
+    it 'calculate top scores' do
       expect(GameEngineService.scores(realm.channel).count).to eq(3)
       expect(GameEngineService.scores(realm.channel))
           .to include(
                   { first_name: winner3.first_name, last_name: winner3.last_name, username: winner3.username, total_score: 179 + 205 },
                   { first_name: winner2.first_name, last_name: winner2.last_name, username: winner2.username, total_score: 138 + 108 },
                   { first_name: winner1.first_name, last_name: winner1.last_name, username: winner1.username, total_score: 152 }
+              )
+    end
+
+    it 'calculate top trends for last week' do
+      expect(GameEngineService.trends(realm.channel).count).to eq(2)
+      expect(GameEngineService.trends(realm.channel))
+          .to include(
+                  { first_name: winner3.first_name, last_name: winner3.last_name, username: winner3.username, total_score: 205 },
+                  { first_name: winner2.first_name, last_name: winner2.last_name, username: winner2.username, total_score: 108 }
               )
     end
 

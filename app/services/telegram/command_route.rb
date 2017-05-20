@@ -20,6 +20,7 @@ module Telegram
     START        = /^#{Telegram::Action::Command::START}#{BOT_REGEXP}$/i
     STOP         = /^#{Telegram::Action::Command::STOP}#{BOT_REGEXP}$/i
     SUGGEST      = /^#{Telegram::Action::Command::SUGGEST}#{BOT_REGEXP}\s*(?<letters>[[:alpha:]]+)?$/i
+    TREND        = /^#{Telegram::Action::Command::TREND}#{BOT_REGEXP}\s*(?<since>(day|week|month))?$/i
     TRIES        = /^#{Telegram::Action::Command::TRIES}#{BOT_REGEXP}$/i
     ZERO         = /^#{Telegram::Action::Command::ZERO}#{BOT_REGEXP}$/i
     OTHER        = /^\/.*/

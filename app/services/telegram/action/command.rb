@@ -13,6 +13,7 @@ module Telegram
       START    = '/start'
       STOP     = '/stop'
       SUGGEST  = '/suggest'
+      TREND    = '/trend'
       TRIES    = '/tries'
       ZERO     = '/zero'
     end
