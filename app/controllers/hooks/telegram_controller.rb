@@ -1,24 +1,45 @@
+require 'airbrake'
+
 class Hooks::TelegramController < BaseApiController
 
   Rails.logger = Logger.new(STDOUT)
 
   def update
     begin
-      update = Telegram::Bot::Types::Update.new(params)
+      update = Telegram::Bot::Types::Update.new(telegram_params)
       response = TelegramDispatcher.update(update)
       Rails.logger.info("Telegram: Update: #{update.update_id}, Response: #{response.to_json}")
 
       render json: response
     rescue => ex
-      Rails.logger.warn("Error: #{ex.message}")
-      render nothing: true
+      Rails.logger.warn("Error: #{ex.message}, Stacktrace: #{ex.backtrace}")
+      Airbrake.notify(ex, params.to_h)
+      render json: ex.message
     end
   end
 
   private
 
   def telegram_params
-    message = [:message_id, :text, :date, from: [:id, :first_name, :username], chat: [:id, :first_name, :username, :type]]
-    params.permit(:data, message: message, edited_message: message, callback_query: [message: message])
+    message = [
+        :message_id,
+        :text,
+        :date,
+        from: [:id, :first_name, :last_name, :username],
+        chat: [:id, :first_name, :last_name, :username, :type]
+    ]
+
+    params.permit(
+        :update,
+        :data,
+        message: message,
+        edited_message: message,
+        callback_query: [
+            :id,
+            :data,
+            from: [:id, :first_name, :last_name, :username],
+            message: message
+        ]
+    )
   end
 end

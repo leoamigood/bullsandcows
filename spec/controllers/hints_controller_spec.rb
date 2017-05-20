@@ -22,7 +22,7 @@ describe HintsController, :type => :request  do
 
     it 'for a specified existent letter hint' do
       expect {
-        post "/games/#{game.id}/hints", hint: 't'
+        post "/games/#{game.id}/hints", params: { hint: 't' }
       }.to change{ game.hints.count }.by(1) and expect_ok
 
       expect(json).to be
@@ -35,7 +35,7 @@ describe HintsController, :type => :request  do
 
     it 'for a specified non existent letter hint' do
       expect {
-        post "/games/#{game.id}/hints", hint: 'z'
+        post "/games/#{game.id}/hints", params: { hint: 'z' }
       }.to change{ game.hints.count }.by(1) and expect_ok
 
       expect(json).to be

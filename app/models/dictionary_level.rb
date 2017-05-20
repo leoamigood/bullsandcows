@@ -1,4 +1,4 @@
-class DictionaryLevel < ActiveRecord::Base
+class DictionaryLevel < ApplicationRecord
 
   def levels
     min_level..max_level

@@ -1,4 +1,4 @@
-class Dictionary < ActiveRecord::Base
+class Dictionary < ApplicationRecord
   enum lang: {:EN => 'EN', :RU => 'RU', :IT => 'IT', :DE => 'DE', :FR => 'FR'}
 
   has_many :nouns

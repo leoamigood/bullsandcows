@@ -60,7 +60,7 @@ describe Hooks::TelegramController, :type => :request do
 
     it 'responds with game start' do
       expect {
-        post "/hooks/telegram/#{ENV['TELEGRAM_WEBHOOK']}", command
+        post "/hooks/telegram/#{ENV['TELEGRAM_WEBHOOK']}", params: command
       }.to change(queue, :size).by(3)
 
       expect(response).to be_success
@@ -121,7 +121,7 @@ describe Hooks::TelegramController, :type => :request do
     }
 
     it 'responds with help text' do
-      post "/hooks/telegram/#{ENV['TELEGRAM_WEBHOOK']}", command
+      post "/hooks/telegram/#{ENV['TELEGRAM_WEBHOOK']}", params: command
 
       expect(response).to be_success
       expect(response).to have_http_status(200)
@@ -192,7 +192,7 @@ describe Hooks::TelegramController, :type => :request do
     }
 
     it 'responds with help text' do
-      post "/hooks/telegram/#{ENV['TELEGRAM_WEBHOOK']}", command
+      post "/hooks/telegram/#{ENV['TELEGRAM_WEBHOOK']}", params: command
 
       expect(response).to be_success
       expect(response).to have_http_status(200)
@@ -224,8 +224,9 @@ describe Hooks::TelegramController, :type => :request do
                 'id' => '729191086489033331',
                 'from' => {
                     'id' => chat_id,
-                    'first_name' => 'Leo',
-                    'username' => 'Amig0'
+                    'first_name' => 'John',
+                    'last_name' => 'Smith',
+                    'username' => 'john_smith'
                 },
                 'message' => {
                     'message_id' => 120,
@@ -236,8 +237,9 @@ describe Hooks::TelegramController, :type => :request do
                     },
                     'chat' => {
                         'id' => chat_id,
-                        'first_name' => 'Leo',
-                        'username' => 'Amig0',
+                        'first_name' => 'John',
+                        'last_name' => 'Smith',
+                        'username' => 'john_smith',
                         'type' => 'private'
                     },
                     'date' => 1475903668,
@@ -254,8 +256,9 @@ describe Hooks::TelegramController, :type => :request do
                     'id' => '729191086489033331',
                     'from' => {
                         'id' => chat_id,
-                        'first_name' => 'Leo',
-                        'username' => 'Amig0'
+                        'first_name' => 'John',
+                        'last_name' => 'Smith',
+                        'username' => 'john_smith'
                     },
                     'message' => {
                         'message_id' => 120,
@@ -266,8 +269,9 @@ describe Hooks::TelegramController, :type => :request do
                         },
                         'chat' => {
                             'id' => chat_id,
-                            'first_name' => 'Leo',
-                            'username' => 'Amig0',
+                            'first_name' => 'John',
+                            'last_name' => 'Smith',
+                            'username' => 'john_smith',
                             'type' => 'private'
                         },
                         'date' => 1475903668,
@@ -282,7 +286,7 @@ describe Hooks::TelegramController, :type => :request do
 
       it 'creates a game with selected level' do
         expect {
-          post "/hooks/telegram/#{ENV['TELEGRAM_WEBHOOK']}", command
+          post "/hooks/telegram/#{ENV['TELEGRAM_WEBHOOK']}", params: command
         }.to change(queue, :size).by(-1)
 
         expect(response).to be_success

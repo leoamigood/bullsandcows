@@ -8,7 +8,7 @@ describe GuessesController, :type => :request  do
 
     it 'submits non exact guess word' do
       expect {
-        post "/games/#{game.id}/guesses", guess: 'corpus'
+        post "/games/#{game.id}/guesses", params: { guess: 'corpus' }
       }.to change(Guess, :count).by(1) and expect_ok
 
       expect(json).to be
@@ -26,7 +26,7 @@ describe GuessesController, :type => :request  do
 
     it 'submits exact guess word' do
       expect {
-        post "/games/#{game.id}/guesses", guess: 'hostel'
+        post "/games/#{game.id}/guesses", params: { guess: 'hostel' }
       }.to change(Guess, :count).by(1) and expect_ok
 
       expect(json).to be
@@ -56,7 +56,7 @@ describe GuessesController, :type => :request  do
 
     it 'gets second page of previously submitted guesses' do
       expect {
-        get "/games/#{game.id}/guesses?page=2&per_page=5"
+        get "/games/#{game.id}/guesses", params: { page: 2, per_page: 5 }
       }.not_to change(game, :status) and expect_ok
 
       expect(json).to be
@@ -68,7 +68,7 @@ describe GuessesController, :type => :request  do
 
     it 'gets previously submitted guesses since time' do
       expect {
-        get "/games/#{game.id}/guesses?since=#{game.guesses.last.created_at - 5.seconds}"
+        get "/games/#{game.id}/guesses", params: { since: game.guesses.last.created_at - 5.seconds }
       }.not_to change(game, :status) and expect_ok
 
       expect(json).to be
@@ -80,7 +80,7 @@ describe GuessesController, :type => :request  do
 
     it 'gets N best guesses submitted guesses' do
       expect {
-        get "/games/#{game.id}/guesses?best=3"
+        get "/games/#{game.id}/guesses", params: { best: 3 }
       }.not_to change(game, :status) and expect_ok
 
       expect(json).to be
@@ -92,7 +92,7 @@ describe GuessesController, :type => :request  do
 
     it 'gets max available best submitted guesses' do
       expect {
-        get "/games/#{game.id}/guesses?best=15"
+        get "/games/#{game.id}/guesses", params: { best: 15 }
       }.not_to change(game, :status) and expect_ok
 
       expect(json).to be
@@ -104,7 +104,7 @@ describe GuessesController, :type => :request  do
 
     it 'gets best submitted guesses' do
       expect {
-        get "/games/#{game.id}/guesses?best="
+        get "/games/#{game.id}/guesses", params: { best: '' }
       }.not_to change(game, :status) and expect_ok
 
       expect(json).to be
@@ -116,7 +116,7 @@ describe GuessesController, :type => :request  do
 
     it 'gets N zero submitted guesses' do
       expect {
-        get "/games/#{game.id}/guesses?zero=1"
+        get "/games/#{game.id}/guesses", params: { zero: 1 }
       }.not_to change(game, :status) and expect_ok
 
       expect(json).to be
@@ -128,7 +128,7 @@ describe GuessesController, :type => :request  do
 
     it 'gets max available zero submitted guesses' do
       expect {
-        get "/games/#{game.id}/guesses?zero=15"
+        get "/games/#{game.id}/guesses", params: { zero: 15 }
       }.not_to change(game, :status) and expect_ok
 
       expect(json).to be
@@ -140,7 +140,7 @@ describe GuessesController, :type => :request  do
 
     it 'gets ALL zero submitted guesses' do
       expect {
-        get "/games/#{game.id}/guesses?zero="
+        get "/games/#{game.id}/guesses", params: { zero: '' }
       }.not_to change(game, :status) and expect_ok
 
       expect(json).to be
@@ -154,7 +154,7 @@ describe GuessesController, :type => :request  do
   let!(:non_existent_game_id) { 832473246 }
   it 'replies with http 404 on a guess for non existent game' do
     expect {
-      post "/games/#{non_existent_game_id}/guesses", guess: 'corpus'
+      post "/games/#{non_existent_game_id}/guesses", params: { guess: 'corpus' }
     }.not_to change(Guess, :count) and expect_not_found
 
     expect(json).to be
@@ -169,7 +169,7 @@ describe GuessesController, :type => :request  do
 
     xit 'submits a guess word' do
       expect {
-        post "/games/#{game.id}/guesses", guess: 'corpus'
+        post "/games/#{game.id}/guesses", params: { guess: 'corpus' }
       }.not_to change(Guess, :count) and expect_error
 
       expect(json).to be

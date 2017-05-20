@@ -1,4 +1,4 @@
-class Hint < ActiveRecord::Base
+class Hint < ApplicationRecord
   belongs_to :game, counter_cache: true
 
 end

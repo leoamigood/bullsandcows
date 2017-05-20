@@ -1,4 +1,4 @@
-class Setting < ActiveRecord::Base
+class Setting < ApplicationRecord
   belongs_to :dictionary
 
   enum complexity: { easy: 'easy', medium: 'medium', hard: 'hard' }
