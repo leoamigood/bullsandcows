@@ -62,43 +62,36 @@ class GameEngineService
     end
 
     def scores(channel, period = 1.month.ago..Time.now, limit = 8)
-      scores = Score
-                   .where(channel: channel, :created_at => period)
-                   .where.not(winner_id: nil)
-                   .group(:winner_id)
-                   .pluck(:winner_id, 'max(total)')
+      score_sql(channel, period, 'max(total)', limit)
+    end
 
-      scores.map { |winner_id, total|
-        user = User.find_by_ext_id(winner_id)
-        {
-            first_name: user.first_name,
-            last_name: user.last_name,
-            username: user.username,
-            total_score: total
-        } if user.present? && total > 0
-      }.compact.max_by(limit) { |value|
-        value[:total_score]
-      }
+    def score_sql(channel, period, aggregation, limit)
+      query = <<-SQL
+        SELECT
+          first_name,
+          last_name,
+          username,
+          total_score
+        FROM (SELECT
+                winner_id,
+                #{aggregation} AS total_score
+              FROM scores
+              WHERE channel = '#{channel}' 
+              AND created_at BETWEEN '#{period.first.utc}' AND '#{period.last.utc}'
+              AND winner_id IS NOT NULL
+              GROUP BY (winner_id)
+              HAVING #{aggregation} > 0
+             ) AS winners
+          INNER JOIN users ON winner_id = users.ext_id
+          ORDER BY total_score DESC 
+          LIMIT #{limit}
+      SQL
+
+      ActiveRecord::Base.connection.execute(query).to_a
     end
 
     def trends(channel, period = 1.week.ago..Time.now, limit = 8)
-      scores = Score
-                   .where(channel: channel, :created_at => period)
-                   .where.not(winner_id: nil)
-                   .group(:winner_id)
-                   .pluck(:winner_id, 'max(total) - min(total)')
-
-      scores.map { |winner_id, total|
-        user = User.find_by_ext_id(winner_id)
-        {
-            first_name: user.first_name,
-            last_name: user.last_name,
-            username: user.username,
-            total_score: total
-        } if user.present? && total > 0
-      }.compact.max_by(limit) { |value|
-        value[:total_score]
-      }
+      score_sql(channel, period, 'max(total) - min(total)', limit)
     end
 
     def settings(channel, attributes)

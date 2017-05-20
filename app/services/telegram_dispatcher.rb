@@ -107,7 +107,7 @@ class TelegramDispatcher
           return Telegram::Action::Score.execute(channel), 'HTML'
 
         when Telegram::CommandRoute::TREND
-          return Telegram::Action::Trend.execute(channel, $~['since'] || 'week'), 'HTML'
+          return Telegram::Action::Trend.execute(channel, $~['since'] || 'day'), 'HTML'
 
         when Telegram::CommandRoute::STOP
           Telegram::Action::Stop.execute(channel, message)
