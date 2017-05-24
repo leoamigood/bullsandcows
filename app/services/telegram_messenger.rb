@@ -154,26 +154,24 @@ class TelegramMessenger
     end
 
     def top_scores(scores)
-      scores.each.with_index(1).reduce("Top scores: \n") { |text, indexed_score|
-        score, i = indexed_score.first, indexed_score.last
-
-        name = "<b>#{[score[:first_name], score[:last_name]].compact.join(' ')}</b>, "
-        user = "User: <i>#{score[:username]}</i>, " if score[:username].present?
-        total = "Score: <b>#{ActiveSupport::NumberHelper.number_to_human(score[:total_score])}</b>"
-
-        text + "#{i}: #{name}#{user}#{total}\n"
-      }
+      scores.empty? ? no_scores : "Top scores\n" + scores(scores).join("\n")
     end
 
     def top_trends(scores)
-      scores.each.with_index(1).reduce("Top players: \n") { |text, indexed_score|
-        score, i = indexed_score.first, indexed_score.last
+      scores.empty? ? no_scores : "Top players\n" + scores(scores).join("\n")
+    end
 
-        name = "<b>#{[score[:first_name], score[:last_name]].compact.join(' ')}</b>, "
-        user = "User: <i>#{score[:username]}</i>, " if score[:username].present?
-        total = "Score: <b>#{ActiveSupport::NumberHelper.number_to_human(score[:total_score])}</b>"
+    def no_scores
+      'No scores yet. Start a new game using <i>/start</i> command.'
+    end
 
-        text + "#{i}: #{name}#{user}#{total}\n"
+    def scores(scores)
+      scores.each.with_index(1).map { |score, i|
+        name = "<b>#{[score['first_name'], score['last_name']].compact.join(' ')}</b>, "
+        user = "User: <i>#{score['username']}</i>, " if score['username'].present?
+        total = "Score: <b>#{ActiveSupport::NumberHelper.number_to_human(score['total_score'])}</b>"
+
+        "#{i}: #{name}#{user}#{total}"
       }
     end
 

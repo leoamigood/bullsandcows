@@ -169,9 +169,9 @@ describe GameEngineService, type: :service do
       expect(GameEngineService.scores(realm.channel).count).to eq(3)
       expect(GameEngineService.scores(realm.channel))
           .to include(
-                  { first_name: winner3.first_name, last_name: winner3.last_name, username: winner3.username, total_score: 179 + 205 },
-                  { first_name: winner2.first_name, last_name: winner2.last_name, username: winner2.username, total_score: 138 + 108 },
-                  { first_name: winner1.first_name, last_name: winner1.last_name, username: winner1.username, total_score: 152 }
+                  { 'first_name' => winner3.first_name, 'last_name' => winner3.last_name, 'username' => winner3.username, 'total_score' => 179 + 205 },
+                  { 'first_name' => winner2.first_name, 'last_name' => winner2.last_name, 'username' => winner2.username, 'total_score' => 138 + 108 },
+                  { 'first_name' => winner1.first_name, 'last_name' => winner1.last_name, 'username' => winner1.username, 'total_score' => 152 }
               )
     end
 
@@ -179,8 +179,17 @@ describe GameEngineService, type: :service do
       expect(GameEngineService.trends(realm.channel).count).to eq(2)
       expect(GameEngineService.trends(realm.channel))
           .to include(
-                  { first_name: winner3.first_name, last_name: winner3.last_name, username: winner3.username, total_score: 205 },
-                  { first_name: winner2.first_name, last_name: winner2.last_name, username: winner2.username, total_score: 108 }
+                  { 'first_name' => winner3.first_name, 'last_name' => winner3.last_name, 'username' => winner3.username, 'total_score' => 205 },
+                  { 'first_name' => winner2.first_name, 'last_name' => winner2.last_name, 'username' => winner2.username, 'total_score' => 108 }
+              )
+    end
+
+    it 'calculate top trends for last week' do
+      expect(GameEngineService.trends(realm.channel).count).to eq(2)
+      expect(GameEngineService.trends(realm.channel))
+          .to include(
+                  { 'first_name' => winner3.first_name, 'last_name' => winner3.last_name, 'username' => winner3.username, 'total_score' => 205 },
+                  { 'first_name' => winner2.first_name, 'last_name' => winner2.last_name, 'username' => winner2.username, 'total_score' => 108 }
               )
     end
 
@@ -189,9 +198,9 @@ describe GameEngineService, type: :service do
       expect(GameEngineService.scores(realm.channel, last_3_days).count).to eq(3)
       expect(GameEngineService.scores(realm.channel, last_3_days)).
           to include(
-                 { first_name: winner3.first_name, last_name: winner3.last_name, username: winner3.username, total_score: 179 + 205 },
-                 { first_name: winner1.first_name, last_name: winner1.last_name, username: winner1.username, total_score: 152 },
-                 { first_name: winner2.first_name, last_name: winner2.last_name, username: winner2.username, total_score: 138 }
+                 { 'first_name' => winner3.first_name, 'last_name' => winner3.last_name, 'username' => winner3.username, 'total_score' => 179 + 205 },
+                 { 'first_name' => winner1.first_name, 'last_name' => winner1.last_name, 'username' => winner1.username, 'total_score' => 152 },
+                 { 'first_name' => winner2.first_name, 'last_name' => winner2.last_name, 'username' => winner2.username, 'total_score' => 138 }
              )
     end
 
@@ -199,8 +208,8 @@ describe GameEngineService, type: :service do
       expect(GameEngineService.scores(realm.channel, last_3_days, 2).count).to eq(2)
       expect(GameEngineService.scores(realm.channel, last_3_days, 2)).
           to include(
-                 { first_name: winner3.first_name, last_name: winner3.last_name, username: winner3.username, total_score: 179 + 205 },
-                 { first_name: winner1.first_name, last_name: winner1.last_name, username: winner1.username, total_score: 152 }
+                 { 'first_name' => winner3.first_name, 'last_name' => winner3.last_name, 'username' => winner3.username, 'total_score' => 179 + 205 },
+                 { 'first_name' => winner1.first_name, 'last_name' => winner1.last_name, 'username' => winner1.username, 'total_score' => 152 }
              )
       expect(GameEngineService.scores(realm.channel, last_3_days, 2)).
           not_to include([winner2.first_name, winner2.last_name, winner2.username, winner2.ext_id, 138])
