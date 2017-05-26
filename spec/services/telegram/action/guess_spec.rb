@@ -12,7 +12,7 @@ describe Telegram::Action::Guess, type: :service do
     before do
       allow(GameService).to receive(:recent_game).and_return(game)
       EventSubscriptions.subscribe
-      allow(TelegramMessenger).to receive(:guess)
+      allow(Telegram::TelegramMessenger).to receive(:guess)
     end
 
     it 'verifies non exact guess execution chain' do
@@ -20,7 +20,7 @@ describe Telegram::Action::Guess, type: :service do
         Telegram::Action::Guess.execute(realm.channel, user, message.text)
       }.not_to change{ game.reload.winner_id }
 
-      expect(TelegramMessenger).to have_received(:guess).with(
+      expect(Telegram::TelegramMessenger).to have_received(:guess).with(
           have_attributes(game_id: game.id, word: 'hostel', username: 'john_smith')
       )
     end

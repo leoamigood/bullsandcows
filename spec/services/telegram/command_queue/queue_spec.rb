@@ -5,7 +5,7 @@ describe Telegram::CommandQueue::Queue, type: :service do
   let!(:queue) { Telegram::CommandQueue::Queue.new(channel) }
 
   before do
-    allow(TelegramMessenger).to receive(:ask_level)
+    allow(Telegram::TelegramMessenger).to receive(:ask_level)
   end
 
   after do
@@ -38,7 +38,7 @@ describe Telegram::CommandQueue::Queue, type: :service do
     end
 
     context 'given a command' do
-      let!(:command) { Telegram::CommandQueue::Exec.new('TelegramMessenger.ask_level', channel) }
+      let!(:command) { Telegram::CommandQueue::Exec.new('Telegram::TelegramMessenger.ask_level', channel) }
 
       it 'verify push command increments queue size' do
         expect{
@@ -49,11 +49,11 @@ describe Telegram::CommandQueue::Queue, type: :service do
   end
 
   context 'given one command with assertion in a queue' do
-    let!(:command) { Telegram::CommandQueue::Exec.new('TelegramMessenger.ask_level', channel, Telegram::Action::Level.self?) }
+    let!(:command) { Telegram::CommandQueue::Exec.new('Telegram::TelegramMessenger.ask_level', channel, Telegram::Action::Level.self?) }
 
     before do
       allow(GameEngineService).to receive(:settings)
-      allow(TelegramMessenger).to receive(:level)
+      allow(Telegram::TelegramMessenger).to receive(:level)
 
       queue.push(command)
     end
@@ -73,7 +73,7 @@ describe Telegram::CommandQueue::Queue, type: :service do
     context 'when command gets executed' do
       before do
         expect(queue.execute).to be_nil
-        expect(TelegramMessenger).to have_received(:ask_level).with(channel)
+        expect(Telegram::TelegramMessenger).to have_received(:ask_level).with(channel)
       end
 
       it 'verify command remains in a queue' do

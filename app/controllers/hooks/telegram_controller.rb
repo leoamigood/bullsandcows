@@ -7,7 +7,7 @@ class Hooks::TelegramController < BaseApiController
   def update
     begin
       update = Telegram::Bot::Types::Update.new(telegram_params)
-      response = TelegramDispatcher.update(update)
+      response = Telegram::TelegramDispatcher.update(update)
       Rails.logger.info("Telegram: Update: #{update.update_id}, Response: #{response.to_json}")
 
       render json: response
