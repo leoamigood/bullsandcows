@@ -1,6 +1,6 @@
 require 'rails_helper'
 
-describe TelegramDispatcher, type: :service do
+describe Telegram::TelegramDispatcher, type: :service do
   let!(:user) { create :user, :telegram, :john_smith }
   let!(:realm) { build :telegram_realm, user: user }
 
@@ -8,7 +8,7 @@ describe TelegramDispatcher, type: :service do
   let!(:russian) { create :dictionary, :russian}
 
   before do
-    allow(TelegramMessenger).to receive(:send_message).and_return(message) if defined? message
+    allow(Telegram::TelegramMessenger).to receive(:send_message).and_return(message) if defined? message
   end
 
   context 'when game has not been created' do
@@ -18,9 +18,9 @@ describe TelegramDispatcher, type: :service do
 
       it 'replies with a welcome text' do
         expect {
-          expect(TelegramDispatcher.handle(message)).to be
-          expect(TelegramMessenger).to have_received(:send_message).with(realm.channel, /Welcome to Bulls and Cows!/).once
-          expect(TelegramMessenger).to have_received(:send_message).with(realm.channel, 'Select game language:', markup).once
+          expect(Telegram::TelegramDispatcher.handle(message)).to be
+          expect(Telegram::TelegramMessenger).to have_received(:send_message).with(realm.channel, /Welcome to Bulls and Cows!/).once
+          expect(Telegram::TelegramMessenger).to have_received(:send_message).with(realm.channel, 'Select game language:', markup).once
         }.to change(Telegram::CommandQueue::Queue.new(realm.channel), :size).by(3)
       end
     end
@@ -30,8 +30,8 @@ describe TelegramDispatcher, type: :service do
       let!(:markup) { instance_of(Telegram::Bot::Types::InlineKeyboardMarkup) }
 
       it 'replies with a prompt to specify word length' do
-        expect(TelegramDispatcher.handle(message)).to be
-        expect(TelegramMessenger).to have_received(:send_message).with(realm.channel, 'How many letters will it be?', markup)
+        expect(Telegram::TelegramDispatcher.handle(message)).to be
+        expect(Telegram::TelegramMessenger).to have_received(:send_message).with(realm.channel, 'How many letters will it be?', markup)
       end
     end
 
@@ -39,7 +39,7 @@ describe TelegramDispatcher, type: :service do
       let!(:message) { build :message, :with_realm, text: '/create коитус', realm: realm }
 
       it 'replies with a game created text' do
-        expect(TelegramDispatcher.handle(message)).to include('Game created: *6* letters.')
+        expect(Telegram::TelegramDispatcher.handle(message)).to include('Game created: *6* letters.')
       end
     end
 
@@ -47,7 +47,7 @@ describe TelegramDispatcher, type: :service do
       let!(:message) { build :message, :with_realm, text: '/create     коитус', realm: realm }
 
       it 'replies with a game created text' do
-        expect(TelegramDispatcher.handle(message)).to include('Game created: *6* letters.')
+        expect(Telegram::TelegramDispatcher.handle(message)).to include('Game created: *6* letters.')
       end
     end
 
@@ -58,7 +58,7 @@ describe TelegramDispatcher, type: :service do
       let!(:message) { build :message, :with_realm, text: '/create 6', realm: realm }
 
       it 'replies with a game created text' do
-        expect(TelegramDispatcher.handle(message)).to include('Game created: *6* letters. Language: *EN*.')
+        expect(Telegram::TelegramDispatcher.handle(message)).to include('Game created: *6* letters. Language: *EN*.')
       end
     end
 
@@ -67,11 +67,11 @@ describe TelegramDispatcher, type: :service do
 
       before do
         allow(GameEngineService).to receive(:create_by_word)
-        allow(TelegramMessenger).to receive(:game_created)
+        allow(Telegram::TelegramMessenger).to receive(:game_created)
       end
 
       it 'handles bot name as optional part in command' do
-        expect(TelegramDispatcher.handle(message))
+        expect(Telegram::TelegramDispatcher.handle(message))
         expect(GameEngineService).to have_received(:create_by_word).with(realm, 'секрет')
       end
     end
@@ -82,8 +82,8 @@ describe TelegramDispatcher, type: :service do
 
       it 'replies with prompt to submit game level' do
         expect {
-          TelegramDispatcher.handle(message)
-          expect(TelegramMessenger).to have_received(:send_message).with(realm.channel, 'Select game level:', markup)
+          Telegram::TelegramDispatcher.handle(message)
+          expect(Telegram::TelegramMessenger).to have_received(:send_message).with(realm.channel, 'Select game level:', markup)
         }.not_to change(Game, :count)
       end
     end
@@ -92,7 +92,7 @@ describe TelegramDispatcher, type: :service do
       let!(:callback) { build :callback, :with_realm, data: '/level easy', realm: realm }
 
       before do
-        allow(TelegramMessenger).to receive(:answerCallbackQuery)
+        allow(Telegram::TelegramMessenger).to receive(:answerCallbackQuery)
       end
 
       context 'being last command in command queue' do
@@ -102,8 +102,8 @@ describe TelegramDispatcher, type: :service do
 
         it 'creates setting with selected game level and response with inline message' do
           expect {
-            expect(TelegramDispatcher.handle_callback_query(callback)).to eq('Game level was set to easy.')
-            expect(TelegramMessenger).to have_received(:answerCallbackQuery)
+            expect(Telegram::TelegramDispatcher.handle_callback_query(callback)).to eq('Game level was set to easy.')
+            expect(Telegram::TelegramMessenger).to have_received(:answerCallbackQuery)
           }.to change(Setting, :count).by(1)
         end
       end
@@ -116,8 +116,8 @@ describe TelegramDispatcher, type: :service do
 
         it 'creates setting with selected game level and response with inline message' do
           expect {
-            expect(TelegramDispatcher.handle_callback_query(callback)).to be_nil
-            expect(TelegramMessenger).to have_received(:answerCallbackQuery).with(callback.id, 'Game level was set to easy.').once
+            expect(Telegram::TelegramDispatcher.handle_callback_query(callback)).to be_nil
+            expect(Telegram::TelegramMessenger).to have_received(:answerCallbackQuery).with(callback.id, 'Game level was set to easy.').once
           }.to change(Setting, :count).by(1)
         end
       end
@@ -129,8 +129,8 @@ describe TelegramDispatcher, type: :service do
 
       it 'replies with prompt to submit game language' do
         expect {
-          TelegramDispatcher.handle(message)
-          expect(TelegramMessenger).to have_received(:send_message).with(realm.channel, 'Select game language:', markup)
+          Telegram::TelegramDispatcher.handle(message)
+          expect(Telegram::TelegramMessenger).to have_received(:send_message).with(realm.channel, 'Select game language:', markup)
         }.not_to change(Game, :count)
       end
     end
@@ -139,7 +139,7 @@ describe TelegramDispatcher, type: :service do
       let!(:callback) { build :callback, :with_realm, data: '/lang RU', realm: realm }
 
       before do
-        allow(TelegramMessenger).to receive(:answerCallbackQuery)
+        allow(Telegram::TelegramMessenger).to receive(:answerCallbackQuery)
       end
 
       context 'being last command in command queue' do
@@ -149,8 +149,8 @@ describe TelegramDispatcher, type: :service do
 
         it 'creates setting with selected game language and response with inline message' do
           expect {
-            expect(TelegramDispatcher.handle_callback_query(callback)).to eq('Language was set to Русский.')
-            expect(TelegramMessenger).to have_received(:answerCallbackQuery)
+            expect(Telegram::TelegramDispatcher.handle_callback_query(callback)).to eq('Language was set to Русский.')
+            expect(Telegram::TelegramMessenger).to have_received(:answerCallbackQuery)
           }.to change(Setting, :count).by(1)
         end
       end
@@ -163,8 +163,8 @@ describe TelegramDispatcher, type: :service do
 
         it 'creates setting with selected game language and response with status message' do
           expect {
-            expect(TelegramDispatcher.handle_callback_query(callback)).to be_nil
-            expect(TelegramMessenger).to have_received(:answerCallbackQuery).with(callback.id, 'Language was set to Русский.').once
+            expect(Telegram::TelegramDispatcher.handle_callback_query(callback)).to be_nil
+            expect(Telegram::TelegramMessenger).to have_received(:answerCallbackQuery).with(callback.id, 'Language was set to Русский.').once
           }.to change(Setting, :count).by(1)
         end
       end
@@ -180,7 +180,7 @@ describe TelegramDispatcher, type: :service do
 
       it 'errors out with message about no recent games available' do
         expect {
-          expect(TelegramDispatcher.update(payload)).
+          expect(Telegram::TelegramDispatcher.update(payload)).
               to have_attributes(text: match('No recent game to show _/tries_ guesses on.'))
           expect(Telegram::Action::Tries).not_to have_received(:execute)
         }.not_to change(Guess, :count)
@@ -188,7 +188,7 @@ describe TelegramDispatcher, type: :service do
 
       it 'raises GameNotRunningException' do
         expect {
-          TelegramDispatcher.handle(message)
+          Telegram::TelegramDispatcher.handle(message)
         }.to raise_error(Errors::GameNotRunningException)
       end
     end
@@ -203,7 +203,7 @@ describe TelegramDispatcher, type: :service do
 
       it 'errors out with message about no recent games available' do
         expect {
-          expect(TelegramDispatcher.update(payload)).
+          expect(Telegram::TelegramDispatcher.update(payload)).
               to have_attributes(text: match('No recent game to show _/best_ guesses on.'))
           expect(Telegram::Action::Best).not_to have_received(:execute)
         }.not_to change(Guess, :count)
@@ -211,7 +211,7 @@ describe TelegramDispatcher, type: :service do
 
       it 'raises GameNotRunningException' do
         expect {
-          TelegramDispatcher.handle(message)
+          Telegram::TelegramDispatcher.handle(message)
         }.to raise_error(Errors::GameNotRunningException)
       end
     end
@@ -226,7 +226,7 @@ describe TelegramDispatcher, type: :service do
 
       it 'errors out with message about no recent games available' do
         expect {
-          expect(TelegramDispatcher.update(payload)).
+          expect(Telegram::TelegramDispatcher.update(payload)).
               to have_attributes(text: match('No recent game to show _/zero_ guesses on.'))
           expect(Telegram::Action::Zero).not_to have_received(:execute)
         }.not_to change(Guess, :count)
@@ -234,7 +234,7 @@ describe TelegramDispatcher, type: :service do
 
       it 'raises GameNotRunningException' do
         expect {
-          TelegramDispatcher.handle(message)
+          Telegram::TelegramDispatcher.handle(message)
         }.to raise_error(Errors::GameNotRunningException)
       end
     end
@@ -244,7 +244,7 @@ describe TelegramDispatcher, type: :service do
 
       it 'ignores the message' do
         expect {
-          expect(TelegramDispatcher.handle(message)).to be_nil
+          expect(Telegram::TelegramDispatcher.handle(message)).to be_nil
         }.not_to change(Guess, :count)
       end
     end
@@ -258,7 +258,7 @@ describe TelegramDispatcher, type: :service do
 
       it 'replies with no guesses message' do
         expect {
-          expect(TelegramDispatcher.handle(message)).to include('There was no guesses so far')
+          expect(Telegram::TelegramDispatcher.handle(message)).to include('There was no guesses so far')
         }.not_to change(Guess, :count)
       end
     end
@@ -268,7 +268,7 @@ describe TelegramDispatcher, type: :service do
 
       it 'suggests a word with matching number of letters' do
         expect {
-          expect(TelegramDispatcher.handle(message)).to match('Suggestion: _\w{6}_')
+          expect(Telegram::TelegramDispatcher.handle(message)).to match('Suggestion: _\w{6}_')
         }.to change{ game.guesses.count }.by(1)
       end
     end
@@ -283,7 +283,7 @@ describe TelegramDispatcher, type: :service do
 
       it 'errors out with message about permissions' do
         expect {
-          expect(TelegramDispatcher.update(payload)).
+          expect(Telegram::TelegramDispatcher.update(payload)).
               to have_attributes(text: match('You are NOT allowed to change game language.'))
           expect(Telegram::Action::Language).not_to have_received(:execute)
         }.not_to change(Game, :count)
@@ -291,7 +291,7 @@ describe TelegramDispatcher, type: :service do
 
       it 'raises CommandNotPermitted' do
         expect {
-          TelegramDispatcher.handle(message)
+          Telegram::TelegramDispatcher.handle(message)
         }.to raise_error(Errors::CommandNotPermittedException)
       end
     end
@@ -306,7 +306,7 @@ describe TelegramDispatcher, type: :service do
 
       it 'errors out with message about permissions' do
         expect {
-          expect(TelegramDispatcher.update(payload)).
+          expect(Telegram::TelegramDispatcher.update(payload)).
               to have_attributes(text: match('You are NOT allowed to change game level.'))
           expect(Telegram::Action::Level).not_to have_received(:execute)
         }.not_to change(Game, :count)
@@ -314,7 +314,7 @@ describe TelegramDispatcher, type: :service do
 
       it 'raises CommandNotPermitted' do
         expect {
-          TelegramDispatcher.handle(message)
+          Telegram::TelegramDispatcher.handle(message)
         }.to raise_error(Errors::CommandNotPermittedException)
       end
     end
@@ -328,7 +328,7 @@ describe TelegramDispatcher, type: :service do
 
       it 'replies with guess result' do
         expect {
-          expect(TelegramDispatcher.handle(message)).to include('Guess 11: _flight_')
+          expect(Telegram::TelegramDispatcher.handle(message)).to include('Guess 11: _flight_')
           expect(game.reload.running?).to eq(true)
         }.to change(Guess, :count).by(1)
       end
@@ -339,7 +339,7 @@ describe TelegramDispatcher, type: :service do
 
       it 'handles case sensitive case' do
         expect {
-          TelegramDispatcher.handle(message)
+          Telegram::TelegramDispatcher.handle(message)
           expect(game.reload.finished?).to eq(true)
         }.to change(Guess, :count).by(1)
       end
@@ -351,14 +351,14 @@ describe TelegramDispatcher, type: :service do
 
       it 'replies with error message' do
         expect {
-          expect(TelegramDispatcher.update(payload)).
+          expect(Telegram::TelegramDispatcher.update(payload)).
               to have_attributes(text: match('Your guess word _mistake_ (*7*) has to be *6* letters long.'))
         }.not_to change(Guess, :count)
       end
 
       it 'raises GuessException' do
         expect {
-          TelegramDispatcher.handle(message)
+          Telegram::TelegramDispatcher.handle(message)
         }.to raise_error(Errors::GuessException)
       end
     end
@@ -368,7 +368,7 @@ describe TelegramDispatcher, type: :service do
 
       it 'replies with congratulations' do
         expect {
-          expect(TelegramDispatcher.handle(message)).to include('Congratulations!')
+          expect(Telegram::TelegramDispatcher.handle(message)).to include('Congratulations!')
           expect(game.reload.finished?).to eq(true)
         }.to change(Guess, :count).by(1)
       end
@@ -379,11 +379,11 @@ describe TelegramDispatcher, type: :service do
 
       before do
         allow(GameEngineService).to receive(:guess)
-        allow(TelegramMessenger).to receive(:guess)
+        allow(Telegram::TelegramMessenger).to receive(:guess)
       end
 
       it 'handles bot name as optional part in command' do
-        expect(TelegramDispatcher.handle(message))
+        expect(Telegram::TelegramDispatcher.handle(message))
         expect(GameEngineService).to have_received(:guess).with(game, user, 'secret')
       end
     end
@@ -392,7 +392,7 @@ describe TelegramDispatcher, type: :service do
       let!(:message) { build :message, :with_realm, text: '/tries', realm: realm }
 
       it 'replies previous guess tries' do
-        expect(TelegramDispatcher.handle(message)).to include('Try 9:')
+        expect(Telegram::TelegramDispatcher.handle(message)).to include('Try 9:')
       end
 
       context 'when /tries command includes bot name received' do
@@ -400,11 +400,11 @@ describe TelegramDispatcher, type: :service do
 
         before do
           allow(GameEngineService).to receive(:tries)
-          allow(TelegramMessenger).to receive(:tries)
+          allow(Telegram::TelegramMessenger).to receive(:tries)
         end
 
         it 'handles bot name as optional part in command' do
-          expect(TelegramDispatcher.handle(message))
+          expect(Telegram::TelegramDispatcher.handle(message))
           expect(GameEngineService).to have_received(:tries)
         end
       end
@@ -415,7 +415,7 @@ describe TelegramDispatcher, type: :service do
 
       it 'replies with top guesses' do
         expect {
-          result = TelegramDispatcher.handle(message)
+          result = Telegram::TelegramDispatcher.handle(message)
           expect(result).to include('Top 1: *sector*, Bulls: *3*, Cows: *2*')
           expect(result).to include('Top 2: *master*, Bulls: *1*, Cows: *3*')
           expect(result).to include('Top 3: *energy*, Bulls: *1*, Cows: *2*')
@@ -430,7 +430,7 @@ describe TelegramDispatcher, type: :service do
 
       it 'replies with top <limit> guesses' do
         expect {
-          result = TelegramDispatcher.handle(message)
+          result = Telegram::TelegramDispatcher.handle(message)
           expect(result).to include('Top 1: *sector*, Bulls: *3*, Cows: *2*')
           expect(result).to include('Top 2: *master*, Bulls: *1*, Cows: *3*')
           expect(result).to include('Top 3: *energy*, Bulls: *1*, Cows: *2*')
@@ -444,11 +444,11 @@ describe TelegramDispatcher, type: :service do
 
       before do
         allow(GameEngineService).to receive(:best)
-        allow(TelegramMessenger).to receive(:best)
+        allow(Telegram::TelegramMessenger).to receive(:best)
       end
 
       it 'handles bot name as optional part in command' do
-        expect(TelegramDispatcher.handle(message))
+        expect(Telegram::TelegramDispatcher.handle(message))
         expect(GameEngineService).to have_received(:best)
       end
     end
@@ -458,7 +458,7 @@ describe TelegramDispatcher, type: :service do
 
       it 'reveals one letter in a secret' do
         expect {
-          expect(TelegramDispatcher.handle(message)).to match(/Secret word has letter \*\w\* in it/)
+          expect(Telegram::TelegramDispatcher.handle(message)).to match(/Secret word has letter \*\w\* in it/)
         }.to change{ game.hints.count }.by(1)
       end
     end
@@ -469,7 +469,7 @@ describe TelegramDispatcher, type: :service do
 
         it 'reveals specified matching letter in a secret' do
           expect {
-            expect(TelegramDispatcher.handle(message)).to match(/Secret word has letter \*c\* in it/)
+            expect(Telegram::TelegramDispatcher.handle(message)).to match(/Secret word has letter \*c\* in it/)
           }.to change{ game.hints.count }.by(1)
         end
       end
@@ -479,7 +479,7 @@ describe TelegramDispatcher, type: :service do
 
         it 'reveals the fact that the specified letter is NOT in a secret' do
           expect {
-            expect(TelegramDispatcher.handle(message)).to match(/Secret word has NO letter \*x\* in it/)
+            expect(Telegram::TelegramDispatcher.handle(message)).to match(/Secret word has NO letter \*x\* in it/)
           }.to change{ game.hints.count }.by(1)
         end
       end
@@ -491,7 +491,7 @@ describe TelegramDispatcher, type: :service do
 
         it 'reveals specified number of letter in a secret' do
           expect {
-            expect(TelegramDispatcher.handle(message)).to match(/Secret word has letter \*e\* in it/)
+            expect(Telegram::TelegramDispatcher.handle(message)).to match(/Secret word has letter \*e\* in it/)
           }.to change{ game.hints.count }.by(1)
         end
       end
@@ -501,7 +501,7 @@ describe TelegramDispatcher, type: :service do
 
         xit 'raises error that number is out of bounds' do
           expect {
-            TelegramDispatcher.handle(message)
+            Telegram::TelegramDispatcher.handle(message)
           }.to raise_error
         end
       end
@@ -514,7 +514,7 @@ describe TelegramDispatcher, type: :service do
 
           it 'reveals specified number of letter in a secret' do
             expect {
-              expect(TelegramDispatcher.handle(message)).to match(/Secret word has letter \*т\* in it/)
+              expect(Telegram::TelegramDispatcher.handle(message)).to match(/Secret word has letter \*т\* in it/)
             }.to change{ game_long_secret.hints.count }.by(1)
           end
         end
@@ -526,7 +526,7 @@ describe TelegramDispatcher, type: :service do
 
       it 'suggests a word with a substring specified' do
         expect {
-          expect(TelegramDispatcher.handle(message)).to include('Suggestion: _barrel_, *Bulls: 2*, *Cows: 0*.')
+          expect(Telegram::TelegramDispatcher.handle(message)).to include('Suggestion: _barrel_, *Bulls: 2*, *Cows: 0*.')
         }.to change{ game.guesses.count }.by(1)
       end
     end
@@ -536,7 +536,7 @@ describe TelegramDispatcher, type: :service do
 
       it 'finds no words to suggests based on a substring specified' do
         expect {
-          expect(TelegramDispatcher.handle(message)).to include('Could not find any suggestions based on provided word letters _ku_')
+          expect(Telegram::TelegramDispatcher.handle(message)).to include('Could not find any suggestions based on provided word letters _ku_')
         }.not_to change{ game.guesses.count }
       end
     end
@@ -546,7 +546,7 @@ describe TelegramDispatcher, type: :service do
 
       it 'replies with guesses where bulls and cows have zero occurrences' do
         expect {
-          result = TelegramDispatcher.handle(message)
+          result = Telegram::TelegramDispatcher.handle(message)
           expect(result).to include('Zero letters in: *ballad*, Bulls: *0*, Cows: *0*.')
           expect(result).to include('Zero letters in: *quorum*, Bulls: *0*, Cows: *0*.')
         }.not_to change(Guess, :count)
@@ -563,7 +563,7 @@ describe TelegramDispatcher, type: :service do
 
         it 'finishes the game, replies with a secret word' do
           expect {
-            expect(TelegramDispatcher.handle(message)).to include('You give up? Here is the secret word *secret*.')
+            expect(Telegram::TelegramDispatcher.handle(message)).to include('You give up? Here is the secret word *secret*.')
           }.to change{ game.reload.status }.to('aborted')
         end
       end
@@ -577,14 +577,14 @@ describe TelegramDispatcher, type: :service do
 
         it 'fails to stop the game, replies with a error message' do
           expect {
-            expect(TelegramDispatcher.update(payload)).
+            expect(Telegram::TelegramDispatcher.update(payload)).
                 to have_attributes(text: match('You are NOT allowed to _/stop_ this game.'))
           }.not_to change{ game.reload.status }
         end
 
         it 'raises CommandNotPermitted' do
           expect {
-            TelegramDispatcher.handle(message)
+            Telegram::TelegramDispatcher.handle(message)
           }.to raise_error(Errors::CommandNotPermittedException)
         end
       end
@@ -599,7 +599,7 @@ describe TelegramDispatcher, type: :service do
       end
 
       it 'handles bot name as optional part in command' do
-        expect(TelegramDispatcher.handle(message))
+        expect(Telegram::TelegramDispatcher.handle(message))
         expect(GameService).to have_received(:stop!).with(game)
       end
     end
@@ -609,7 +609,7 @@ describe TelegramDispatcher, type: :service do
 
       it 'replies with guess result' do
         expect {
-          expect(TelegramDispatcher.handle(message)).to include('Guess 11: _flight_')
+          expect(Telegram::TelegramDispatcher.handle(message)).to include('Guess 11: _flight_')
           expect(game.reload.running?).to eq(true)
         }.to change(Guess, :count).by(1)
       end
@@ -620,7 +620,7 @@ describe TelegramDispatcher, type: :service do
 
       it 'replies with congratulations' do
         expect {
-          expect(TelegramDispatcher.handle(message)).to include('Congratulations!')
+          expect(Telegram::TelegramDispatcher.handle(message)).to include('Congratulations!')
           expect(game.reload.finished?).to eq(true)
         }.to change(Guess, :count).by(1)
       end
@@ -631,7 +631,7 @@ describe TelegramDispatcher, type: :service do
 
       it 'ignore the message' do
         expect {
-          TelegramDispatcher.handle(message)
+          Telegram::TelegramDispatcher.handle(message)
         }.not_to change(Guess, :count)
       end
     end
@@ -641,7 +641,7 @@ describe TelegramDispatcher, type: :service do
 
       it 'ignore the message' do
         expect {
-          expect(TelegramDispatcher.handle(message)).to be_nil
+          expect(Telegram::TelegramDispatcher.handle(message)).to be_nil
         }.not_to change(Guess, :count)
       end
     end
@@ -657,7 +657,7 @@ describe TelegramDispatcher, type: :service do
 
       it 'handles case sensitive unicode case' do
         expect {
-          TelegramDispatcher.handle(message)
+          Telegram::TelegramDispatcher.handle(message)
           expect(game.reload.finished?).to eq(true)
         }.to change(Guess, :count).by(1)
       end
@@ -673,14 +673,14 @@ describe TelegramDispatcher, type: :service do
 
       it 'replies with error message' do
         expect {
-          expect(TelegramDispatcher.update(payload)).
+          expect(Telegram::TelegramDispatcher.update(payload)).
               to have_attributes(text: match('Game is not running. Please _/start_ new game and try again.'))
         }.not_to change(Guess, :count)
       end
 
       it 'raises GameNotRunningException' do
         expect {
-          TelegramDispatcher.handle(message)
+          Telegram::TelegramDispatcher.handle(message)
         }.to raise_error(Errors::GameNotRunningException)
       end
     end
@@ -691,14 +691,14 @@ describe TelegramDispatcher, type: :service do
 
       it 'replies with error message' do
         expect {
-          expect(TelegramDispatcher.update(payload)).
+          expect(Telegram::TelegramDispatcher.update(payload)).
               to have_attributes(text: match('Game is not running. Please _/start_ new game and try again.'))
         }.not_to change(Hint, :count)
       end
 
       it 'raises GameNotRunningException' do
         expect {
-          TelegramDispatcher.handle(message)
+          Telegram::TelegramDispatcher.handle(message)
         }.to raise_error(Errors::GameNotRunningException)
       end
     end
@@ -709,14 +709,14 @@ describe TelegramDispatcher, type: :service do
 
       it 'replies with error message' do
         expect {
-          expect(TelegramDispatcher.update(payload)).
+          expect(Telegram::TelegramDispatcher.update(payload)).
               to have_attributes(text: 'Game is not running. Please _/start_ new game and try again.')
         }.not_to change(Hint, :count)
       end
 
       it 'raises GameNotRunningException' do
         expect {
-          TelegramDispatcher.handle(message)
+          Telegram::TelegramDispatcher.handle(message)
         }.to raise_error(Errors::GameNotRunningException)
       end
     end
@@ -727,8 +727,8 @@ describe TelegramDispatcher, type: :service do
 
       it 'replies with prompt to submit game level' do
         expect {
-          TelegramDispatcher.handle(message)
-          expect(TelegramMessenger).to have_received(:send_message).with(realm.channel, 'Select game level:', markup)
+          Telegram::TelegramDispatcher.handle(message)
+          expect(Telegram::TelegramMessenger).to have_received(:send_message).with(realm.channel, 'Select game level:', markup)
         }.not_to change(Game, :count)
       end
     end
@@ -737,7 +737,7 @@ describe TelegramDispatcher, type: :service do
       let!(:callback) { build :callback, :with_realm, data: '/level easy', realm: realm }
 
       before do
-        allow(TelegramMessenger).to receive(:answerCallbackQuery)
+        allow(Telegram::TelegramMessenger).to receive(:answerCallbackQuery)
       end
 
       context 'being last command in command queue' do
@@ -747,8 +747,8 @@ describe TelegramDispatcher, type: :service do
 
         it 'creates setting with selected game level and response with inline message' do
           expect {
-            expect(TelegramDispatcher.handle_callback_query(callback)).to eq('Game level was set to easy.')
-            expect(TelegramMessenger).to have_received(:answerCallbackQuery)
+            expect(Telegram::TelegramDispatcher.handle_callback_query(callback)).to eq('Game level was set to easy.')
+            expect(Telegram::TelegramMessenger).to have_received(:answerCallbackQuery)
           }.to change(Setting, :count).by(1)
         end
       end
@@ -760,8 +760,8 @@ describe TelegramDispatcher, type: :service do
 
       it 'replies with prompt to submit game language' do
         expect {
-          TelegramDispatcher.handle(message)
-          expect(TelegramMessenger).to have_received(:send_message).with(realm.channel, 'Select game language:', markup)
+          Telegram::TelegramDispatcher.handle(message)
+          expect(Telegram::TelegramMessenger).to have_received(:send_message).with(realm.channel, 'Select game language:', markup)
         }.not_to change(Game, :count)
       end
     end
@@ -770,7 +770,7 @@ describe TelegramDispatcher, type: :service do
       let!(:callback) { build :callback, :with_realm, data: '/lang RU', realm: realm }
 
       before do
-        allow(TelegramMessenger).to receive(:answerCallbackQuery)
+        allow(Telegram::TelegramMessenger).to receive(:answerCallbackQuery)
       end
 
       context 'being last command in command queue' do
@@ -780,8 +780,8 @@ describe TelegramDispatcher, type: :service do
 
         it 'creates setting with selected game language and response with inline message' do
           expect {
-            expect(TelegramDispatcher.handle_callback_query(callback)).to eq('Language was set to Русский.')
-            expect(TelegramMessenger).to have_received(:answerCallbackQuery)
+            expect(Telegram::TelegramDispatcher.handle_callback_query(callback)).to eq('Language was set to Русский.')
+            expect(Telegram::TelegramMessenger).to have_received(:answerCallbackQuery)
           }.to change(Setting, :count).by(1)
         end
       end
@@ -792,7 +792,7 @@ describe TelegramDispatcher, type: :service do
 
       it 'replies with game guesses' do
         expect {
-          expect(TelegramDispatcher.handle(message)).to match('Try .* Bulls: .* Cows: .*')
+          expect(Telegram::TelegramDispatcher.handle(message)).to match('Try .* Bulls: .* Cows: .*')
         }.not_to change(Guess, :count)
       end
     end
@@ -802,7 +802,7 @@ describe TelegramDispatcher, type: :service do
 
       it 'replies with top guesses' do
         expect {
-          expect(TelegramDispatcher.handle(message)).to match('Top .* Bulls: .* Cows: .*')
+          expect(Telegram::TelegramDispatcher.handle(message)).to match('Top .* Bulls: .* Cows: .*')
         }.not_to change(Guess, :count)
       end
     end
@@ -812,7 +812,7 @@ describe TelegramDispatcher, type: :service do
 
       it 'replies with guesses where bulls and cows have zero occurrences' do
         expect {
-          expect(TelegramDispatcher.handle(message)).to match('Zero letters in:')
+          expect(Telegram::TelegramDispatcher.handle(message)).to match('Zero letters in:')
         }.not_to change(Guess, :count)
       end
     end
@@ -823,7 +823,7 @@ describe TelegramDispatcher, type: :service do
 
       it 'replies with top scores' do
         expect {
-          expect(TelegramDispatcher.handle(message)).to satisfy { |response|
+          expect(Telegram::TelegramDispatcher.handle(message)).to satisfy { |response|
             response.first.include?('1: <b>John Smith</b>, User: <i>john_smith</i>, Score: <b>807</b>') &&
                 response.last == 'HTML'
           }
@@ -838,7 +838,7 @@ describe TelegramDispatcher, type: :service do
 
       it 'replies with top players' do
         expect {
-          expect(TelegramDispatcher.handle(message)).to satisfy { |response|
+          expect(Telegram::TelegramDispatcher.handle(message)).to satisfy { |response|
             response.first.include?('1: <b>John Smith</b>, User: <i>john_smith</i>, Score: <b>153</b>') &&
                 response.last == 'HTML'
           }
@@ -851,7 +851,7 @@ describe TelegramDispatcher, type: :service do
 
       it 'ignores the message' do
         expect {
-          expect(TelegramDispatcher.handle(message)).to be_nil
+          expect(Telegram::TelegramDispatcher.handle(message)).to be_nil
           expect(game.reload.finished?).to eq(true)
         }.not_to change(Guess, :count)
       end
@@ -862,19 +862,19 @@ describe TelegramDispatcher, type: :service do
     let!(:message) { build :message, :with_realm, text: '/help', realm: realm }
 
     it 'replies with help message' do
-      expect(TelegramDispatcher.handle(message)).to include('Here is the list of available commands:')
+      expect(Telegram::TelegramDispatcher.handle(message)).to include('Here is the list of available commands:')
     end
 
     context 'when /help command includes bot name received' do
       let!(:message) { build :message, :with_realm, text: '/help@BullsAndCowsWordsBot', realm: realm }
 
       before do
-        allow(TelegramMessenger).to receive(:help)
+        allow(Telegram::TelegramMessenger).to receive(:help)
       end
 
       it 'handles bot name as optional part in command' do
-        expect(TelegramDispatcher.handle(message))
-        expect(TelegramMessenger).to have_received(:help)
+        expect(Telegram::TelegramDispatcher.handle(message))
+        expect(Telegram::TelegramMessenger).to have_received(:help)
       end
     end
   end
@@ -883,7 +883,7 @@ describe TelegramDispatcher, type: :service do
     let!(:message) { build :message, :with_realm, text: '/unknown', realm: realm }
 
     it 'replies with generic message' do
-      expect(TelegramDispatcher.handle(message)).to include('Nothing I can do')
+      expect(Telegram::TelegramDispatcher.handle(message)).to include('Nothing I can do')
     end
   end
 
@@ -891,12 +891,12 @@ describe TelegramDispatcher, type: :service do
     let!(:message) { build :message, :with_realm, text: '/rules', realm: realm }
 
     before do
-      allow(TelegramMessenger).to receive(:rules)
+      allow(Telegram::TelegramMessenger).to receive(:rules)
     end
 
     it 'handles bot name as optional part in command' do
-      expect(TelegramDispatcher.handle(message))
-      expect(TelegramMessenger).to have_received(:rules)
+      expect(Telegram::TelegramDispatcher.handle(message))
+      expect(Telegram::TelegramMessenger).to have_received(:rules)
     end
   end
 

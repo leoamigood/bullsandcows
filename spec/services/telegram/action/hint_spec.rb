@@ -9,7 +9,7 @@ describe Telegram::Action::Hint, type: :service do
 
     before do
       allow(GameService).to receive(:find_by_channel!).and_return(game)
-      allow(TelegramMessenger).to receive(:hint)
+      allow(Telegram::TelegramMessenger).to receive(:hint)
     end
 
     let!(:letter) { 'r' }
@@ -17,7 +17,7 @@ describe Telegram::Action::Hint, type: :service do
       Telegram::Action::Hint.execute(realm.channel, letter: 'r', strategy: :by_letter)
 
       expect(GameService).to have_received(:find_by_channel!).with(realm.channel)
-      expect(TelegramMessenger).to have_received(:hint).with(letter)
+      expect(Telegram::TelegramMessenger).to have_received(:hint).with(letter)
     end
 
     let!(:number) { 4 }
@@ -25,7 +25,7 @@ describe Telegram::Action::Hint, type: :service do
       Telegram::Action::Hint.execute(realm.channel, number: number, strategy: :by_number)
 
       expect(GameService).to have_received(:find_by_channel!).with(realm.channel)
-      expect(TelegramMessenger).to have_received(:hint).with(letter)
+      expect(Telegram::TelegramMessenger).to have_received(:hint).with(letter)
     end
   end
 end

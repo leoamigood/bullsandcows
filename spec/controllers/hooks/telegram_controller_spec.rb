@@ -10,7 +10,7 @@ describe Hooks::TelegramController, :type => :request do
 
   context 'when receives telegram message with /start command' do
     before do
-      allow(TelegramMessenger).to receive(:send_message)
+      allow(Telegram::TelegramMessenger).to receive(:send_message)
     end
 
     let!(:command) {
@@ -206,10 +206,10 @@ describe Hooks::TelegramController, :type => :request do
   end
 
   context 'given dictionary with word levels' do
-    let!(:ask_level) { Telegram::CommandQueue::Exec.new('TelegramMessenger.ask_level', chat_id, Telegram::Action::Level.self?) }
+    let!(:ask_level) { Telegram::CommandQueue::Exec.new('Telegram::TelegramMessenger.ask_level', chat_id, Telegram::Action::Level.self?) }
 
     before do
-      allow(TelegramMessenger).to receive(:answerCallbackQuery)
+      allow(Telegram::TelegramMessenger).to receive(:answerCallbackQuery)
 
       queue.push(ask_level)
     end
