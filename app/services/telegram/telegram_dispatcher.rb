@@ -64,8 +64,8 @@ module Telegram
           when Telegram::CommandRoute::CREATE
             Telegram::Action::Create.ask(channel)
 
-          when Telegram::CommandRoute::CREATE_ALPHA
-            Telegram::Action::Create.execute(channel, user, word: $~['secret'], strategy: :by_word)
+          # when Telegram::CommandRoute::CREATE_ALPHA
+          #   Telegram::Action::Create.execute(channel, user, word: $~['secret'], strategy: :by_word)
 
           when Telegram::CommandRoute::CREATE_DIGIT
             Telegram::Action::Create.execute(channel, user, length: $~['number'], strategy: :by_number)
