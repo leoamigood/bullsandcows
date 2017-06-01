@@ -21,7 +21,8 @@ describe Hooks::TelegramController, :type => :request do
               'from' => {
                   'id' => chat_id,
                   'first_name' => 'Leo',
-                  'username' => 'Amig0'
+                  'username' => 'Amig0',
+                  'language_code' => 'ru-Ru'
           },
               'chat' => {
                   'id' => chat_id,
@@ -83,7 +84,8 @@ describe Hooks::TelegramController, :type => :request do
               'from' => {
                   'id' => chat_id,
                   'first_name' => 'Leo',
-                  'username' => 'Amig0'
+                  'username' => 'Amig0',
+                  'language_code' => 'ru-Ru'
               },
               'chat' => {
                   'id' => chat_id,
