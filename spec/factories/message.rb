@@ -26,6 +26,7 @@ FactoryGirl.define do
 
   trait :with_realm do
     after :build do |message, evaluator|
+
       case message.class.name
         when Telegram::Bot::Types::Message.to_s
           message.stub_chain(:chat, :id).and_return(evaluator.realm.channel)
@@ -33,7 +34,11 @@ FactoryGirl.define do
         when Telegram::Bot::Types::CallbackQuery.to_s
           message.stub_chain(:message, :chat, :id).and_return(evaluator.realm.channel)
       end
-      message.stub_chain(:from).and_return(evaluator.realm.user)
+
+      message.stub_chain(:from, :language_code).and_return(evaluator.realm.user.language)
+      message.stub_chain(:from, :first_name).and_return(evaluator.realm.user.first_name)
+      message.stub_chain(:from, :last_name).and_return(evaluator.realm.user.last_name)
+      message.stub_chain(:from, :username).and_return(evaluator.realm.user.username)
       message.stub_chain(:from, :id).and_return(evaluator.realm.user.ext_id)
     end
   end

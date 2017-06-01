@@ -25,7 +25,7 @@ class Hooks::TelegramController < BaseApiController
         :message_id,
         :text,
         :date,
-        from: [:id, :first_name, :last_name, :username],
+        from: [:id, :first_name, :last_name, :username, :language_code],
         chat: [:id, :first_name, :last_name, :username, :type]
     ]
 
@@ -37,7 +37,7 @@ class Hooks::TelegramController < BaseApiController
         callback_query: [
             :id,
             :data,
-            from: [:id, :first_name, :last_name, :username],
+            from: [:id, :first_name, :last_name, :username, :language_code],
             message: message
         ]
     )
