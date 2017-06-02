@@ -190,4 +190,8 @@ describe GameService, type: :service do
   it 'sanitize word with ambiguous spelling and case' do
     expect(GameService.sanitize('Ёлка')).to eq('елка')
   end
+
+  it 'sanitize word whitespaces on each side of the word' do
+    expect(GameService.sanitize(' magic  ')).to eq('magic')
+  end
 end

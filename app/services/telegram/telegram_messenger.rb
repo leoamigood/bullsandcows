@@ -14,6 +14,12 @@ module Telegram
         end
       end
 
+      def answerInlineQuery(inline_query_id, markup)
+        Telegram::Bot::Client.run(TELEGRAM_TOKEN) do |bot|
+          bot.api.answerInlineQuery(inline_query_id: inline_query_id, results: markup, cache_time: 0)
+        end
+      end
+
       def getChatMember(channel, user_id)
         Telegram::Bot::Client.run(TELEGRAM_TOKEN) do |bot|
           bot.api.getChatMember(chat_id: channel, user_id: user_id)
@@ -73,6 +79,19 @@ module Telegram
         text += TelegramMessenger.finish(guess.game) if guess.exact?
 
         text
+      end
+
+      def query(id, words)
+        markup = words.map do |word|
+          Telegram::Bot::Types::InlineQueryResultArticle.new(
+              id: "#{word.noun} #{word.dictionary.lang}",
+              title: 'Create new game using secret word:',
+              description: "#{word.noun} (#{word.dictionary.lang})",
+              input_message_content: Telegram::Bot::Types::InputTextMessageContent.new(message_text: '/create')
+          )
+        end
+
+        TelegramMessenger.answerInlineQuery(id, markup)
       end
 
       def finish(game)

@@ -9,7 +9,7 @@ describe UserService, type: :service do
     let!(:message) { build :message, :with_realm, text: '/start', realm: realm }
 
     it 'create user from telegram message' do
-      expect(UserService.create_from_telegram(message)).
+      expect(UserService.create_from_telegram(message.from)).
           to have_attributes(
                  username: 'john_smith',
                  first_name: 'John',
@@ -30,7 +30,7 @@ describe UserService, type: :service do
       let!(:message) { build :message, :with_realm, text: '/start', realm: realm }
 
       it 'update user properties, but keep telegram source' do
-        expect(UserService.create_from_telegram(message)).
+        expect(UserService.create_from_telegram(message.from)).
             to have_attributes(
                    username: 'john_smith',
                    first_name: 'John',

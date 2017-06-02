@@ -6,7 +6,7 @@ class GameEngineService
     def create_by_word(realm, input)
       secret = GameService.sanitize(input)
 
-      GameService.create(realm, Noun.new(noun: secret))
+      GameService.create(realm, Noun.find_by(noun: secret) || Noun.new(noun: secret))
     end
 
     def create_by_options(realm, options)
