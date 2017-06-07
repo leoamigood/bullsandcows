@@ -47,18 +47,17 @@ module Telegram
         response = execute(command, channel, callback_query)
 
         TelegramMessenger.answerCallbackQuery(callback_query.id, response)
+
         queue = Telegram::CommandQueue::Queue.new(channel)
         queue.present? ? queue.execute : response
       end
 
       def handle_inline(inline_query)
-        return unless inline_query.query.present?
+        return TelegramMessenger.howto(inline_query.id) unless inline_query.query.present?
 
         query = GameService.sanitize(inline_query.query)
         words = Noun.active.where(noun: query)
         return unless words.present?
-
-        Rails.logger.info("Total results for inline query: #{query}:#{words.count}")
 
         TelegramMessenger.query(inline_query.id, words)
 
@@ -71,7 +70,7 @@ module Telegram
 
         case command
           when Telegram::CommandRoute::START
-            Telegram::Action::Start.execute(channel)
+            Telegram::Action::Start.execute(channel, $~['prologue'])
             Telegram::CommandQueue::Queue.new(channel).execute
 
           when Telegram::CommandRoute::LANG

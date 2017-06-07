@@ -5,8 +5,8 @@ module Telegram
 
     class Start
       class << self
-        def execute(channel)
-          TelegramMessenger.welcome(channel)
+        def execute(channel, prologue)
+          TelegramMessenger.welcome(channel, prologue)
 
           queue = Telegram::CommandQueue::Queue.new(channel).reset
 

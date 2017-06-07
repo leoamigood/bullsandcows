@@ -17,7 +17,7 @@ module Telegram
     LEVEL_ALPHA  = /^#{Telegram::Action::Command::LEVEL}#{BOT_REGEXP}\s+(?<level>[[:alpha:]]+)$/i
     RULES        = /^#{Telegram::Action::Command::RULES}#{BOT_REGEXP}/i
     SCORE        = /^#{Telegram::Action::Command::SCORE}#{BOT_REGEXP}\s*(?<period>[[:digit:]]+)?$/i
-    START        = /^#{Telegram::Action::Command::START}#{BOT_REGEXP}$/i
+    START        = /^#{Telegram::Action::Command::START}#{BOT_REGEXP}\s*(?<prologue>(howto))?$/i
     STOP         = /^#{Telegram::Action::Command::STOP}#{BOT_REGEXP}$/i
     SUGGEST      = /^#{Telegram::Action::Command::SUGGEST}#{BOT_REGEXP}\s*(?<letters>[[:alpha:]]+)?$/i
     TREND        = /^#{Telegram::Action::Command::TREND}#{BOT_REGEXP}\s*(?<since>(day|week|month))?$/i
