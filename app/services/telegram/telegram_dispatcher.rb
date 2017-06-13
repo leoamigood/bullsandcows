@@ -14,6 +14,10 @@ module Telegram
             when Telegram::Bot::Types::CallbackQuery
               response = handle_callback_query(payload)
               Telegram::Response.new(chat_id, response)
+
+            when Telegram::Bot::Types::InlineQuery
+              response = handle_inline(payload)
+              Telegram::Response.new(chat_id, response)
           end
         rescue Errors::GameException => ex
           log_error(ex, update)
@@ -43,16 +47,30 @@ module Telegram
         response = execute(command, channel, callback_query)
 
         TelegramMessenger.answerCallbackQuery(callback_query.id, response)
+
         queue = Telegram::CommandQueue::Queue.new(channel)
         queue.present? ? queue.execute : response
       end
 
+      def handle_inline(inline_query)
+        return TelegramMessenger.howto(inline_query.id) unless inline_query.query.present?
+
+        query = GameService.sanitize(inline_query.query)
+        words = Noun.active.where(noun: query)
+        return unless words.present?
+
+        TelegramMessenger.query(inline_query.id, words)
+
+        user = UserService.create_from_telegram(inline_query.from)
+        Telegram::CommandQueue::UserQueue.new(user).reset.push("/create #{query}")
+      end
+
       def execute(command, channel, message)
-        user = UserService.create_from_telegram(message)
+        user = UserService.create_from_telegram(message.from)
 
         case command
           when Telegram::CommandRoute::START
-            Telegram::Action::Start.execute(channel)
+            Telegram::Action::Start.execute(channel, $~['prologue'])
             Telegram::CommandQueue::Queue.new(channel).execute
 
           when Telegram::CommandRoute::LANG
@@ -62,12 +80,15 @@ module Telegram
             Telegram::Action::Language.execute(channel, $~['language'])
 
           when Telegram::CommandRoute::CREATE
-            Telegram::Action::Create.ask(channel)
+            pre = Telegram::CommandQueue::UserQueue.new(user).pop
+            pre.present? ? execute(pre, channel, message) : Telegram::Action::Create.ask(channel)
 
-          # when Telegram::CommandRoute::CREATE_ALPHA
-          #   Telegram::Action::Create.execute(channel, user, word: $~['secret'], strategy: :by_word)
+          when Telegram::CommandRoute::CREATE_ALPHA
+            Telegram::CommandQueue::Queue.new(channel).reset
+            Telegram::Action::Create.execute(channel, user, word: $~['secret'], strategy: :by_word)
 
           when Telegram::CommandRoute::CREATE_DIGIT
+            Telegram::CommandQueue::Queue.new(channel).reset
             Telegram::Action::Create.execute(channel, user, length: $~['number'], strategy: :by_number)
 
           when Telegram::CommandRoute::GUESS
@@ -125,6 +146,7 @@ module Telegram
 
     def self.extract_message(update)
       return update.callback_query, update.callback_query.message.chat.id if update.callback_query.present?
+      return update.inline_query, nil if update.inline_query.present?
       return update.message, update.message.chat.id if update.message.present?
     end
   end

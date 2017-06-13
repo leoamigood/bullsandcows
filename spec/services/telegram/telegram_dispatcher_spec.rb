@@ -29,10 +29,23 @@ describe Telegram::TelegramDispatcher, type: :service do
       let!(:message) { build :message, :with_realm, text: '/create', realm: realm }
       let!(:markup) { instance_of(Telegram::Bot::Types::InlineKeyboardMarkup) }
 
-      it 'replies with a prompt to specify word length' do
-        expect(Telegram::TelegramDispatcher.handle(message)).to be
-        expect(Telegram::TelegramMessenger).to have_received(:send_message).with(realm.channel, 'How many letters will it be?', markup)
+      context 'without previous inline query' do
+        it 'replies with a prompt to specify word length' do
+          expect(Telegram::TelegramDispatcher.handle(message)).to be
+          expect(Telegram::TelegramMessenger).to have_received(:send_message).with(realm.channel, 'How many letters will it be?', markup)
+        end
       end
+
+      context 'with previous user inline query' do
+        before do
+          allow_any_instance_of(Telegram::CommandQueue::UserQueue).to receive(:pop).and_return('/create игра')
+        end
+
+        it 'replies with a game created text' do
+          expect(Telegram::TelegramDispatcher.handle(message)).to include('Game created: *4* letters.')
+        end
+      end
+
     end
 
     context 'when /create <word> command received' do

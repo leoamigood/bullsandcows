@@ -17,5 +17,8 @@ module Telegram
       TRIES    = '/tries'
       ZERO     = '/zero'
     end
+    module Options
+      HOWTO = 'howto'
+    end
   end
 end

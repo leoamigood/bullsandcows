@@ -2,9 +2,9 @@ module Telegram
   class TelegramMessenger
 
     class << self
-      def send_message(channel, text, markup = nil)
+      def send_message(channel, text, markup = nil, parse_mode = 'Markdown')
         Telegram::Bot::Client.run(TELEGRAM_TOKEN) do |bot|
-          bot.api.send_message(chat_id: channel, text: text, reply_markup: markup)
+          bot.api.send_message(chat_id: channel, text: text, reply_markup: markup, parse_mode: parse_mode)
         end
       end
 
@@ -14,14 +14,30 @@ module Telegram
         end
       end
 
+      def answerInlineQuery(inline_query_id, markup, defaults = {})
+        Telegram::Bot::Client.run(TELEGRAM_TOKEN) do |bot|
+          bot.api.answerInlineQuery(defaults.merge(inline_query_id: inline_query_id, results: markup, cache_time: 0))
+        end
+      end
+
       def getChatMember(channel, user_id)
         Telegram::Bot::Client.run(TELEGRAM_TOKEN) do |bot|
           bot.api.getChatMember(chat_id: channel, user_id: user_id)
         end
       end
 
-      def welcome(channel)
-        send_message(channel, 'Welcome to Bulls and Cows! Use /rules command to learn how to play.')
+      def welcome(channel, prologue = nil)
+        case prologue
+          when Telegram::Action::Options::HOWTO
+            send_message(channel, rules)
+          else
+            send_message(channel, 'Welcome to Bulls and Cows! Use /rules command to learn how to play.')
+        end
+      end
+
+      def howto(id)
+        options = { switch_pm_text: 'How to use this bot', switch_pm_parameter: Telegram::Action::Options::HOWTO }
+        TelegramMessenger.answerInlineQuery(id, [], options)
       end
 
       def ask_language(channel)
@@ -73,6 +89,19 @@ module Telegram
         text += TelegramMessenger.finish(guess.game) if guess.exact?
 
         text
+      end
+
+      def query(id, words)
+        markup = words.map do |word|
+          Telegram::Bot::Types::InlineQueryResultArticle.new(
+              id: "#{word.noun} #{word.dictionary.lang}",
+              title: 'Create new game using secret word:',
+              description: "#{word.noun} (#{word.dictionary.lang})",
+              input_message_content: Telegram::Bot::Types::InputTextMessageContent.new(message_text: '/create')
+          )
+        end
+
+        TelegramMessenger.answerInlineQuery(id, markup)
       end
 
       def finish(game)
@@ -159,7 +188,7 @@ module Telegram
       end
 
       def top_trends(scores, since)
-        scores.empty? ? no_scores : "Top #{since} players:\n" + scores(scores).join("\n")
+        scores.empty? ? no_scores : "Top players of the #{since}:\n" + scores(scores).join("\n")
       end
 
       def no_scores
@@ -177,7 +206,7 @@ module Telegram
       end
 
       def rules
-        '[Game rules](https://en.wikipedia.org/wiki/Bulls_and_Cows)'
+        '[Bulls & Cows Game Rules](https://en.wikipedia.org/wiki/Bulls_and_Cows)'
       end
 
       def help

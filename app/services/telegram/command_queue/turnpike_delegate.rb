@@ -3,27 +3,7 @@ require 'turnpike'
 module Telegram
 
   module CommandQueue
-    class TurnpikeDelegate
-      def initialize(channel)
-        @queue = Turnpike.call(channel)
-      end
-      
-      def push(*elements)
-        @queue.push(*elements)
-      end
-
-      def size
-        @queue.size
-      end
-
-      def empty?
-        @queue.size == 0
-      end
-
-      def present?
-        @queue.size > 0
-      end
-
+    class TurnpikeDelegate < BasicTurnpikeDelegate
       def pop
         unpack(@queue.pop)
       end
@@ -33,10 +13,6 @@ module Telegram
         @queue.unshift(element) if element.present?
 
         unpack(element)
-      end
-
-      def clear
-        @queue.pop(@queue.size)
       end
 
       private

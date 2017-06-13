@@ -34,6 +34,11 @@ class Hooks::TelegramController < BaseApiController
         :data,
         message: message,
         edited_message: message,
+        inline_query: [
+            :id,
+            :query,
+            from: [:id, :first_name, :last_name, :username, :language_code]
+        ],
         callback_query: [
             :id,
             :data,
