@@ -1,5 +1,3 @@
-require 'aspector'
-
 module Telegram
   module Action
 
@@ -16,20 +14,15 @@ module Telegram
 
           queue.push(ask_language, ask_level, ask_length)
         end
-      end
-    end
 
-    private
+        private
 
-    aspector(Start, class_methods: true) do
-      target do
-        def permit(*args, &block)
-          channel, message = *args
-          Telegram::Validator.validate!(Command::START, channel, message)
+        def command
+          Command::START
         end
       end
-
-      before :execute, :permit
     end
+
+    Rules::PermitExecute.apply(Start, class_methods: true)
   end
 end

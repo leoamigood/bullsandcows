@@ -13,20 +13,15 @@ module Telegram
 
           TelegramMessenger.guess(guess)
         end
-      end
-    end
 
-    private
-    
-    aspector(Guess, class_methods: true) do
-      target do
-        def permit(*args, &block)
-          channel = *args
-          Telegram::Validator.validate!(Command::GUESS, channel)
+        private
+
+        def command
+          Command::GUESS
         end
       end
-
-      before :execute, :permit
     end
+
+    Rules::PermitExecute.apply(Guess, class_methods: true)
   end
 end

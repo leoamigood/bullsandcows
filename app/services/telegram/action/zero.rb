@@ -9,20 +9,16 @@ module Telegram
           guesses = GameEngineService.zero(channel)
           TelegramMessenger.zero(guesses)
         end
-      end
-    end
 
-    private
+        private
 
-    aspector(Zero, class_methods: true) do
-      target do
-        def permit(*args, &block)
-          channel, message = *args
-          Telegram::Validator.validate!(Command::ZERO, channel, message)
+        def command
+          Command::ZERO
         end
       end
-
-      before :execute, :permit
     end
+
+    Rules::PermitExecute.apply(Zero, class_methods: true)
   end
 end
+

@@ -10,20 +10,15 @@ module Telegram
           GameService.stop!(game)
           TelegramMessenger.game_stop(game)
         end
-      end
-    end
 
-    private
+        private
 
-    aspector(Stop, class_methods: true) do
-      target do
-        def permit(*args, &block)
-          channel, message = *args
-          Telegram::Validator.validate!(Command::STOP, channel, message)
+        def command
+          Command::STOP
         end
       end
-
-      before :execute, :permit
     end
+
+    Rules::PermitExecute.apply(Stop, class_methods: true)
   end
 end
