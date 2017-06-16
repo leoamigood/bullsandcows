@@ -209,6 +209,17 @@ module Telegram
         '[Bulls & Cows Game Rules](https://en.wikipedia.org/wiki/Bulls_and_Cows)'
       end
 
+      def faq
+        lines = %w(/rules /help)
+        Telegram::Bot::Types::ReplyKeyboardMarkup.new(
+            keyboard: lines.each_with_object([]) { |line, memo|
+              memo << [Telegram::Bot::Types::KeyboardButton.new(text: line)]
+            },
+            one_time_keyboard: true,
+            selective: true
+        )
+      end
+
       def help
         # start   - Use /start to start the game bot
         # best    - Use /best [number] to show best guesses
@@ -224,6 +235,7 @@ module Telegram
         # score   - Use /score to show total scores
         # trend   - Use /trend _[day|week|month]_ to show top players
         # rules   - Use /rules to see the game rules
+        # faq     - Usr /faq to show game FAQ
         # help    - Usr /help to show this help
 
         lines = [
@@ -242,6 +254,7 @@ module Telegram
             '/score to show total scores',
             '/trend _[day|week|month]_ to show top players',
             '/rules to see the game rules',
+            '/faq to show game FAQ',
             '/help to show this help'
         ]
         lines.join("\n")

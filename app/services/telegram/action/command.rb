@@ -3,6 +3,7 @@ module Telegram
     module Command
       BEST     = '/best'
       CREATE   = '/create'
+      FAQ      = '/faq'
       GUESS    = '/guess'
       HELP     = '/help'
       HINT     = '/hint'

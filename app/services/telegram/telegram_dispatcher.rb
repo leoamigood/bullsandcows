@@ -133,6 +133,9 @@ module Telegram
           when Telegram::CommandRoute::STOP
             Telegram::Action::Stop.execute(channel, message)
 
+          when Telegram::CommandRoute::FAQ
+            TelegramMessenger.faq
+
           when Telegram::CommandRoute::HELP
             TelegramMessenger.help
 
