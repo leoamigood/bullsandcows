@@ -35,10 +35,13 @@ module Telegram
       end
 
       def handle(message)
-        return unless message.text.present?
+        command = nil
 
-        command = message.text.mb_chars.downcase.to_s
-        execute(command, channel = message.chat.id, message)
+        if message.text.present?
+          command = message.text.mb_chars.downcase.to_s
+        end
+
+        execute(command, message.chat.id, message)
       end
 
       def handle_callback_query(callback_query)
@@ -138,6 +141,12 @@ module Telegram
 
           when Telegram::CommandRoute::OTHER
             TelegramMessenger.unknown_command(message)
+
+          when nil
+            if message.voice.present?
+              command = Telegram::Action::Voice.execute(channel, user, message.voice)
+              execute(command, channel, message) if command.present?
+            end
         end
       end
     end

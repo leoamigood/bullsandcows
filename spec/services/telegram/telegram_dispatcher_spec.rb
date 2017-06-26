@@ -331,6 +331,21 @@ describe Telegram::TelegramDispatcher, type: :service do
         }.to raise_error(Errors::CommandNotPermittedException)
       end
     end
+
+    context 'when voice guess received' do
+      let!(:message) { build :message, :with_realm, :voice_short, realm: realm }
+
+      before do
+        allow(Telegram::TelegramMessenger).to receive(:loadFile).with(message.voice.file_id)
+        allow(GoogleCloudService).to receive(:recognize).with(anything(), 'en-GB').and_return('wonder')
+        allow(Telegram::Action::Guess).to receive(:execute)
+      end
+
+      it 'uses voice message transcribed word as a guess' do
+        expect(Telegram::TelegramDispatcher.handle(message))
+        expect(Telegram::Action::Guess).to have_received(:execute).with(realm.channel, realm.user, 'wonder')
+      end
+    end
   end
 
   context 'when game is in progress and has multiple guesses placed' do

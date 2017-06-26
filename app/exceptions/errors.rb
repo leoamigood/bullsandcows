@@ -6,6 +6,9 @@ module Errors
     end
   end
 
+  class TelegramIOException < StandardError
+  end
+
   class GameException < StandardError
     attr_reader :game
 
@@ -13,6 +16,9 @@ module Errors
       @game = game
       super(message)
     end
+  end
+
+  class VoiceMessageException < GameException
   end
 
   class GuessException < GameException

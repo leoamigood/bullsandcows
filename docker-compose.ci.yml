@@ -22,9 +22,10 @@ services:
       - redis
     working_dir: /u/apps/bullsandcows
     environment:
-      RAILS_ENV: test
+      - CODECLIMATE_API_HOST
+      - CODECLIMATE_REPO_TOKEN
     env_file:
       - '.env.backend'
       - '.env.backend.test'
       - '.env.postgres.test'
-    command: bash -c "sleep 5 && rake db:setup && bundle exec rspec -fd"
+    command: bash -c "sleep 5 && rake db:setup && bundle exec rspec -fd && codeclimate-test-reporter"

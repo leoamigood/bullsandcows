@@ -45,6 +45,7 @@ gem 'attr_extras'
 gem 'aspector'
 gem 'turnpike'
 gem 'event_bus'
+gem 'google-cloud-speech'
 
 group :development, :test do
   # Call 'byebug' anywhere in the code to stop execution and get a debugger console
@@ -60,7 +61,8 @@ group :development do
 end
 
 group :test  do
-  gem 'simplecov'
+  gem 'simplecov', require: false
+  gem 'codeclimate-test-reporter', require: false
   gem 'rspec-rails'
   gem 'factory_girl_rails', '~> 4.0'
 end

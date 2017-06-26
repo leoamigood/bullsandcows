@@ -20,6 +20,18 @@ module Telegram
         end
       end
 
+      def loadFile(file_id)
+        response = Telegram::Bot::Client.run(TELEGRAM_TOKEN) do |bot|
+          bot.api.getFile(file_id: file_id)
+        end
+
+        raise Errors::TelegramIOException.new(response['description']) unless response['ok']
+        url = "https://api.telegram.org/file/bot#{TELEGRAM_TOKEN}/#{response['result']['file_path']}"
+
+        Rails.logger.info("LOADING FILE AT: #{url}")
+        open(url).read
+      end
+
       def getChatMember(channel, user_id)
         Telegram::Bot::Client.run(TELEGRAM_TOKEN) do |bot|
           bot.api.getChatMember(chat_id: channel, user_id: user_id)

@@ -26,7 +26,8 @@ class Hooks::TelegramController < BaseApiController
         :text,
         :date,
         from: [:id, :first_name, :last_name, :username, :language_code],
-        chat: [:id, :first_name, :last_name, :username, :type]
+        chat: [:id, :first_name, :last_name, :username, :type],
+        voice: [:duration, :mime_type, :file_id, :file_id]
     ]
 
     params.permit(

@@ -130,6 +130,10 @@ class GameService
       !!recent_game(channel).try(:in_progress?)
     end
 
+    def current_game(channel)
+      recent_game(channel) if in_progress?(channel)
+    end
+
     private
 
     def bulls(guess, secret)
