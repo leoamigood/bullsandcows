@@ -15,7 +15,7 @@ describe UserService, type: :service do
                  first_name: 'John',
                  last_name: 'Smith',
                  source: 'telegram',
-                 language: nil
+                 language: 'en-GB'
              )
     end
   end

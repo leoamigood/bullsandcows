@@ -24,6 +24,13 @@ FactoryGirl.define do
     end
   end
 
+  trait :voice_short do
+    after :build do |message|
+      message.stub_chain(:voice).and_return(Telegram::Bot::Types::Voice.new)
+      message.stub_chain(:voice, :duration).and_return(2)
+    end
+  end
+
   trait :with_realm do
     after :build do |message, evaluator|
 

@@ -18,7 +18,7 @@
 # See http://rubydoc.info/gems/rspec-core/RSpec/Core/Configuration
 RSpec.configure do |config|
   require 'factory_girl_rails'
-  require  'simplecov'
+  require 'simplecov'
 
   config.before(:example) do
     @MAX_INT_VALUE = 2 ** (0.size * 4) / 2 - 1
