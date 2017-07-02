@@ -1,5 +1,5 @@
 class Game < ApplicationRecord
-  belongs_to :creator, class_name: 'User', primary_key: 'ext_id', foreign_key: 'winner_id'
+  belongs_to :creator, class_name: 'User', primary_key: 'ext_id', foreign_key: 'user_id'
   belongs_to :winner, class_name: 'User', primary_key: 'ext_id', foreign_key: 'winner_id'
   belongs_to :dictionary
   has_one  :score

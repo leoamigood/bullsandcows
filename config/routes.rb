@@ -13,6 +13,11 @@ Rails.application.routes.draw do
     resources :hints, :only => [:create, :index]
   end
 
+  resources :graphql, only: :create
+  if Rails.env.development?
+    mount GraphiQL::Rails::Engine, at: '/graphiql', graphql_path: '/graphql'
+  end
+
   namespace :hooks do
     resources :telegram, :only => [] do
       post ENV['TELEGRAM_WEBHOOK'], action: :update, :on => :collection

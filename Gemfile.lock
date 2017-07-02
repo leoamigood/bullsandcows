@@ -111,6 +111,9 @@ GEM
       multi_json (~> 1.11)
       os (~> 0.9)
       signet (~> 0.7)
+    graphiql-rails (1.4.2)
+      rails
+    graphql (1.6.4)
     grpc (1.4.0)
       google-protobuf (~> 3.1)
       googleauth (~> 0.5.1)
@@ -287,6 +290,8 @@ DEPENDENCIES
   event_bus
   factory_girl_rails (~> 4.0)
   google-cloud-speech
+  graphiql-rails
+  graphql
   jbuilder (~> 2.0)
   jquery-rails
   kaminari

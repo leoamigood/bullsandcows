@@ -46,6 +46,8 @@ gem 'aspector'
 gem 'turnpike'
 gem 'event_bus'
 gem 'google-cloud-speech'
+gem 'graphql'
+gem 'graphiql-rails'
 
 group :development, :test do
   # Call 'byebug' anywhere in the code to stop execution and get a debugger console
