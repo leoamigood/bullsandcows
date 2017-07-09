@@ -7,7 +7,7 @@ describe Telegram::Action::Create, type: :service do
   let!(:message) { build :message, :with_realm, text: '/create', realm: realm }
 
   before do
-    allow_any_instance_of(Telegram::CommandQueue::Queue).to receive(:pop)
+    allow_any_instance_of(CommandQueue::Queue).to receive(:pop)
   end
 
   context 'given game channel and settings' do
@@ -18,7 +18,7 @@ describe Telegram::Action::Create, type: :service do
     end
 
     it 'verifies create by word execution chain' do
-      expect_any_instance_of(Telegram::CommandQueue::Queue).to receive(:pop).with(no_args)
+      expect_any_instance_of(CommandQueue::Queue).to receive(:pop).with(no_args)
       Telegram::Action::Create.execute(realm.channel, user, word: 'secret', strategy: :by_word)
 
       expect(Telegram::TelegramMessenger).to have_received(:game_created).with(
@@ -31,7 +31,7 @@ describe Telegram::Action::Create, type: :service do
       let!(:hard) { create :dictionary_level, :hard_ru, dictionary_id: dictionary.id }
 
       it 'creates game with specifies word length' do
-        expect_any_instance_of(Telegram::CommandQueue::Queue).to receive(:pop).with(no_args)
+        expect_any_instance_of(CommandQueue::Queue).to receive(:pop).with(no_args)
         Telegram::Action::Create.execute(realm.channel, user, length: 8, strategy: :by_number)
 
         expect(Telegram::TelegramMessenger).to have_received(:game_created).with(

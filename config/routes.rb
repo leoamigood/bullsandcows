@@ -17,5 +17,6 @@ Rails.application.routes.draw do
     resources :telegram, :only => [] do
       post ENV['TELEGRAM_WEBHOOK'], action: :update, :on => :collection
     end
+    mount Facebook::Messenger::Server, at: 'facebook'
   end
 end

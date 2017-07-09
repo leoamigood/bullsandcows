@@ -1,8 +1,8 @@
 require 'rails_helper'
 
-describe Telegram::CommandQueue::TurnpikeDelegate, type: :service do
+describe CommandQueue::TurnpikeDelegate, type: :service do
   let!(:channel) { Random.rand(@MAX_INT_VALUE) }
-  let!(:queue) { Telegram::CommandQueue::TurnpikeDelegate.new(channel) }
+  let!(:queue) { CommandQueue::TurnpikeDelegate.new(channel) }
 
   before do
     queue.clear
@@ -45,7 +45,7 @@ describe Telegram::CommandQueue::TurnpikeDelegate, type: :service do
   end
 
   context 'given one one item in a queue' do
-    let!(:command1) { Telegram::CommandQueue::Exec.new('String.new', 'first item') }
+    let!(:command1) { CommandQueue::Exec.new('String.new', 'first item') }
 
     before do
       queue.push(command1)
@@ -84,8 +84,8 @@ describe Telegram::CommandQueue::TurnpikeDelegate, type: :service do
       }.to change(queue, :size).by(1)
     end
 
-    let!(:command2) { Telegram::CommandQueue::Exec.new('String.new', 'first item') }
-    let!(:command3) { Telegram::CommandQueue::Exec.new('String.new', 'first item') }
+    let!(:command2) { CommandQueue::Exec.new('String.new', 'first item') }
+    let!(:command3) { CommandQueue::Exec.new('String.new', 'first item') }
     it 'verify queue order with multiple push and pop' do
       expect{
         queue.push(command2)

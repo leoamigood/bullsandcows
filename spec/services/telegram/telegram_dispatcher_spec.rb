@@ -21,7 +21,7 @@ describe Telegram::TelegramDispatcher, type: :service do
           expect(Telegram::TelegramDispatcher.handle(message)).to be
           expect(Telegram::TelegramMessenger).to have_received(:send_message).with(realm.channel, /Welcome to Bulls and Cows!/).once
           expect(Telegram::TelegramMessenger).to have_received(:send_message).with(realm.channel, 'Select game language:', markup).once
-        }.to change(Telegram::CommandQueue::Queue.new(realm.channel), :size).by(3)
+        }.to change(CommandQueue::Queue.new(realm.channel), :size).by(3)
       end
     end
 
@@ -38,7 +38,7 @@ describe Telegram::TelegramDispatcher, type: :service do
 
       context 'with previous user inline query' do
         before do
-          allow_any_instance_of(Telegram::CommandQueue::UserQueue).to receive(:pop).and_return('/create игра')
+          allow_any_instance_of(CommandQueue::UserQueue).to receive(:pop).and_return('/create игра')
         end
 
         it 'replies with a game created text' do
@@ -110,7 +110,7 @@ describe Telegram::TelegramDispatcher, type: :service do
 
       context 'being last command in command queue' do
         before do
-          allow(Telegram::CommandQueue).to receive(:present?).and_return(false)
+          allow(CommandQueue).to receive(:present?).and_return(false)
         end
 
         it 'creates setting with selected game level and response with inline message' do
@@ -123,8 +123,8 @@ describe Telegram::TelegramDispatcher, type: :service do
 
       context 'NOT being last command in command queue' do
         before do
-          allow_any_instance_of(Telegram::CommandQueue::Queue).to receive(:present?).and_return(true)
-          allow_any_instance_of(Telegram::CommandQueue::Queue).to receive(:execute)
+          allow_any_instance_of(CommandQueue::Queue).to receive(:present?).and_return(true)
+          allow_any_instance_of(CommandQueue::Queue).to receive(:execute)
         end
 
         it 'creates setting with selected game level and response with inline message' do
@@ -157,7 +157,7 @@ describe Telegram::TelegramDispatcher, type: :service do
 
       context 'being last command in command queue' do
         before do
-          allow(Telegram::CommandQueue).to receive(:present?).and_return(false)
+          allow(CommandQueue).to receive(:present?).and_return(false)
         end
 
         it 'creates setting with selected game language and response with inline message' do
@@ -170,8 +170,8 @@ describe Telegram::TelegramDispatcher, type: :service do
 
       context 'NOT being last command in command queue' do
         before do
-          allow_any_instance_of(Telegram::CommandQueue::Queue).to receive(:present?).and_return(true)
-          allow_any_instance_of(Telegram::CommandQueue::Queue).to receive(:execute)
+          allow_any_instance_of(CommandQueue::Queue).to receive(:present?).and_return(true)
+          allow_any_instance_of(CommandQueue::Queue).to receive(:execute)
         end
 
         it 'creates setting with selected game language and response with status message' do
@@ -770,7 +770,7 @@ describe Telegram::TelegramDispatcher, type: :service do
 
       context 'being last command in command queue' do
         before do
-          allow(Telegram::CommandQueue).to receive(:present?).and_return(false)
+          allow(CommandQueue).to receive(:present?).and_return(false)
         end
 
         it 'creates setting with selected game level and response with inline message' do
@@ -803,7 +803,7 @@ describe Telegram::TelegramDispatcher, type: :service do
 
       context 'being last command in command queue' do
         before do
-          allow(Telegram::CommandQueue).to receive(:present?).and_return(false)
+          allow(CommandQueue).to receive(:present?).and_return(false)
         end
 
         it 'creates setting with selected game language and response with inline message' do

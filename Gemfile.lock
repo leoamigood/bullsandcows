@@ -76,6 +76,9 @@ GEM
     erubi (1.6.0)
     event_bus (1.1.1)
     execjs (2.7.0)
+    facebook-messenger (1.0.0)
+      httparty (~> 0.13, >= 0.13.7)
+      rack (>= 1.6.4)
     factory_girl (4.8.0)
       activesupport (>= 3.0.0)
     factory_girl_rails (4.8.0)
@@ -114,6 +117,8 @@ GEM
     grpc (1.4.0)
       google-protobuf (~> 3.1)
       googleauth (~> 0.5.1)
+    httparty (0.15.5)
+      multi_xml (>= 0.5.2)
     i18n (0.8.1)
     ice_nine (0.11.2)
     jbuilder (2.6.4)
@@ -154,6 +159,7 @@ GEM
     minitest (5.10.2)
     msgpack (1.1.0)
     multi_json (1.12.1)
+    multi_xml (0.6.0)
     multipart-post (2.0.0)
     newrelic_rpm (4.1.0.333)
     nio4r (2.0.0)
@@ -285,6 +291,7 @@ DEPENDENCIES
   codeclimate-test-reporter
   coffee-rails (~> 4.2.0)
   event_bus
+  facebook-messenger
   factory_girl_rails (~> 4.0)
   google-cloud-speech
   jbuilder (~> 2.0)

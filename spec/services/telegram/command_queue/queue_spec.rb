@@ -1,8 +1,8 @@
 require 'rails_helper'
 
-describe Telegram::CommandQueue::Queue, type: :service do
+describe CommandQueue::Queue, type: :service do
   let!(:channel) { Random.rand(@MAX_INT_VALUE) }
-  let!(:queue) { Telegram::CommandQueue::Queue.new(channel) }
+  let!(:queue) { CommandQueue::Queue.new(channel) }
 
   before do
     allow(Telegram::TelegramMessenger).to receive(:ask_level)
@@ -38,7 +38,7 @@ describe Telegram::CommandQueue::Queue, type: :service do
     end
 
     context 'given a command' do
-      let!(:command) { Telegram::CommandQueue::Exec.new('Telegram::TelegramMessenger.ask_level', channel) }
+      let!(:command) { CommandQueue::Exec.new('Telegram::TelegramMessenger.ask_level', channel) }
 
       it 'verify push command increments queue size' do
         expect{
@@ -49,7 +49,7 @@ describe Telegram::CommandQueue::Queue, type: :service do
   end
 
   context 'given one command with assertion in a queue' do
-    let!(:command) { Telegram::CommandQueue::Exec.new('Telegram::TelegramMessenger.ask_level', channel, Telegram::Action::Level.self?) }
+    let!(:command) { CommandQueue::Exec.new('Telegram::TelegramMessenger.ask_level', channel, Telegram::Action::Level.self?) }
 
     before do
       allow(GameEngineService).to receive(:settings)

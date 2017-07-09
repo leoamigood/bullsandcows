@@ -2,7 +2,7 @@ require 'rails_helper'
 
 describe Hooks::TelegramController, :type => :request do
   let!(:chat_id) { 169778030 }
-  let!(:queue) { Telegram::CommandQueue::Queue.new(chat_id) }
+  let!(:queue) { CommandQueue::Queue.new(chat_id) }
 
   after do
     queue.clear
@@ -208,7 +208,7 @@ describe Hooks::TelegramController, :type => :request do
   end
 
   context 'given dictionary with word levels' do
-    let!(:ask_level) { Telegram::CommandQueue::Exec.new('Telegram::TelegramMessenger.ask_level', chat_id, Telegram::Action::Level.self?) }
+    let!(:ask_level) { CommandQueue::Exec.new('Telegram::TelegramMessenger.ask_level', chat_id, Telegram::Action::Level.self?) }
 
     before do
       allow(Telegram::TelegramMessenger).to receive(:answerCallbackQuery)

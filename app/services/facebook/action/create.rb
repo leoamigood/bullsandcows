@@ -1,0 +1,45 @@
+require 'aspector'
+
+module Facebook
+  module Action
+
+    class Create
+      class << self
+        def ask(sender)
+          FacebookMessenger.ask_length(sender)
+        end
+
+        def self?
+          "proc { |cls| cls == #{self.name} }"
+        end
+      end
+    end
+
+    private
+
+    # aspector(Create, class_methods: true) do
+    #   target do
+    #     def assert(*args, &block)
+    #       channel = args.first
+    #       CommandQueue::Queue.new(channel).assert(self)
+    #     end
+    #
+    #     def permit(*args, &block)
+    #       channel = args.first
+    #       Telegram::Validator.validate!(Command::CREATE, channel)
+    #     end
+    #
+    #     def pop(*args, &block)
+    #       msg, channel = *args
+    #       CommandQueue::Queue.new(channel).pop
+    #
+    #       msg
+    #     end
+    #   end
+    #
+    #   before_filter :execute, :assert
+    #   before :ask, :execute, :permit
+    #   after :execute, :pop
+    # end
+  end
+end

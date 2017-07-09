@@ -36,7 +36,7 @@ module Telegram
       target do
         def assert(*args, &block)
           channel = args.first
-          Telegram::CommandQueue::Queue.new(channel).assert(self)
+          CommandQueue::Queue.new(channel).assert(self)
         end
 
         def permit(*args, &block)
@@ -46,7 +46,7 @@ module Telegram
 
         def pop(*args, &block)
           msg, channel = *args
-          Telegram::CommandQueue::Queue.new(channel).pop
+          CommandQueue::Queue.new(channel).pop
 
           msg
         end
