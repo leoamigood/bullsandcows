@@ -109,7 +109,7 @@ class GameService
     end
 
     def update_winner(game)
-      game.winner_id = game.guesses.last.user_id
+      game.winner_id = game.guesses.detect { |g| g.exact? }.user_id
       game.save!
     end
 
