@@ -37,7 +37,7 @@ module Telegram
                 "No running game to _#{STOP}_. Please _#{START}_ new game and try again."
             ) unless game.try(:in_progress?)
             
-            if (message.chat.type == 'group')
+            if (is_group?(message))
               raise Errors::CommandNotPermittedException.new(
                   "You are NOT allowed to _#{STOP}_ this game. Only _admin_ or _game creator_ is.", game
               ) unless permitted?(game, message)
@@ -50,6 +50,10 @@ module Telegram
 
       def permitted?(game, message)
         is_admin?(message) || is_game_creator?(game, message)
+      end
+
+      def is_group?(message)
+        message.chat.type == 'group' || message.chat.type == 'supergroup'
       end
 
       def is_admin?(message)

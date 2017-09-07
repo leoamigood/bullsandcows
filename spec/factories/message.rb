@@ -24,6 +24,12 @@ FactoryGirl.define do
     end
   end
 
+  trait :supergroup do
+    after :build do |message|
+      message.stub_chain(:chat, :type).and_return('supergroup')
+    end
+  end
+
   trait :voice_short do
     after :build do |message|
       message.stub_chain(:voice).and_return(Telegram::Bot::Types::Voice.new)
