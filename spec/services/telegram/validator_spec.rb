@@ -100,6 +100,60 @@ describe Telegram::Validator, type: :service do
         end
       end
     end
+
+    context 'given super group /stop message' do
+      let!(:message) { build :message, :with_realm, :supergroup, text: '/stop', realm: creator_realm }
+
+      context 'given message from a channel creator' do
+        before do
+          Telegram::TelegramMessenger.stub_chain(:getChatMember, :[], :[]).with('result').with('status').and_return('creator')
+        end
+
+        it 'allows player permission to stop the game' do
+          expect{
+            Telegram::Validator.validate!(Telegram::Action::Stop, channel, message)
+          }.not_to raise_error
+        end
+      end
+
+      context 'given message from a channel administrator' do
+        before do
+          Telegram::TelegramMessenger.stub_chain(:getChatMember, :[], :[]).with('result').with('status').and_return('administrator')
+        end
+
+        it 'allows player permission to stop the game' do
+          expect{
+            Telegram::Validator.validate!(STOP, channel, message)
+          }.not_to raise_error
+        end
+      end
+
+      context 'given message from a game creator' do
+        before do
+          Telegram::TelegramMessenger.stub_chain(:getChatMember, :[], :[]).with('result').with('status').and_return('member')
+        end
+
+        it 'allows player permission to stop the game' do
+          expect{
+            Telegram::Validator.validate!(STOP, channel, message)
+          }.not_to raise_error
+        end
+      end
+
+      context 'given message from a game player' do
+        before do
+          Telegram::TelegramMessenger.stub_chain(:getChatMember, :[], :[]).with('result').with('status').and_return('member')
+        end
+
+        let!(:message) { build :message, :with_realm, :group, text: '/stop', realm: player_realm }
+
+        it 'denies player permission to stop the game' do
+          expect{
+            Telegram::Validator.validate!(STOP, channel, message)
+          }.to raise_error(Errors::CommandNotPermittedException)
+        end
+      end
+    end
   end
 
 end
