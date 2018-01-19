@@ -1,4 +1,4 @@
-class CreateGame < ActiveRecord::Migration
+class CreateGame < ActiveRecord::Migration[5.1]
   def change
     create_table :games do |t|
       t.string  :secret, limit: 64

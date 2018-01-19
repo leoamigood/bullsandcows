@@ -1,4 +1,4 @@
-class CreateScore < ActiveRecord::Migration
+class CreateScore < ActiveRecord::Migration[5.1]
   def change
     create_table :scores do |t|
       t.integer :game_id

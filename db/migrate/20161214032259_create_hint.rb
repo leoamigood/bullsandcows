@@ -1,4 +1,4 @@
-class CreateHint < ActiveRecord::Migration
+class CreateHint < ActiveRecord::Migration[5.1]
   def change
     create_table :hints do |t|
       t.integer :game_id

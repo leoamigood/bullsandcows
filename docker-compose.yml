@@ -43,8 +43,8 @@ services:
     working_dir: /u/apps/bullsandcows
     environment:
       RAILS_ENV: test
+      POSTGRES_USER: postgres
     env_file:
       - '.env.backend'
       - '.env.backend.test'
-      - '.env.postgres.secret'
     command: bundle exec rspec -fd

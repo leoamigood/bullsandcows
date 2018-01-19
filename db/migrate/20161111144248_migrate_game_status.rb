@@ -1,4 +1,4 @@
-class MigrateGameStatus < ActiveRecord::Migration
+class MigrateGameStatus < ActiveRecord::Migration[5.1]
   def change
     Game.where(status: '0').update_all(status: Game.statuses[:created])
     Game.where(status: '1').update_all(status: Game.statuses[:running])

@@ -1,4 +1,4 @@
-class FillCommonToGuess < ActiveRecord::Migration
+class FillCommonToGuess < ActiveRecord::Migration[5.1]
   disable_ddl_transaction!
   def change
     Guess.where(common: nil).each do |guess|

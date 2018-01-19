@@ -1,4 +1,4 @@
-class CreateNouns < ActiveRecord::Migration
+class CreateNouns < ActiveRecord::Migration[5.1]
   def change
     create_table :nouns do |t|
       t.string  :noun, limit: 64
