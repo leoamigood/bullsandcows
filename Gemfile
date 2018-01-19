@@ -4,7 +4,6 @@ source 'https://rubygems.org'
 # Bundle edge Rails instead: gem 'rails', github: 'rails/rails'
 gem 'rails', '>= 5.1', '< 5.2'
 # gem 'rails-api'
-gem 'pg'
 # Use SCSS for stylesheets
 gem 'sass-rails', '~> 5.0'
 # Use Uglifier as compressor for JavaScript assets
@@ -26,26 +25,21 @@ gem 'sdoc', '~> 0.4.0', group: :doc
 # Use ActiveModel has_secure_password
 # gem 'bcrypt', '~> 3.1.7'
 
-# Use Unicorn as the app server
-# gem 'unicorn'
-gem 'puma'
-gem 'puma-heroku'
-gem 'newrelic_rpm'
-gem 'airbrake', '~> 6.1'
-
-# Use Capistrano for deployment
-# gem 'capistrano-rails', group: :development
-
-gem 'telegram-bot-ruby'
 gem 'activerecord-import', '~> 0.18'
-gem 'rack-cors', :require => 'rack/cors'
-gem 'kaminari'
+gem 'airbrake', '~> 6.1'
 gem 'api-pagination'
-gem 'attr_extras'
 gem 'aspector'
-gem 'turnpike'
+gem 'attr_extras'
 gem 'event_bus'
 gem 'google-cloud-speech'
+gem 'kaminari'
+gem 'newrelic_rpm'
+gem 'pg', '~>0.18'
+gem 'puma'
+gem 'puma-heroku'
+gem 'rack-cors', :require => 'rack/cors'
+gem 'telegram-bot-ruby'
+gem 'turnpike'
 
 group :development, :test do
   # Call 'byebug' anywhere in the code to stop execution and get a debugger console

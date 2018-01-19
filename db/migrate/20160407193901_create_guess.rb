@@ -1,4 +1,4 @@
-class CreateGuess < ActiveRecord::Migration
+class CreateGuess < ActiveRecord::Migration[5.1]
   def change
     create_table :guesses do |t|
       t.integer :game_id

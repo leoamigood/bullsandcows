@@ -1,4 +1,4 @@
-class AddMetaAndLevel < ActiveRecord::Migration
+class AddMetaAndLevel < ActiveRecord::Migration[5.1]
   def change
     add_column :nouns, :excluded, :boolean, after: :noun, null: false, default: false
     add_column :nouns, :level, :integer, after: :dictionary_id

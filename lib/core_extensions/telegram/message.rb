@@ -4,12 +4,7 @@ module CoreExtensions
       include Executor
 
       def handle
-        command = nil
-
-        if text.present?
-          command = text.mb_chars.downcase.to_s
-        end
-
+        command = text.present? ? text.mb_chars.downcase.to_s : nil
         execute(command, chat.id)
       end
     end

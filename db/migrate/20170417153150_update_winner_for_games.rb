@@ -1,4 +1,4 @@
-class UpdateWinnerForGames < ActiveRecord::Migration
+class UpdateWinnerForGames < ActiveRecord::Migration[5.1]
   def change
     ActiveRecord::Base.transaction do
       Game.where(status: :finished).each do |game|

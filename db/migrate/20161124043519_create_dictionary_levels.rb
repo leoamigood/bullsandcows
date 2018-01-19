@@ -1,4 +1,4 @@
-class CreateDictionaryLevels < ActiveRecord::Migration
+class CreateDictionaryLevels < ActiveRecord::Migration[5.1]
   def change
     create_table :dictionary_levels do |t|
       t.integer :dictionary_id

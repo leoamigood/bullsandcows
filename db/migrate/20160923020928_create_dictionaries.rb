@@ -1,4 +1,4 @@
-class CreateDictionaries < ActiveRecord::Migration
+class CreateDictionaries < ActiveRecord::Migration[5.1]
   create_table :dictionaries do |t|
     t.string  :source, limit: 64
     t.string  :lang, limit: 2
