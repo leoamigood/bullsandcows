@@ -4,7 +4,7 @@ module CoreExtensions
       include Executor
 
       def handle
-        return ::TelegramMessenger.howto(id) unless query.present?
+        return ::Telegram::TelegramMessenger.howto(id) unless query.present?
 
         query = GameService.sanitize(query)
         words = Noun.active.where(noun: query)
