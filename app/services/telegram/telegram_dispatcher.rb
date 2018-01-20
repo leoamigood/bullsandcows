@@ -5,6 +5,7 @@ module Telegram
     class << self
       def update(update)
         payload, chat_id = extract_message(update)
+        return unless payload.present?
         begin
           response, mode = *payload.handle
           Telegram::Response.new(chat_id, response, mode || 'Markdown')
