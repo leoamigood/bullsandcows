@@ -10,7 +10,7 @@ module CoreExtensions
         words = Noun.active.where(noun: word)
         return unless words.present?
 
-        ::TelegramMessenger.query(id, words)
+        ::Telegram::TelegramMessenger.query(id, words)
 
         user = UserService.create_from_telegram(from)
         ::Telegram::CommandQueue::UserQueue.new(user).reset.push("/create #{word}")
