@@ -6,7 +6,7 @@ module CoreExtensions
       include Executor
 
       def handle
-        channel = message.chat.id
+        channel = chat_id
         command = data.downcase.to_s
         response = execute(command, channel)
 
@@ -14,6 +14,10 @@ module CoreExtensions
 
         queue = ::Telegram::CommandQueue::Queue.new(channel)
         queue.present? ? queue.execute : response
+      end
+
+      def chat_id
+        message.chat.id
       end
     end
   end

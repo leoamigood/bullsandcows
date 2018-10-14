@@ -7,6 +7,10 @@ module CoreExtensions
         command = text.present? ? text.mb_chars.downcase.to_s : nil
         execute(command, chat.id)
       end
+
+      def chat_id
+        chat.id
+      end
     end
   end
 end
