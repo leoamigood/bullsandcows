@@ -15,6 +15,10 @@ module CoreExtensions
         user = UserService.create_from_telegram(from)
         ::Telegram::CommandQueue::UserQueue.new(user).reset.push("/create #{word}")
       end
+
+      def chat_id
+        nil
+      end
     end
   end
 end
