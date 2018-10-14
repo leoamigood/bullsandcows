@@ -928,5 +928,18 @@ describe Telegram::TelegramDispatcher, type: :service do
     end
   end
 
+  context 'when incoming update with unknown message type is received' do
+    let!(:payload) { build :update }
+
+    before do
+      allow(Telegram::TelegramDispatcher).to receive(:log_error)
+    end
+
+    it 'logs error for TelegramIOException' do
+      expect(Telegram::TelegramDispatcher.update(payload))
+      expect(Telegram::TelegramDispatcher).to have_received(:log_error).with(instance_of(Errors::TelegramIOException), payload)
+    end
+  end
+
 end
 
